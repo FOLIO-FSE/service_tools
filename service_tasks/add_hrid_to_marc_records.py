@@ -1,19 +1,16 @@
-import sys
 import csv
 import json
 import os
+import sys
 import uuid
 from abc import abstractmethod
 from concurrent.futures.process import ProcessPoolExecutor
 from io import StringIO
-from pymarc import Field, JSONWriter, XMLWriter
-from os import listdir
-from os.path import isfile, join
 
 import pymarc
+from pymarc import Field, JSONWriter, XMLWriter
 
-from service_tasks.service_task_base import ServiceTaskBase, print_dict_to_md_table
-from folioclient import FolioClient
+from service_tasks.service_task_base import ServiceTaskBase
 
 
 class AddHRIDToMARCRecords(ServiceTaskBase):
@@ -93,10 +90,11 @@ class AddHRIDToMARCRecords(ServiceTaskBase):
 
     @staticmethod
     @abstractmethod
-    def add_arguments(sub_parser):
-        sub_parser.add_argument("source_path", widget="DirChooser")
-        sub_parser.add_argument("results_path", widget="DirChooser")
-        sub_parser.add_argument("id_map_path", widget="FileChooser")
+    def add_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        parser.add_argument("source_path", widget="DirChooser")
+        parser.add_argument("results_path", widget="DirChooser")
+        parser.add_argument("id_map_path", widget="FileChooser")
 
 
 def from_json(jobj):

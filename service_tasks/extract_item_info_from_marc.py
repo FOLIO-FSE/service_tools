@@ -3,7 +3,7 @@ import uuid
 from abc import abstractmethod
 from pymarc import MARCReader
 import os.path
-from service_tasks.service_task_base import ServiceTaskBase, print_dict_to_md_table
+from service_tasks.service_task_base import ServiceTaskBase
 
 
 class ExtractItemInfoFromMARC(ServiceTaskBase):
@@ -96,7 +96,8 @@ class ExtractItemInfoFromMARC(ServiceTaskBase):
             for h in self.holdings.values():
                 self.write_object(h, holdings_file)
 
-    def write_object(self, obj, file):
+    @staticmethod
+    def write_object(obj, file):
         # TODO: Move to interface or parent class
         file.write("{}\n".format(json.dumps(obj)))
 
@@ -121,7 +122,8 @@ class ExtractItemInfoFromMARC(ServiceTaskBase):
 
     @staticmethod
     @abstractmethod
-    def add_arguments(sub_parser):
-        sub_parser.add_argument("source_path", widget="FileChooser")
-        sub_parser.add_argument("results_path", widget="DirChooser")
-        sub_parser.add_argument("instance_id_map_path", widget="FileChooser")
+    def add_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        parser.add_argument("source_path", widget="FileChooser")
+        parser.add_argument("results_path", widget="DirChooser")
+        parser.add_argument("instance_id_map_path", widget="FileChooser")

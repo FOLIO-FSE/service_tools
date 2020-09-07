@@ -1,7 +1,6 @@
 import json
-import traceback
-from abc import abstractmethod
 import time
+from abc import abstractmethod
 
 import requests
 from folioclient import FolioClient
@@ -59,6 +58,7 @@ class SingleObjectsPoster(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
         parser.add_argument("objects_file_path", help="path data file", widget="FileChooser")
         parser.add_argument("skip", help="Number of records to skip")
         parser.add_argument(

@@ -45,6 +45,7 @@ class DeleteInstances(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_arguments(sub_parser):
+        ServiceTaskBase.add_common_arguments(sub_parser)
         sub_parser.add_argument(
             "-d", "--dry_run", action="store_true", help="Dry run only"
         )

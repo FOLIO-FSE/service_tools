@@ -1,10 +1,10 @@
-from abc import abstractclassmethod, abstractmethod
+from abc import abstractmethod
 
 from folioclient import FolioClient
 
 
 class ServiceTaskBase():
-    def __init__(self, folio_client: FolioClient=None):
+    def __init__(self, folio_client: FolioClient = None):
         self.stats = {}
         self.migration_report = {}
         self.folio_client = folio_client
@@ -14,6 +14,14 @@ class ServiceTaskBase():
             self.stats[measure_to_add] = 1
         else:
             self.stats[measure_to_add] += 1
+
+    @staticmethod
+    def print_dict_to_md_table(my_dict, h1="", h2=""):
+        d_sorted = {k: my_dict[k] for k in sorted(my_dict)}
+        print(f"{h1} | {h2}")
+        print("--- | ---:")
+        for k, v in d_sorted.items():
+            print(f"{k} | {v}")
 
     def add_to_migration_report(self, header, message_string):
         if header not in self.migration_report:
@@ -29,10 +37,8 @@ class ServiceTaskBase():
     def do_work(self):
         raise NotImplementedError
 
-
-def print_dict_to_md_table(my_dict, h1="", h2=""):
-    d_sorted = {k: my_dict[k] for k in sorted(my_dict)}
-    print(f"{h1} | {h2}")
-    print("--- | ---:")
-    for k, v in d_sorted.items():
-        print(f"{k} | {v}")
+    @staticmethod
+    def add_common_arguments(parser):
+        parser.add_argument(
+            "okapi_credentials_string", help="URL, TENANT_ID,  USERNAME, PASSWORD"
+        )

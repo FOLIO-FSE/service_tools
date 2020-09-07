@@ -1,12 +1,9 @@
 import json
-
-import uuid
 from abc import abstractmethod
 
 import requests
 
-from service_tasks.service_task_base import ServiceTaskBase, print_dict_to_md_table
-from folioclient import FolioClient
+from service_tasks.service_task_base import ServiceTaskBase
 
 
 class SetSourceToFOLIOForMissingSRSRecs(ServiceTaskBase):
@@ -39,6 +36,7 @@ class SetSourceToFOLIOForMissingSRSRecs(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_arguments(sub_parser):
+        ServiceTaskBase.add_common_arguments(sub_parser)
         sub_parser.add_argument(
             "source_file", help="file of Instance Ids to be updated", widget="FileChooser"
         )

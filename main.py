@@ -1,5 +1,3 @@
-import json
-
 from folioclient import FolioClient
 from gooey import Gooey, GooeyParser
 
@@ -12,16 +10,9 @@ def parse_args(task_classes):
     subs = parser.add_subparsers(help="commands", dest="command")
     for task_class in task_classes:
         sub_parser = subs.add_parser(task_class.__name__)
-        add_common_arguments(sub_parser)
         task_class.add_arguments(sub_parser)
     args = parser.parse_args()
     return args
-
-
-def add_common_arguments(parser):
-    parser.add_argument(
-        "okapi_credentials_string", help=("URL, TENANT_ID,  USERNAME, PASSWORD")
-    )
 
 
 @Gooey(
@@ -35,9 +26,10 @@ def add_common_arguments(parser):
 )
 def main():
     task_classes = inheritors(ServiceTaskBase)
+    print(len(task_classes))
     args = parse_args(task_classes)
     task_class = next(tc for tc in task_classes if tc.__name__ == args.command)
-    if args.okapi_credentials_string:
+    if "okapi_credentials_string" in args and args.okapi_credentials_string:
         okapi_credentials = args.okapi_credentials_string.split(" ")
         folio_client = FolioClient(
             okapi_credentials[0],

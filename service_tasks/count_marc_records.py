@@ -1,8 +1,6 @@
-import uuid
 import time
 from abc import abstractmethod
 
-import requests
 from pymarc import MARCReader
 
 from service_tasks.service_task_base import ServiceTaskBase
