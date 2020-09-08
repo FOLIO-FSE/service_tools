@@ -21,6 +21,6 @@ class ListPermissions(ServiceTaskBase):
 
     @staticmethod
     @abstractmethod
-    def add_arguments(sub_parser):
-        ServiceTaskBase.add_common_arguments(sub_parser)
-        sub_parser.add_argument("userid", help="user to look up")
+    def add_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        ServiceTaskBase.add_argument(parser,"userid", "user to look up","")

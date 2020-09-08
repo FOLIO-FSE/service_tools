@@ -35,8 +35,8 @@ class SetSourceToFOLIOForMissingSRSRecs(ServiceTaskBase):
 
     @staticmethod
     @abstractmethod
-    def add_arguments(sub_parser):
-        ServiceTaskBase.add_common_arguments(sub_parser)
-        sub_parser.add_argument(
+    def add_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        ServiceTaskBase.add_argument(parser,destination=
             "source_file", help="file of Instance Ids to be updated", widget="FileChooser"
         )

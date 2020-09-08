@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from argparse import ArgumentParser
 
 from folioclient import FolioClient
 
@@ -32,6 +33,19 @@ class ServiceTaskBase():
     @abstractmethod
     def add_arguments(sub_parser):
         raise NotImplementedError
+
+    @staticmethod
+    def add_argument(parser, destination, help, widget, **kwargs):
+        # print(parser.__class__.__name__)
+        # print(destination)
+        if parser.__class__.__name__ == "GooeyParser":
+            parser.add_argument(dest=destination, help=help, widget=widget)
+        elif parser.__class__.__name__ == "ArgumentParser":
+            if "destination" in kwargs:
+                ArgumentParser(parser).add_argument(dest=kwargs.get('destination'), help=help)
+            else:
+                parser.add_argument(destination)
+
 
     @abstractmethod
     def do_work(self):

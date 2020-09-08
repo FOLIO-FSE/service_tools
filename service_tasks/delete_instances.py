@@ -44,13 +44,10 @@ class DeleteInstances(ServiceTaskBase):
 
     @staticmethod
     @abstractmethod
-    def add_arguments(sub_parser):
-        ServiceTaskBase.add_common_arguments(sub_parser)
-        sub_parser.add_argument(
-            "-d", "--dry_run", action="store_true", help="Dry run only"
-        )
-        sub_parser.add_argument(
+    def add_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        ServiceTaskBase.add_argument(parser,
             "instance_ids",
-            help="Comma separated list of instance ids " "to delete",
-            widget="Textarea",
+            "Comma separated list of instance ids " "to delete",
+            "Textarea"
         )

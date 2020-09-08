@@ -1,30 +1,21 @@
 from folioclient import FolioClient
-from gooey import Gooey, GooeyParser
 
 from service_tasks.service_task_base import ServiceTaskBase
 from service_tasks import *
+import argparse
 
 def parse_args(task_classes):
     """Parse CLI Arguments"""
-    parser = GooeyParser(description="My Cool Gooey App!")
+    parser = argparse.ArgumentParser()
     subs = parser.add_subparsers(help="commands", dest="command")
     for task_class in task_classes:
-        # print(task_class.__name__)
         sub_parser = subs.add_parser(task_class.__name__)
         task_class.add_arguments(sub_parser)
     args = parser.parse_args()
+    print(args)
     return args
 
 
-@Gooey(
-    advanced=True,
-    progress_regex=r"^progress: (?P<current>\d+)/(?P<total>\d+)$",
-    progress_expr="current / total * 100",
-    required_cols = 1,
-    optional_cols=0,
-    default_size=[1100,800],
-    program_name="FOLIO Service task helper"
-)
 def main():
     task_classes = inheritors(ServiceTaskBase)
     args = parse_args(task_classes)
@@ -52,7 +43,6 @@ def inheritors(base_class):
             if child not in subclasses:
                 subclasses.add(child)
                 work.append(child)
-    list(subclasses).sort(key=lambda x: x.__name__)
     return subclasses
 
 

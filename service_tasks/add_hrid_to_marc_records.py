@@ -92,9 +92,9 @@ class AddHRIDToMARCRecords(ServiceTaskBase):
     @abstractmethod
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        parser.add_argument("source_path", widget="DirChooser")
-        parser.add_argument("results_path", widget="DirChooser")
-        parser.add_argument("id_map_path", widget="FileChooser")
+        ServiceTaskBase.add_argument(parser,"source_path","", "DirChooser")
+        ServiceTaskBase.add_argument(parser,"results_path","", "DirChooser")
+        ServiceTaskBase.add_argument(parser,"id_map_path", "", "FileChooser")
 
 
 def from_json(jobj):
