@@ -121,15 +121,15 @@ class BatchPoster(ServiceTaskBase):
     @abstractmethod
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        ServiceTaskBase.add_argument(parser=parser, destination="objects_file", help="path data file", widget="FileChooser")
-        """parser.add_argument("batch_size", help="batch size")
-        parser.add_argument(
+        ServiceTaskBase.add_argument(parser, "objects_file", "path data file", widget="FileChooser")
+        ServiceTaskBase.add_argument(parser, "batch_size", help="batch size")
+        ServiceTaskBase.add_argument(parser,
             metavar='What objects to batch post',
             help='What objects to batch post',
             dest='object_name',
             widget='Dropdown',
             choices=list(list_objects().keys()),
-        )"""
+        )
 
 
 def list_objects():
