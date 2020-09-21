@@ -8,6 +8,8 @@ folioclient = "*"
 gooey = "*"
 black = "*"
 pymarc = "*"
+dateutil = "*"
+python-dateutil = "*"
 
 [dev-packages]
 

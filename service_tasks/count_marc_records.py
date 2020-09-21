@@ -8,6 +8,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class CountMarcRecords(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.marc_file = args.marc_file
 
     def do_work(self):

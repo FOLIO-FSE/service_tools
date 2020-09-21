@@ -19,6 +19,7 @@ class BatchPoster(ServiceTaskBase):
         self.processed = 0
         self.processed_rows = 0
         self.objects_file = args.objects_file
+        self.users_per_group = {}
         self.failed_fields = set()
 
     def do_work(self):
@@ -123,11 +124,9 @@ class BatchPoster(ServiceTaskBase):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_argument(parser, "objects_file", "path data file", "FileChooser")
         ServiceTaskBase.add_argument(parser, "batch_size", "batch size", "")
-        ServiceTaskBase.add_argument(parser,"object_name",
+        ServiceTaskBase.add_argument(parser,"object_name","What objects to batch post","Dropdown",
             metavar='What objects to batch post',
-            help='What objects to batch post',
             dest='object_name',
-            widget='Dropdown',
             choices=list(list_objects().keys()),
         )
 

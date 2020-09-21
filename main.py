@@ -52,7 +52,8 @@ def inheritors(base_class):
             if child not in subclasses:
                 subclasses.add(child)
                 work.append(child)
-    list(subclasses).sort(key=lambda x: x.__name__)
+    subclasses = list(subclasses)
+    subclasses.sort(key=lambda x: x.__name__)
     return subclasses
 
 

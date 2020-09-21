@@ -61,13 +61,11 @@ class SingleObjectsPoster(ServiceTaskBase):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_argument(parser,"objects_file_path", "path data file", "FileChooser")
         ServiceTaskBase.add_argument(parser,"skip", "Number of records to skip","")
-        """ServiceTaskBase.add_argument(parser,"",
+        ServiceTaskBase.add_argument(parser,"","What objects to post","Dropdown",
             metavar='What objects to post',
-            help='What objects to post',
             dest='object_name',
-            widget="Dropdown",
             choices=list(list_objects().keys()),
-        )"""
+        )
 
 
 def timings(t0, t0func, num_objects):

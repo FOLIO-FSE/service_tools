@@ -39,7 +39,7 @@ class ServiceTaskBase():
         # print(parser.__class__.__name__)
         # print(destination)
         if parser.__class__.__name__ == "GooeyParser":
-            parser.add_argument(dest=destination, help=help, widget=widget)
+            parser.add_argument(dest=destination, help=help, widget=widget, metavar=kwargs.get('metavar'), choices=kwargs.get('choices') )
         elif parser.__class__.__name__ == "ArgumentParser":
             if "destination" in kwargs:
                 ArgumentParser(parser).add_argument(dest=kwargs.get('destination'), help=help)
