@@ -1,3 +1,4 @@
 .idea/
 service_tasks/__pycache__/
+user_migration/mappers/__pycache__/
 Pipfile.lock
