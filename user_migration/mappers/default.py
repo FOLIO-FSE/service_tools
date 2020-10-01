@@ -7,7 +7,6 @@ from folioclient import FolioClient
 
 from user_migration.mappers.mapper_base import MapperBase
 
-
 class Default(MapperBase):
     def __init__(self, folio_client: FolioClient, args):
         super().__init__(folio_client)
@@ -15,16 +14,12 @@ class Default(MapperBase):
         self.user_schema = MapperBase.get_user_schema()
 
     def do_map(self, legacy_user_dict):
+        folio_user = self.instantiate_user()
         legacy_user = legacy_user_dict["data"]
 
         self.add_to_migration_report("Users per patron type", str(legacy_user["patronGroup"]))
-        folio_user = {"metadata": self.folio_client.get_metadata_construct(),
-                      "id": str(uuid.uuid4()),
-                      "type": "object",
-                      "personal": {}}
-        self.report_folio_mapping("id", True)
-        self.report_folio_mapping("metadata", True)
         mapped_legacy_props = []
+
         for prop in self.user_schema["properties"]:
             if prop in legacy_user:  # is there a match in the csv?
                 if legacy_user[prop].strip():  # Match! Lets report this
@@ -36,6 +31,15 @@ class Default(MapperBase):
                     mapped_legacy_props.append(prop)
                     self.report_legacy_mapping(prop, True, True)
                     self.report_folio_mapping(prop, True, True)
+            elif prop == "customFields":
+                custom_fields = [c for c in legacy_user if c.startswith("customField")]
+                if any(custom_fields):
+                    for custom_field in custom_fields:
+                        folio_user["customFields"][custom_field.split('.')[1]] = legacy_user[custom_field]
+                        self.add_to_migration_report("General",
+                                             f"Custom field {custom_field.split('.')[1]} added")
+                        self.report_legacy_mapping(prop, True, False)
+                        self.report_folio_mapping(prop, True, False)
             else:
                 self.report_folio_mapping(prop, False, False)
                 # self.report_legacy_mapping(prop, False, False)
@@ -58,12 +62,13 @@ class Default(MapperBase):
                     self.report_legacy_mapping(f"{prop}", False, False)
                 else:
                     self.report_legacy_mapping(f"{prop}", False, True)
-        folio_user['patronGroup'] = self.get_user_group(legacy_user['patronGroup'])
+        folio_user['patronGroup'] = legacy_user['patronGroup']
         self.add_to_migration_report("Users by FOLIO Patron Group", folio_user['patronGroup'])
         self.handle_addresses(folio_user, legacy_user_dict)
         self.validate(folio_user)
-        if 'dateOfBirth' in folio_user['personal']:
-            del folio_user['personal']['dateOfBirth']
+        if self.args.temp_email:
+            self.add_to_migration_report("General", f"Replaced email with {self.args.temp_email}")
+            folio_user["personal"]["email"] = self.args.temp_email
         return folio_user
 
     def handle_addresses(self, folio_user, legacy_user_dict):
@@ -77,50 +82,46 @@ class Default(MapperBase):
         self.add_to_migration_report("Address type breakdown", "-".join(address_types))
         self.add_to_migration_report("Address type breakdown", f"Patrons with {len(addresses)} address")
         email = ""
-        for address in addresses:
-            self.add_to_migration_report("Address Types from Voyager", f"All addresses, total")
-            is_duplicate = address['addressTypeId'].lower() in mapped_types
+        for legacy_address in addresses:
+            self.add_to_migration_report("Address Types from Legacy system", f"All addresses, total")
+            is_duplicate = legacy_address['addressTypeId'].lower() in mapped_types
             if is_duplicate:
-                self.add_to_migration_report("Address Types from Voyager", f"Duplicate of {address['addressTypeId']}")
+                self.add_to_migration_report("Address Types from Legacy system",
+                                             f"Duplicate of {legacy_address['addressTypeId']}")
             else:
-                self.add_to_migration_report("Address Types from Voyager", f"{address['addressTypeId']}")
-                mapped_types.append(address['addressTypeId'].lower())
-                if address['addressTypeId'].lower() == "email" or folio_user['personal'].get('email', '') == address[
-                    'addressLine1']:
-                    mapped_types.append(address['addressTypeId'].lower())
-                    email = address['addressLine1']
-                else:
-                    folio_address = {}
-                    primary = False
-                    a += 1
-                    for prop in self.user_schema['properties']['personal']['properties']['addresses']['items'][
-                        'properties']:
-                        if prop in address:  # is there a match in the csv?
-                            if address[prop].strip():  # Match! Lets report this
-                                folio_address[prop] = address[prop]
-                                self.report_legacy_mapping(f"address.{a}.{prop}", True, False)
-                                self.report_folio_mapping(f"personal.addresses.{a}.{prop}", True, False)
-                            else:  # Match but empty field. Lets report this
-                                self.report_legacy_mapping(f"address.{a}.{prop}", True, True)
-                                self.report_folio_mapping(f"personal.addresses.{a}.{prop}", True, True)
-                        else:
-                            self.report_folio_mapping(f"personal.addresses.{a}.{prop}", False, False)
-                            self.report_legacy_mapping(f"address.{a}.{prop}", False, False)
-                        if str(address['addressTypeId']).lower() == "temporary":
-                            folio_address['addressTypeId'] = "Campus"  # campus
-                            if address['primaryAddress'].lower() == "temporary":
-                                primary = True if not primary_set else False
-                                primary_set = True
-                        elif str(address['addressTypeId']).lower() == "permanent":
-                            if address['primaryAddress'].lower() == "permanent":
-                                primary = True if not primary_set else False
-                                primary_set = True
-                            folio_address['addressTypeId'] = "Home"  # Home
-                        folio_address['primaryAddress'] = primary
-                        self.add_to_migration_report("Primary addresses", str(primary))
-                        self.add_to_migration_report("Country Codes", folio_address.get('countryId', 'None'))
-                        folio_address['countryId'] = 'US'
-                    folio_user['personal']['addresses'].append(folio_address)
+                self.add_to_migration_report("Address Types from Legacy system", f"{legacy_address['addressTypeId']}")
+                mapped_types.append(legacy_address['addressTypeId'].lower())
+                folio_address = {}
+                primary = False
+                a += 1
+                for prop in self.user_schema['properties']['personal']['properties']['addresses']['items'][
+                    'properties']:
+                    if prop in legacy_address:  # is there a match in the csv?
+                        if legacy_address[prop].strip():  # Match! Lets report this
+                            folio_address[prop] = legacy_address[prop]
+                            self.report_legacy_mapping(f"address.{a}.{prop}", True, False)
+                            self.report_folio_mapping(f"personal.addresses.{a}.{prop}", True, False)
+                        else:  # Match but empty field. Lets report this
+                            self.report_legacy_mapping(f"address.{a}.{prop}", True, True)
+                            self.report_folio_mapping(f"personal.addresses.{a}.{prop}", True, True)
+                    else:
+                        self.report_folio_mapping(f"personal.addresses.{a}.{prop}", False, False)
+                        self.report_legacy_mapping(f"address.{a}.{prop}", False, False)
+                    if str(legacy_address['addressTypeId']).lower() == "temporary":
+                        folio_address['addressTypeId'] = "Campus"  # campus
+                        if legacy_address['primaryAddress'].lower() == "temporary":
+                            primary = True if not primary_set else False
+                            primary_set = True
+                    elif str(legacy_address['addressTypeId']).lower() == "permanent":
+                        if legacy_address['primaryAddress'].lower() == "permanent":
+                            primary = True if not primary_set else False
+                            primary_set = True
+                        folio_address['addressTypeId'] = "Home"  # Home
+                    folio_address['primaryAddress'] = primary
+                    self.add_to_migration_report("Primary addresses", str(primary))
+                    self.add_to_migration_report("Country Codes", folio_address.get('countryId', 'None'))
+                folio_address['countryId'] = folio_address.get('countryId', 'None')
+            folio_user['personal']['addresses'].append(folio_address)
 
         if not folio_user['personal'].get('email', '').strip() and email:
             folio_user['personal']['email'] = email
@@ -157,25 +158,4 @@ class Default(MapperBase):
                 if not bad_email:
                     current_user['addresses'].append(address)
                 else:
-                    self.add_to_migration_report("Emails thatare listed as other addresses", bad_email)
-
-    def get_user_group(self, group_code):
-        return {"1": "Staff",
-                "2": "Faculty",
-                "3": "Undergraduate",
-                "4": "Graduate",
-                "5": "Extramural Undergrad",
-                "6": "CU Undergraduate",
-                "7": "CU Graduate",
-                "8": "CU Faculty",
-                "9": "Library Card",
-                "10": "CU Staff",
-                "11": "SPEC(Library Dept Card)",
-                "12": "Interlibrary Loan",
-                "12": "Carrel",
-                "13": "SUNY",
-                "14": "Privilege Card (Statutory)",
-                "15": "Proxy Borrower",
-                "16": "Trustee",
-                "17": "Borrow Direct",
-                "18": "CU Partner"}.get(group_code, "Unmapped")
+                    self.add_to_migration_report("Emails that are listed as other addresses", bad_email)
