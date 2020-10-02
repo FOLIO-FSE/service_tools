@@ -6,10 +6,10 @@ name = "pypi"
 [packages]
 folioclient = "*"
 gooey = "*"
-black = "*"
 pymarc = "*"
-dateutil = "*"
 python-dateutil = "*"
+sickle = "*"
+xmltodict = "*"
 
 [dev-packages]
 

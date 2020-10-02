@@ -6,7 +6,7 @@ from service_tasks import *
 
 def parse_args(task_classes):
     """Parse CLI Arguments"""
-    parser = GooeyParser(description="My Cool Gooey App!")
+    parser = GooeyParser(description="a FOLIO Migration and Service task tool")
     subs = parser.add_subparsers(help="commands", dest="command")
     for task_class in task_classes:
         # print(task_class.__name__)

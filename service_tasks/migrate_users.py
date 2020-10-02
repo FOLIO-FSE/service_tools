@@ -30,19 +30,19 @@ class MigrateUsers(ServiceTaskBase):
         self.posted_records = 0
         self.failed_objects = []
         self.batch_size = int(args.batch_size)
-        print(f"BATCH SIZE: {self.batch_size}")
         self.objects_file = args.objects_file
         self.results_path = os.path.join(args.results_folder, "users")
-        # self.transformer_class = getattr(importlib.import_module("user_migration.mappers"),args.transformer_name)
-        # print(self.transformer_class)
-        # self.transformer = self.transformer_class(self.folio_client, args)
-        self.transformer = Default(self.folio_client,args)
+        self.transformer = Default(self.folio_client, args)
+
     def do_work(self):
+        raise NotImplementedError("Create ID-Legacy ID Mapping file!")
+        raise NotImplementedError("Check for ID duplicates (barcodes, externalsystemID:s, usernames, emails?, ")
+
         print("Starting....")
         batch = []
         i = 0
         try:
-            with open(self.objects_file,encoding="utf8") as object_file:
+            with open(self.objects_file, encoding="utf8") as object_file:
                 for legacy_user in self.transformer.get_users(object_file):
                     i += 1
                     try:
@@ -54,7 +54,7 @@ class MigrateUsers(ServiceTaskBase):
                             batch = []
                         if i == 1:
                             print("## First user")
-                            print(json.dumps(folio_user,indent=4, sort_keys=True))
+                            print(json.dumps(folio_user, indent=4, sort_keys=True))
                         self.add_stats("Successfull user transformations")
                     except ValueError as ve:
                         print(ve)
@@ -89,7 +89,7 @@ class MigrateUsers(ServiceTaskBase):
             resp = json.loads(response.text)
 
             for error in resp["errors"]:
-               print(json.dumps(error))
+                print(json.dumps(error))
 
         elif response.status_code in [500, 413]:
             print(f"{response.status_code}\t{response.text}")
@@ -97,7 +97,7 @@ class MigrateUsers(ServiceTaskBase):
         else:
             raise Exception(f"UNHANDLED ERROR! HTTP {response.status_code}\t{response.text}")
 
-    def write_results(self,batch, file_name):
+    def write_results(self, batch, file_name):
         if not os.path.exists(self.results_path):
             os.makedirs(self.results_path)
         path = os.path.join(self.results_path, file_name)
@@ -116,22 +116,35 @@ class MigrateUsers(ServiceTaskBase):
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_argument(parser, "objects_file", "path data file", "FileChooser")
-        ServiceTaskBase.add_argument(parser, "results_folder", "Folder where results are saved", "DirChooser")
-        ServiceTaskBase.add_argument(parser, "batch_size", "batch size", "")
-        ServiceTaskBase.add_argument(parser,"transformer_name","What objects to batch post","Dropdown",
+        ServiceTaskBase.add_argument(parser, "results_folder",
+                                     "Folder where results are saved. The script will create a "
+                                     "./users subfolder and add results to it.",
+                                     "DirChooser")
+        ServiceTaskBase.add_argument(parser, "batch_size",
+                                     "The number of users in each batch that is saved to disk and posted to FOLIO", "")
+        ServiceTaskBase.add_argument(parser, "temp_email",
+                                     "Email address to give all users during testing. Leave empty at go-live",
+                                     "")
+        ServiceTaskBase.add_argument(parser, "transformer_name",
+                                     "Choose a transformer. If unsure and starting with a new client, try the default",
+                                     "Dropdown",
                                      metavar='What objects to batch post',
                                      dest='transformer_name',
                                      choices=list(get_transformers().keys()),
                                      )
 
 
+
+
+
+
 def get_transformers():
     ret = {
         "default": {"transformer": "default"},
-        "Alabama":  {"parser": ""},
-        "AlabamaBanner":   {"parser": ""},
-        "FiveColleges":   {"parser": ""},
-        "MSUMigration":   {"parser": ""}
+        "Alabama": {"parser": ""},
+        "AlabamaBanner": {"parser": ""},
+        "FiveColleges": {"parser": ""},
+        "MSUMigration": {"parser": ""}
     }
     return ret
 

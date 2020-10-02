@@ -39,13 +39,13 @@ class ServiceTaskBase():
         # print(parser.__class__.__name__)
         # print(destination)
         if parser.__class__.__name__ == "GooeyParser":
-            parser.add_argument(dest=destination, help=help, widget=widget, metavar=kwargs.get('metavar'), choices=kwargs.get('choices') )
+            parser.add_argument(dest=destination, help=help, widget=widget, metavar=kwargs.get('metavar'),
+                                choices=kwargs.get('choices'))
         elif parser.__class__.__name__ == "ArgumentParser":
             if "destination" in kwargs:
                 ArgumentParser(parser).add_argument(dest=kwargs.get('destination'), help=help)
             else:
                 parser.add_argument(destination)
-
 
     @abstractmethod
     def do_work(self):
@@ -54,5 +54,6 @@ class ServiceTaskBase():
     @staticmethod
     def add_common_arguments(parser):
         parser.add_argument(
-            "okapi_credentials_string", help="URL, TENANT_ID,  USERNAME, PASSWORD"
+            "okapi_credentials_string", help="Space delimited string containing"
+                                             "OKAPI_URL, TENANT_ID,  USERNAME, PASSWORD in that oreder."
         )
