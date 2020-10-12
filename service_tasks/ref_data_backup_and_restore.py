@@ -48,7 +48,7 @@ class RefDataBackupDeleteAndLoad(ServiceTaskBase):
                                      "Dropdown",
                                      metavar='Pick ref data set',
                                      dest="ref_data_set",
-                                     choices=RefDataBackupDeleteAndLoad.get_sets().keys()
+                                     choices=get_sets().keys()
                                      )
 
         ServiceTaskBase.add_argument(parser, "action",
@@ -58,201 +58,215 @@ class RefDataBackupDeleteAndLoad(ServiceTaskBase):
                                      dest="action",
                                      choices=["backup", "purge", "restore"]
                                      )
+
     @staticmethod
-    def get_sets():
-        return {
-            "all":{},
-            "addressTypes": {
-                "path": "/addresstypes",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "alternativeTitleTypes": {
-                "path": "/alternative-title-types",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "callNumberTypes": {
-                "path": "/call-number-types",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "cancellationReasons": {
-                "path": "/cancellation-reason-storage/cancellation-reasons",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "categories": {
-                "path": "/vendor-storage/categories",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "circulation_rules": {
-                "path": "/circulation-rules-storage",
-                "insertMethod": "put",
-                "saveEntireResponse": True
-            },
-            "classificationTypes": {
-                "path": "/classification-types",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "contributorNameTypes": {
-                "path": "/contributor-name-types",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "contributorTypes": {
-                "path": "/contributor-types",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "electronicAccessRelationships": {
-                "path": "/electronic-access-relationships",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "fileExtensions": {
-                "path": "/data-import/fileExtensions",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "holdingsTypes": {
-                "path": "/holdings-types",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "identifierTypes": {
-                "path": "/identifier-types",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "illPolicies": {
-                "path": "/ill-policies",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "instanceFormats": {
-                "path": "/instance-formats",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "instanceStatuses": {
-                "path": "/instance-statuses",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "instanceTypes": {
-                "path": "/instance-types",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "loanPolicies": {
-                "path": "/loan-policy-storage/loan-policies",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "loantypes": {
-                "path": "/loan-types",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "locations": {
-                "path": "/locations",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "loccamps": {
-                "path": "/location-units/campuses",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "locinsts": {
-                "path": "/location-units/institutions",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "loclibs": {
-                "path": "/location-units/libraries",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "mtypes": {
-                "path": "/material-types",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "openingPeriods": {
-                "path": "/calendar/periods",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "organizations": {
-                "path": "/organizations-storage/organizations",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "patronNoticePolicies": {
-                "path": "/patron-notice-policy-storage/patron-notice-policies",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "refunds": {
-                "path": "/refunds",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "requestPolicies": {
-                "path": "/request-policy-storage/request-policies",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "servicepoints": {
-                "path": "/service-points",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "staffSlips": {
-                "path": "/staff-slips-storage/staff-slips",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "statisticalCodeTypes": {
-                "path": "/statistical-code-types",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "statisticalCodes": {
-                "path": "/statistical-codes",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "tags": {
-                "path": "/tags",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "templates": {
-                "path": "/templates",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "usergroups": {
-                "path": "/groups",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "users": {
-                "path": "/users",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            },
-            "waiver": {
-                "path": "/waives",
-                "insertMethod": "post",
-                "saveEntireResponse": False
-            }
+    @abstractmethod
+    def add_cli_arguments(parser):
+        print("args")
+        ServiceTaskBase.add_common_arguments(parser)
+        ServiceTaskBase.add_cli_argument(parser, "path",
+                                         "Source or results folder depending on action")
+        ServiceTaskBase.add_cli_argument(parser, "ref_data_set",
+                                         "Choose a ref data set",
+                                         choices=get_sets().keys())
+        ServiceTaskBase.add_cli_argument(parser, "action", "Which action to perform",
+                                         choices=["backup", "purge", "restore"])
+
+
+def get_sets():
+    return {
+        "all": {},
+        "addressTypes": {
+            "path": "/addresstypes",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "alternativeTitleTypes": {
+            "path": "/alternative-title-types",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "callNumberTypes": {
+            "path": "/call-number-types",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "cancellationReasons": {
+            "path": "/cancellation-reason-storage/cancellation-reasons",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "categories": {
+            "path": "/vendor-storage/categories",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "circulation_rules": {
+            "path": "/circulation-rules-storage",
+            "insertMethod": "put",
+            "saveEntireResponse": True
+        },
+        "classificationTypes": {
+            "path": "/classification-types",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "contributorNameTypes": {
+            "path": "/contributor-name-types",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "contributorTypes": {
+            "path": "/contributor-types",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "electronicAccessRelationships": {
+            "path": "/electronic-access-relationships",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "fileExtensions": {
+            "path": "/data-import/fileExtensions",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "holdingsTypes": {
+            "path": "/holdings-types",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "identifierTypes": {
+            "path": "/identifier-types",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "illPolicies": {
+            "path": "/ill-policies",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "instanceFormats": {
+            "path": "/instance-formats",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "instanceStatuses": {
+            "path": "/instance-statuses",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "instanceTypes": {
+            "path": "/instance-types",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "loanPolicies": {
+            "path": "/loan-policy-storage/loan-policies",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "loantypes": {
+            "path": "/loan-types",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "locations": {
+            "path": "/locations",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "loccamps": {
+            "path": "/location-units/campuses",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "locinsts": {
+            "path": "/location-units/institutions",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "loclibs": {
+            "path": "/location-units/libraries",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "mtypes": {
+            "path": "/material-types",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "openingPeriods": {
+            "path": "/calendar/periods",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "organizations": {
+            "path": "/organizations-storage/organizations",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "patronNoticePolicies": {
+            "path": "/patron-notice-policy-storage/patron-notice-policies",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "refunds": {
+            "path": "/refunds",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "requestPolicies": {
+            "path": "/request-policy-storage/request-policies",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "servicepoints": {
+            "path": "/service-points",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "staffSlips": {
+            "path": "/staff-slips-storage/staff-slips",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "statisticalCodeTypes": {
+            "path": "/statistical-code-types",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "statisticalCodes": {
+            "path": "/statistical-codes",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "tags": {
+            "path": "/tags",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "templates": {
+            "path": "/templates",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "usergroups": {
+            "path": "/groups",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "users": {
+            "path": "/users",
+            "insertMethod": "post",
+            "saveEntireResponse": False
+        },
+        "waiver": {
+            "path": "/waives",
+            "insertMethod": "post",
+            "saveEntireResponse": False
         }
+    }
 
 
 class Purge:
@@ -438,4 +452,3 @@ class Restore:
                 except Exception as ee:
                     print("ERROR=================================")
                     print(ee)
-

@@ -45,3 +45,9 @@ class InstanceIdentifierRemover(ServiceTaskBase):
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_argument(parser, "identifier_type_id", "The UUID of the Identifier to remove", "")
+
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        ServiceTaskBase.add_cli_argument(parser, "identifier_type_id", "The UUID of the Identifier to remove")

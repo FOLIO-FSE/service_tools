@@ -9,7 +9,6 @@ def parse_args(task_classes):
     parser = GooeyParser(description="a FOLIO Migration and Service task tool")
     subs = parser.add_subparsers(help="commands", dest="command")
     for task_class in task_classes:
-        # print(task_class.__name__)
         sub_parser = subs.add_parser(task_class.__name__)
         task_class.add_arguments(sub_parser)
     args = parser.parse_args()

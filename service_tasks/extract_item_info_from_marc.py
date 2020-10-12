@@ -127,3 +127,11 @@ class ExtractItemInfoFromMARC(ServiceTaskBase):
         ServiceTaskBase.add_argument(parser,"source_path","", "FileChooser")
         ServiceTaskBase.add_argument(parser,"results_path","", "DirChooser")
         ServiceTaskBase.add_argument(parser,"instance_id_map_path","","FileChooser")
+
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        ServiceTaskBase.add_cli_argument(parser, "source_path", "")
+        ServiceTaskBase.add_cli_argument(parser, "results_path", "")
+        ServiceTaskBase.add_cli_argument(parser, "instance_id_map_path", "")

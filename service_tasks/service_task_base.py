@@ -35,17 +35,20 @@ class ServiceTaskBase():
         raise NotImplementedError
 
     @staticmethod
+    @abstractmethod
+    def add_cli_arguments(sub_parser):
+        raise NotImplementedError
+
+    @staticmethod
     def add_argument(parser, destination, help, widget, **kwargs):
         # print(parser.__class__.__name__)
         # print(destination)
-        if parser.__class__.__name__ == "GooeyParser":
-            parser.add_argument(dest=destination, help=help, widget=widget, metavar=kwargs.get('metavar'),
-                                choices=kwargs.get('choices'))
-        elif parser.__class__.__name__ == "ArgumentParser":
-            if "destination" in kwargs:
-                ArgumentParser(parser).add_argument(dest=kwargs.get('destination'), help=help)
-            else:
-                parser.add_argument(destination)
+        parser.add_argument(dest=destination, help=help, widget=widget, metavar=kwargs.get('metavar'),
+                            choices=kwargs.get('choices'))
+
+    @staticmethod
+    def add_cli_argument(parser: ArgumentParser, destination, help, **kwargs):
+        parser.add_argument(dest=destination, help=help)
 
     @abstractmethod
     def do_work(self):
@@ -54,6 +57,6 @@ class ServiceTaskBase():
     @staticmethod
     def add_common_arguments(parser):
         parser.add_argument(
-            "okapi_credentials_string", help="Space delimited string containing"
+            "okapi_credentials_string", help="Space delimited string containing "
                                              "OKAPI_URL, TENANT_ID,  USERNAME, PASSWORD in that oreder."
         )

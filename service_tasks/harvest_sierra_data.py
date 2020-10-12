@@ -18,7 +18,6 @@ class HarvestSierraData(ServiceTaskBase):
         self.auth_token = ""
         self.authenticate()
 
-
     def do_work(self):
         print("Starting...")
 
@@ -35,6 +34,14 @@ class HarvestSierraData(ServiceTaskBase):
                                      dest="ref_data_set",
                                      choices=["apa"])
 
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_cli_argument(parser, "base_uri", "Base URI for Sierra API")
+        ServiceTaskBase.add_cli_argument(parser, "public_key", "Public Key for Sierra API")
+        ServiceTaskBase.add_cli_argument(parser, "private_key", "Private Key for Sierra API")
+        ServiceTaskBase.add_cli_argument(parser, "data_feed", "Choose a data feed", choices=["apa"])
+
     def authenticate(self):
         resp = requests.post(url=f"{self.base_uri}{self.token_path}",
                              headers={"Authorization": f"Basic {self.encoded_credentials}",
@@ -45,8 +52,7 @@ class HarvestSierraData(ServiceTaskBase):
         self.auth_token = data["access_token"]
         print(self.auth_token)
         print(time.ctime())
-        threading.Timer(self.api_timeout_seconds,self.authenticate).start()
-
+        threading.Timer(self.api_timeout_seconds, self.authenticate).start()
 
 
 def to_base64(message):

@@ -96,6 +96,14 @@ class AddHRIDToMARCRecords(ServiceTaskBase):
         ServiceTaskBase.add_argument(parser,"results_path","", "DirChooser")
         ServiceTaskBase.add_argument(parser,"id_map_path", "", "FileChooser")
 
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        ServiceTaskBase.add_cli_argument(parser, "source_path", "")
+        ServiceTaskBase.add_cli_argument(parser, "results_path", "")
+        ServiceTaskBase.add_cli_argument(parser, "id_map_path", "")
+
 
 def from_json(jobj):
     rec = pymarc.Record()

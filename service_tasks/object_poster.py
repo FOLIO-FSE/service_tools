@@ -34,7 +34,7 @@ class SingleObjectsPoster(ServiceTaskBase):
 
                     if req.status_code == 201:
                         # print(f"{self.num_rows}\tHTTP {req.status_code}\tPOST {url}")
-                        if self.num_rows%100 == 0:
+                        if self.num_rows % 100 == 0:
                             print(timings(self.t0, t0_function, self.num_rows))
                     elif req.status_code == 422:
                         self.failed_posts += 1
@@ -59,13 +59,21 @@ class SingleObjectsPoster(ServiceTaskBase):
     @abstractmethod
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        ServiceTaskBase.add_argument(parser,"objects_file_path", "path data file", "FileChooser")
-        ServiceTaskBase.add_argument(parser,"skip", "Number of records to skip","")
-        ServiceTaskBase.add_argument(parser,"","What objects to post","Dropdown",
-            metavar='What objects to post',
-            dest='object_name',
-            choices=list(list_objects().keys()),
-        )
+        ServiceTaskBase.add_argument(parser, "objects_file_path", "path data file", "FileChooser")
+        ServiceTaskBase.add_argument(parser, "skip", "Number of records to skip", "")
+        ServiceTaskBase.add_argument(parser, "", "What objects to post", "Dropdown",
+                                     metavar='What objects to post',
+                                     dest='object_name',
+                                     choices=list(list_objects().keys()),
+                                     )
+
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        ServiceTaskBase.add_cli_argument(parser, "objects_file_path", "path data file")
+        ServiceTaskBase.add_cli_argument(parser, "skip", "Number of records to skip")
+        ServiceTaskBase.add_cli_argument(parser, "", "What objects to post", choices=list(list_objects().keys()))
 
 
 def timings(t0, t0func, num_objects):

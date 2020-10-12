@@ -134,9 +134,18 @@ class PostOpenLoans(ServiceTaskBase):
         ServiceTaskBase.add_argument(parser, "service_point_id", "UUID of the service point that checked the items out",
                                      "")
 
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        ServiceTaskBase.add_cli_argument(parser, "objects_file_path", "path data file")
+        ServiceTaskBase.add_cli_argument(parser, "service_point_id", "UUID of the service point"
+                                                                     "that checked the items out")
+
 
 def timings(t0, t0func, num_objects):
     avg = num_objects / (time.time() - t0)
     elapsed = time.time() - t0
     elapsed_func = num_objects / (time.time() - t0func)
-    return f"Objects processed: {num_objects}\tTotal elapsed: {elapsed}\tAverage per object: {avg:.2f}\tElapsed this time: {elapsed_func:.2f}"
+    return (f"Objects processed: {num_objects}\tTotal elapsed: {elapsed}\tAverage per object: {avg:.2f}\t"
+            "Elapsed this time: {elapsed_func:.2f}")

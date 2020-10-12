@@ -28,6 +28,7 @@ class BatchPoster(ServiceTaskBase):
         with open(self.objects_file) as rows:
             for row in rows:
                 json_rec = json.loads(row.split("\t")[-1])
+                print(json.dumps(json_rec, indent=4))
                 self.processed_rows += 1
                 try:
                     batch.append(json_rec)
@@ -114,6 +115,7 @@ class BatchPoster(ServiceTaskBase):
             payload = {"records": list(batch), "totalRecords": len(batch)}
         else:
             payload = {kind["object_name"]: batch}
+        print(json.dumps(payload, ensure_ascii=True))
         return requests.post(
             url, data=json.dumps(payload), headers=self.folio_client.okapi_headers
         )
@@ -124,11 +126,21 @@ class BatchPoster(ServiceTaskBase):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_argument(parser, "objects_file", "path data file", "FileChooser")
         ServiceTaskBase.add_argument(parser, "batch_size", "batch size", "")
-        ServiceTaskBase.add_argument(parser,"object_name","What objects to batch post","Dropdown",
-            metavar='What objects to batch post',
-            dest='object_name',
-            choices=list(list_objects().keys()),
-        )
+        ServiceTaskBase.add_argument(parser, "object_name", "What objects to batch post", "Dropdown",
+                                     metavar='What objects to batch post',
+                                     dest='object_name',
+                                     choices=list(list_objects().keys()),
+                                     )
+
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        ServiceTaskBase.add_cli_argument(parser, "objects_file", "path data file")
+        ServiceTaskBase.add_cli_argument(parser, "batch_size", "batch size")
+        ServiceTaskBase.add_cli_argument(parser, "object_name", "What objects to batch post",
+                                         choices=list(list_objects().keys())
+                                         )
 
 
 def list_objects():
@@ -139,7 +151,7 @@ def list_objects():
         "Instances": {"object_name": "instances", "api_endpoint": "/instance-storage/batch/synchronous",
                       "total_records": False},
         "Source Records - Batch": {"object_name": "records", "api_endpoint": "/source-storage/batch/records",
-                           "total_records": True}
+                                   "total_records": True}
     }
 
 

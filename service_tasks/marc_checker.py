@@ -64,3 +64,9 @@ class MARCChecker(ServiceTaskBase):
         ServiceTaskBase.add_argument(parser,
                                      "marc_files", help="Path to the file", widget="MultiFileChooser"
                                      )
+
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_cli_argument(parser, "marc_files", help="Path to the file")
+

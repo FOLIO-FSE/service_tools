@@ -4,13 +4,14 @@ from service_tasks.service_task_base import ServiceTaskBase
 from service_tasks import *
 import argparse
 
+
 def parse_args(task_classes):
     """Parse CLI Arguments"""
     parser = argparse.ArgumentParser()
     subs = parser.add_subparsers(help="commands", dest="command")
     for task_class in task_classes:
         sub_parser = subs.add_parser(task_class.__name__)
-        task_class.add_arguments(sub_parser)
+        task_class.add_cli_arguments(sub_parser)
     args = parser.parse_args()
     print(args)
     return args

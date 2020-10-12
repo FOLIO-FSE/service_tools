@@ -133,9 +133,22 @@ class MigrateUsers(ServiceTaskBase):
                                      choices=list(get_transformers().keys()),
                                      )
 
-
-
-
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_common_arguments(parser)
+        ServiceTaskBase.add_cli_argument(parser, "objects_file", "path data file")
+        ServiceTaskBase.add_cli_argument(parser, "results_folder",
+                                         "Folder where results are saved. The script will create a "
+                                         "./users subfolder and add results to it.")
+        ServiceTaskBase.add_cli_argument(parser, "batch_size",
+                                         "The number of users in each batch that is saved to disk and posted to FOLIO")
+        ServiceTaskBase.add_cli_argument(parser, "temp_email",
+                                         "Email address to give all users during testing. Leave empty at go-live")
+        ServiceTaskBase.add_cli_argument(parser, "transformer_name",
+                                         "Choose a transformer. If unsure and starting with a new client,"
+                                         "try the default",
+                                         choices=list(get_transformers().keys()))
 
 
 def get_transformers():

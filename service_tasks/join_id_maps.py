@@ -31,6 +31,13 @@ class JoinIdMaps(ServiceTaskBase):
     @abstractmethod
     def add_arguments(parser):
         ServiceTaskBase.add_argument(parser,
-            "data_path", help="path to folder with files to map", widget="MultiFileChooser"
-        )
-        ServiceTaskBase.add_argument(parser,"result_path", help="path to resutls file", widget="DirChooser")
+                                     "data_path", help="path to folder with files to map", widget="MultiFileChooser"
+                                     )
+        ServiceTaskBase.add_argument(parser, "result_path", help="path to results file", widget="DirChooser")
+
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_cli_argument(parser,
+                                         "data_path", help="path to folder with files to map")
+        ServiceTaskBase.add_cli_argument(parser, "result_path", help="path to results file")

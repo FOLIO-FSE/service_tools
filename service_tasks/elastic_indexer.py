@@ -1,4 +1,3 @@
-
 import argparse
 import pathlib
 import json
@@ -45,7 +44,15 @@ class ElasticLoader(ServiceTaskBase):
                                      "FileChooser")
         ServiceTaskBase.add_argument(parser,
                                      "index_name",
-                                     "Name of the Elastic Index",""
+                                     "Name of the Elastic Index", ""
                                      )
 
-
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_cli_argument(parser,
+                                         "file_to_index",
+                                         "File to load into Elasticsearch")
+        ServiceTaskBase.add_cli_argument(parser,
+                                         "index_name",
+                                         "Name of the Elastic Index")

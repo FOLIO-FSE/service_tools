@@ -1,4 +1,3 @@
-
 import argparse
 import os
 import pathlib
@@ -29,20 +28,18 @@ class OAIHarvest(ServiceTaskBase):
             raise ValueError("metadata format")
         records = sickle.ListRecords(metadataPrefix=self.metadata_prefix, set='all')
         i = 0
-        with codecs.open(os.path.join(self.results_folder, f"{i}.json"), "w+","utf-8") as harvest_file:
+        with codecs.open(os.path.join(self.results_folder, f"{i}.json"), "w+", "utf-8") as harvest_file:
             for record in records:
-                i+= 1
+                i += 1
                 if i % 10 == 0:
                     print(i)
 
                 try:
-                    harvest_file.write(record.raw.replace("<marc:","<").replace("</marc:","</"))
+                    harvest_file.write(record.raw.replace("<marc:", "<").replace("</marc:", "</"))
                 except Exception as ee:
                     print(ee)
                     print(record.raw)
         print("Finished!")
-
-
 
     @staticmethod
     @abstractmethod
@@ -53,17 +50,31 @@ class OAIHarvest(ServiceTaskBase):
                                      "DirChooser")
         ServiceTaskBase.add_argument(parser,
                                      "base_uri",
-                                     "Base uri of the OAI server",""
+                                     "Base uri of the OAI server", ""
                                      )
 
         ServiceTaskBase.add_argument(parser,
                                      "metadata_prefix",
-                                     "Metadata prefix",""
+                                     "Metadata prefix", ""
                                      )
         ServiceTaskBase.add_argument(parser,
                                      "from_date",
-                                     "From date",""
+                                     "From date", ""
                                      )
 
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_cli_argument(parser,
+                                         "results_folder",
+                                         "Folder where results are saved")
+        ServiceTaskBase.add_cli_argument(parser,
+                                         "base_uri",
+                                         "Base uri of the OAI server")
 
-
+        ServiceTaskBase.add_cli_argument(parser,
+                                         "metadata_prefix",
+                                         "Metadata prefix")
+        ServiceTaskBase.add_cli_argument(parser,
+                                         "from_date",
+                                         "From date")

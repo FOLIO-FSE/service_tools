@@ -27,3 +27,8 @@ class CountMarcRecords(ServiceTaskBase):
     @abstractmethod
     def add_arguments(parser):
         ServiceTaskBase.add_argument(parser, "marc_file", "URL To MARC file", "FileChooser")
+
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_cli_argument(parser, "marc_file", "URL To MARC file")

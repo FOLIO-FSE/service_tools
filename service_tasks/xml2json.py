@@ -28,3 +28,13 @@ class XML2JSON(ServiceTaskBase):
                                      "to_file",
                                      "The destination where you want to store the results",
                                      "FileChooser")
+
+    @staticmethod
+    @abstractmethod
+    def add_cli_arguments(parser):
+        ServiceTaskBase.add_cli_argument(parser,
+                                         "from_file",
+                                         "The XML file you want to transform to JSON")
+        ServiceTaskBase.add_cli_argument(parser,
+                                         "to_file",
+                                         "The destination where you want to store the results")
