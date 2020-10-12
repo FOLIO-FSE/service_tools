@@ -6,7 +6,7 @@ import traceback
 from abc import abstractmethod
 import xml.etree.ElementTree as ET
 from datetime import datetime as dt, datetime
-
+from dateutil import parser as du_parser
 import dateutil
 import requests
 
@@ -53,8 +53,8 @@ class MigrateOpenLoans(ServiceTaskBase):
                         # extend loan backwards
                         if self.change_due_date(folio_loan[1], legacy_loan):
                             loan_to_extend = folio_loan[1]
-                            due_date = dateutil.parser.isoparse(legacy_loan["due_date"])
-                            out_date = dateutil.parser.isoparse(legacy_loan["out_date"])
+                            due_date = du_parser.isoparse(legacy_loan["due_date"])
+                            out_date = du_parser.isoparse(legacy_loan["out_date"])
                             renewal_count = legacy_loan["renewal_count"]
 
                             self.update_open_loan(
@@ -116,15 +116,14 @@ class MigrateOpenLoans(ServiceTaskBase):
         try:
             req = requests.post(url, headers=self.folio_client.okapi_headers, data=json.dumps(data))
             if str(req.status_code) == "422":
-                print(
-                    f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(data)}",
-                    flush=True,
-                )
-                return False, None, json.loads(req.text)["errors"][0]["message"]
+                error_message =json.loads(req.text)['errors'][0]['message']
+                self.add_stats(f"Check out error: {error_message}")
+                return False, None, error_message
             elif str(req.status_code) == "201":
-                print(f"{req.status_code}\tPOST {url}", flush=True)
+                self.add_stats("Successful checkouts by barcode")
                 return True, json.loads(req.text), None
             else:
+                self.add_stats(f"Failed checkout http status {req.status_code}")
                 req.raise_for_status()
         except Exception as exception:
             print(f"\tPOST FAILED {url}\t{json.dumps(data)}", flush=True)
@@ -159,21 +158,25 @@ class MigrateOpenLoans(ServiceTaskBase):
             del self.failed[loan["item_id"]]
 
     def change_due_date(self, folio_loan, legacy_loan):
-
         api_url = f"{self.folio_client.okapi_url}/circulation/loans/{folio_loan['id']}/change-due-date"
-        body = {"dueDate": dateutil.parser.isoparse(legacy_loan["due_date"]).isoformat()}
+        body = {"dueDate": du_parser.isoparse(legacy_loan["due_date"]).isoformat()}
         req = requests.post(
             api_url, headers=self.folio_client.okapi_headers, data=json.dumps(body)
         )
         if str(req.status_code) == "422":
             error_message = json.loads(req.text)['errors'][0]['message']
+            self.add_stats(f"Change due date error: {error_message}")
             print(
                 f"{error_message}\t",
                 flush=True,
             )
             self.add_stats(error_message)
             return False
+        elif str(req.status_code) == "201":
+            self.add_stats("Successful checkouts by barcode")
+            return True, json.loads(req.text), None
         else:
+            self.add_stats(f"Update open loan error http status: {req.status_code}")
             req.raise_for_status()
         print(json.dumps(req.text))
         return True
@@ -181,7 +184,6 @@ class MigrateOpenLoans(ServiceTaskBase):
     def update_open_loan(self, loan, extension_due_date, extend_out_date, renewal_count=0):
         # TODO: add logging instead of print out
         try:
-            df = "%Y-%m-%dT%H:%M:%S.%f+0000"
             loan_to_put = copy.deepcopy(loan)
             del loan_to_put["metadata"]
             loan_to_put["dueDate"] = extension_due_date.isoformat()
@@ -196,12 +198,13 @@ class MigrateOpenLoans(ServiceTaskBase):
                 flush=True,
             )
             if str(req.status_code) == "422":
-                print(
-                    f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(loan_to_put)}",
-                    flush=True,
-                )
+                error_message = json.loads(req.text)['errors'][0]['message']
+                self.add_stats(f"Update open loan error: {error_message}")
                 return False
+            elif str(req.status_code) == "201":
+                self.add_stats("Successfully updated loans")
             else:
+                self.add_stats(f"Update open loan error http status: {req.status_code}")
                 req.raise_for_status()
             return True
         except Exception as exception:
