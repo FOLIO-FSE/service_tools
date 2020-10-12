@@ -1,9 +1,11 @@
+import copy
 import csv
 import json
 import time
+import traceback
 from abc import abstractmethod
 import xml.etree.ElementTree as ET
-from datetime import datetime as dt
+from datetime import datetime as dt, datetime
 
 import dateutil
 import requests
@@ -39,7 +41,7 @@ class MigrateOpenLoans(ServiceTaskBase):
                 try:
                     t0_function = time.time()
                     i += 1
-                    folio_loan = self.folio_client.check_out_by_barcode(
+                    folio_loan = self.check_out_by_barcode(
                         legacy_loan["item_barcode"],
                         legacy_loan["patron_barcode"],
                         dt.now(),
@@ -53,8 +55,10 @@ class MigrateOpenLoans(ServiceTaskBase):
                             loan_to_extend = folio_loan[1]
                             due_date = dateutil.parser.isoparse(legacy_loan["due_date"])
                             out_date = dateutil.parser.isoparse(legacy_loan["out_date"])
-                            self.folio_client.extend_open_loan(
-                                loan_to_extend, due_date, out_date
+                            renewal_count = legacy_loan["renewal_count"]
+
+                            self.update_open_loan(
+                                loan_to_extend, due_date, out_date, renewal_count
                             )
                             print(f"{timings(self.t0, t0_function, i)} {i}")
                             self.successful_items.add(legacy_loan["item_id"])
@@ -96,6 +100,37 @@ class MigrateOpenLoans(ServiceTaskBase):
             print(f"# {a}")
             for b in self.migration_report[a]:
                 print(b)
+
+    def check_out_by_barcode(
+            self, item_barcode, patron_barcode, loan_date: datetime, service_point_id
+    ):
+        # TODO: add logging instead of print out
+        data = {
+            "itemBarcode": item_barcode,
+            "userBarcode": patron_barcode,
+            "loanDate": loan_date.isoformat(),
+            "servicePointId": service_point_id,
+        }
+        path = "/circulation/check-out-by-barcode"
+        url = f"{self.folio_client.okapi_url}{path}"
+        try:
+            req = requests.post(url, headers=self.folio_client.okapi_headers, data=json.dumps(data))
+            if str(req.status_code) == "422":
+                print(
+                    f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(data)}",
+                    flush=True,
+                )
+                return False, None, json.loads(req.text)["errors"][0]["message"]
+            elif str(req.status_code) == "201":
+                print(f"{req.status_code}\tPOST {url}", flush=True)
+                return True, json.loads(req.text), None
+            else:
+                req.raise_for_status()
+        except Exception as exception:
+            print(f"\tPOST FAILED {url}\t{json.dumps(data)}", flush=True)
+            traceback.print_exc()
+            print(exception, flush=True)
+            return False, None, str(exception)
 
     @staticmethod
     @abstractmethod
@@ -142,6 +177,41 @@ class MigrateOpenLoans(ServiceTaskBase):
             req.raise_for_status()
         print(json.dumps(req.text))
         return True
+
+    def update_open_loan(self, loan, extension_due_date, extend_out_date, renewal_count=0):
+        # TODO: add logging instead of print out
+        try:
+            df = "%Y-%m-%dT%H:%M:%S.%f+0000"
+            loan_to_put = copy.deepcopy(loan)
+            del loan_to_put["metadata"]
+            loan_to_put["dueDate"] = extension_due_date.isoformat()
+            loan_to_put["loanDate"] = extend_out_date.isoformat()
+            loan_to_put["renewalCount"] = renewal_count
+            url = f"{self.folio_client.okapi_url}/circulation/loans/{loan_to_put['id']}"
+            req = requests.put(
+                url, headers=self.folio_client.okapi_headers, data=json.dumps(loan_to_put)
+            )
+            print(
+                f"{req.status_code}\tPUT Extend loan {loan_to_put['id']} to {loan_to_put['dueDate']}\t {url}",
+                flush=True,
+            )
+            if str(req.status_code) == "422":
+                print(
+                    f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(loan_to_put)}",
+                    flush=True,
+                )
+                return False
+            else:
+                req.raise_for_status()
+            return True
+        except Exception as exception:
+            print(
+                f"PUT FAILED Extend loan to {loan_to_put['dueDate']}\t {url}\t{json.dumps(loan_to_put)}",
+                flush=True,
+            )
+            traceback.print_exc()
+            print(exception, flush=True)
+            return False
 
 
 def timings(t0, t0func, num_objects):
