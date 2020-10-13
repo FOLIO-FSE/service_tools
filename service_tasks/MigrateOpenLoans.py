@@ -19,7 +19,7 @@ class MigrateOpenLoans(ServiceTaskBase):
         super().__init__(folio_client)
         self.service_point_id = args.service_point_id
         csv.register_dialect("tsv", delimiter="\t")
-        with open(args.open_loans_file) as loans_file:
+        with open(args.open_loans_file, 'r') as loans_file:
             self.loans = list(InsensitiveDictReader(loans_file, dialect="tsv"))
         print(f"{len(self.loans)} loans to migrate")
         self.patron_item_combos = set()
@@ -36,7 +36,7 @@ class MigrateOpenLoans(ServiceTaskBase):
     def do_work(self):
         print("Starting")
         i = 0
-        for legacy_loan in self.loans[15:18]:
+        for legacy_loan in self.loans:
             if legacy_loan["item_id"] not in self.successful_items:
                 try:
                     t0_function = time.time()
