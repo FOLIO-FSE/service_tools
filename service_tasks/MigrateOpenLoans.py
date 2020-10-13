@@ -1,6 +1,7 @@
 import copy
 import csv
 import json
+import re
 import time
 import traceback
 from abc import abstractmethod
@@ -118,6 +119,9 @@ class MigrateOpenLoans(ServiceTaskBase):
             req = requests.post(url, headers=self.folio_client.okapi_headers, data=json.dumps(data))
             if req.status_code == 422:
                 error_message =json.loads(req.text)['errors'][0]['message']
+                if "has the item status" in error_message:
+                    error_message = re.findall("(?<=has the item status\s).*(?=\sand cannot be checked out)",
+                                               error_message)[0]
                 self.add_stats(f"Check out error: {error_message}")
                 return False, None, error_message
             elif req.status_code == 201:
