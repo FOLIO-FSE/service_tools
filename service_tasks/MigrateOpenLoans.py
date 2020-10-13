@@ -122,6 +122,8 @@ class MigrateOpenLoans(ServiceTaskBase):
                 if "has the item status" in error_message:
                     error_message = re.findall("(?<=has the item status\s).*(?=\sand cannot be checked out)",
                                                error_message)[0]
+                elif "No item with barcode" in error_message:
+                    error_message = "Missing barcode"
                 self.add_stats(f"Check out error: {error_message}")
                 return False, None, error_message
             elif req.status_code == 201:
