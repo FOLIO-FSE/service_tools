@@ -21,7 +21,7 @@ class MigrateOpenLoans(ServiceTaskBase):
         csv.register_dialect("tsv", delimiter="\t")
         with open(args.open_loans_file, 'r') as loans_file:
             self.loans = list(InsensitiveDictReader(loans_file, dialect="tsv"))
-        print(f"{len(self.loans)} loans to migrate")
+        print(f"{len(self.loans)} loans to migrate", flush=True)
         self.patron_item_combos = set()
         self.t0 = time.time()
         self.duplicate_loans = 0
@@ -31,10 +31,10 @@ class MigrateOpenLoans(ServiceTaskBase):
         self.successful_items = set()
         self.failed = {}
         self.failed_and_not_dupe = {}
-        print("Init completed")
+        print("Init completed", flush=True)
 
     def do_work(self):
-        print("Starting")
+        print("Starting", flush=True)
         i = 0
         for legacy_loan in self.loans:
             if legacy_loan["item_id"] not in self.successful_items:
@@ -69,7 +69,7 @@ class MigrateOpenLoans(ServiceTaskBase):
                             self.failed[legacy_loan["item_id"]] = (folio_loan, legacy_loan)
                         # Second Failure
                         else:
-                            print(f"Loan already in failed {legacy_loan}")
+                            print(f"Loan already in failed {legacy_loan}", flush=True)
                             self.failed_and_not_dupe[legacy_loan["item_id"]] = [
                                 (folio_loan, legacy_loan),
                                 self.failed[legacy_loan["item_id"]],
@@ -77,7 +77,7 @@ class MigrateOpenLoans(ServiceTaskBase):
                             self.add_stats("Duplicate loans")
                             del self.failed[legacy_loan["item_id"]]
                 except Exception as ee:
-                    print(f"Error in row {i} {legacy_loan} {ee}")
+                    print(f"Error in row {i} {legacy_loan} {ee}", flush=True)
                     traceback.print_exc()
                     ##raise ee
             else:
@@ -85,8 +85,8 @@ class MigrateOpenLoans(ServiceTaskBase):
                 self.add_stats("Skipped since already added")
                 self.add_stats("Duplicate loans")
             if i%50 == 0:
-                print(f"{timings(self.t0, t0_function, i)} {i}")
                 self.print_dict_to_md_table(self.stats)
+                print(f"{timings(self.t0, t0_function, i)} {i}", flush=True)
         # wrap up
         for k, v in self.failed.items():
             self.failed_and_not_dupe[k] = [v]
