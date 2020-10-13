@@ -36,7 +36,7 @@ class MigrateOpenLoans(ServiceTaskBase):
     def do_work(self):
         print("Starting")
         i = 0
-        for legacy_loan in self.loans[18:]:
+        for legacy_loan in self.loans[15:18]:
             if legacy_loan["item_id"] not in self.successful_items:
                 try:
                     t0_function = time.time()
@@ -60,13 +60,12 @@ class MigrateOpenLoans(ServiceTaskBase):
                             self.update_open_loan(
                                 loan_to_extend, due_date, out_date, renewal_count
                             )
-                            print(f"{timings(self.t0, t0_function, i)} {i}")
                             self.successful_items.add(legacy_loan["item_id"])
+                            self.add_stats("Successfully migrated loans")
                     # Loan Posting Failed
                     else:
                         # First failure
                         if legacy_loan["item_id"] not in self.failed:
-                            print(f"Adding loan to failed {legacy_loan}")
                             self.failed[legacy_loan["item_id"]] = (folio_loan, legacy_loan)
                         # Second Failure
                         else:
@@ -75,15 +74,19 @@ class MigrateOpenLoans(ServiceTaskBase):
                                 (folio_loan, legacy_loan),
                                 self.failed[legacy_loan["item_id"]],
                             ]
-                            self.duplicate_loans += 1
+                            self.add_stats("Duplicate loans")
                             del self.failed[legacy_loan["item_id"]]
                 except Exception as ee:
                     print(f"Error in row {i} {legacy_loan} {ee}")
+                    traceback.print_exc()
                     ##raise ee
             else:
                 print(f"loan already successfully processed {json.dumps(legacy_loan)}")
-                self.skipped_since_already_added += 1
-                self.duplicate_loans += 1
+                self.add_stats("Skipped since already added")
+                self.add_stats("Duplicate loans")
+            if i%50 == 0:
+                print(f"{timings(self.t0, t0_function, i)} {i}")
+                self.print_dict_to_md_table(self.stats)
         # wrap up
         for k, v in self.failed.items():
             self.failed_and_not_dupe[k] = [v]
@@ -91,15 +94,13 @@ class MigrateOpenLoans(ServiceTaskBase):
         print("## Loan migration counters")
         print("Title | Number")
         print("--- | ---:")
-        print(f"Duplicate rows in file | {self.duplicate_loans}")
-        print(f"Skipped since already added | {self.skipped_since_already_added}")
-        print(f"Successfully checked out items | {len(self.successful_items)}")
         print(f"Failed items/loans | {len(self.failed_and_not_dupe)}")
         print(f"Total Rows in file  | {i}")
         for a in self.migration_report:
             print(f"# {a}")
             for b in self.migration_report[a]:
                 print(b)
+        self.print_dict_to_md_table(self.stats)
 
     def check_out_by_barcode(
             self, item_barcode, patron_barcode, loan_date: datetime, service_point_id
@@ -115,13 +116,16 @@ class MigrateOpenLoans(ServiceTaskBase):
         url = f"{self.folio_client.okapi_url}{path}"
         try:
             req = requests.post(url, headers=self.folio_client.okapi_headers, data=json.dumps(data))
-            if str(req.status_code) == "422":
+            if req.status_code == 422:
                 error_message =json.loads(req.text)['errors'][0]['message']
                 self.add_stats(f"Check out error: {error_message}")
                 return False, None, error_message
-            elif str(req.status_code) == "201":
-                self.add_stats("Successful checkouts by barcode")
+            elif req.status_code == 201:
+                self.add_stats(f"Successfully checked out by barcode ({req.status_code})")
                 return True, json.loads(req.text), None
+            elif req.status_code == 204:
+                self.add_stats(f"Successfully checked out by barcode ({req.status_code})")
+                return True, None, None
             else:
                 self.add_stats(f"Failed checkout http status {req.status_code}")
                 req.raise_for_status()
@@ -163,7 +167,7 @@ class MigrateOpenLoans(ServiceTaskBase):
         req = requests.post(
             api_url, headers=self.folio_client.okapi_headers, data=json.dumps(body)
         )
-        if str(req.status_code) == "422":
+        if req.status_code == 422:
             error_message = json.loads(req.text)['errors'][0]['message']
             self.add_stats(f"Change due date error: {error_message}")
             print(
@@ -172,9 +176,12 @@ class MigrateOpenLoans(ServiceTaskBase):
             )
             self.add_stats(error_message)
             return False
-        elif str(req.status_code) == "201":
-            self.add_stats("Successful checkouts by barcode")
+        elif req.status_code == 201:
+            self.add_stats(f"Successfully changed due date ({req.status_code})")
             return True, json.loads(req.text), None
+        elif req.status_code == 204:
+            self.add_stats(f"Successfully changed due date ({req.status_code})")
+            return True, None , None
         else:
             self.add_stats(f"Update open loan error http status: {req.status_code}")
             req.raise_for_status()
@@ -193,16 +200,16 @@ class MigrateOpenLoans(ServiceTaskBase):
             req = requests.put(
                 url, headers=self.folio_client.okapi_headers, data=json.dumps(loan_to_put)
             )
-            print(
-                f"{req.status_code}\tPUT Extend loan {loan_to_put['id']} to {loan_to_put['dueDate']}\t {url}",
-                flush=True,
-            )
-            if str(req.status_code) == "422":
+            if req.status_code == 422:
                 error_message = json.loads(req.text)['errors'][0]['message']
                 self.add_stats(f"Update open loan error: {error_message}")
                 return False
-            elif str(req.status_code) == "201":
-                self.add_stats("Successfully updated loans")
+            elif req.status_code == 201:
+                self.add_stats(f"Successfully updated open loan ({req.status_code})")
+                return True, json.loads(req.text), None
+            elif req.status_code == 204:
+                self.add_stats(f"Successfully updated open loan ({req.status_code})")
+                return True, None, None
             else:
                 self.add_stats(f"Update open loan error http status: {req.status_code}")
                 req.raise_for_status()
