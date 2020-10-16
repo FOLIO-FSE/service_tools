@@ -27,10 +27,10 @@ class BatchPoster(ServiceTaskBase):
         batch = []
         with open(self.objects_file) as rows:
             for row in rows:
-                json_rec = json.loads(row.split("\t")[-1])
-                print(json.dumps(json_rec, indent=4))
-                self.processed_rows += 1
                 try:
+                    json_rec = json.loads(row.split("\t")[-1])
+                    # print(json.dumps(json_rec, indent=4))
+                    self.processed_rows += 1
                     batch.append(json_rec)
                     if len(batch) == int(self.batch_size):
                         self.post_batch(batch)
@@ -39,6 +39,7 @@ class BatchPoster(ServiceTaskBase):
                     print(f"{exception} row failed", flush=True)
                     batch = []
                     traceback.print_exc()
+                    raise exception
             # Last batch
         self.post_batch(batch)
         print(json.dumps(self.failed_objects), flush=True)
@@ -115,7 +116,7 @@ class BatchPoster(ServiceTaskBase):
             payload = {"records": list(batch), "totalRecords": len(batch)}
         else:
             payload = {kind["object_name"]: batch}
-        print(json.dumps(payload, ensure_ascii=True))
+        # print(json.dumps(payload, ensure_ascii=True))
         return requests.post(
             url, data=json.dumps(payload), headers=self.folio_client.okapi_headers
         )

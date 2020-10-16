@@ -24,10 +24,19 @@ class ServiceTaskBase():
         for k, v in d_sorted.items():
             print(f"{k} | {v}")
 
+    def print_stats(self):
+        self.print_dict_to_md_table(self.stats, "Measure", "  #  ")
+
     def add_to_migration_report(self, header, message_string):
         if header not in self.migration_report:
             self.migration_report[header] = list()
         self.migration_report[header].append(message_string)
+
+    def print_migration_report(self):
+        for a in self.migration_report:
+            print(f"# {a}")
+            for b in self.migration_report[a]:
+                print(b)
 
     @staticmethod
     @abstractmethod
