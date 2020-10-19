@@ -27,8 +27,13 @@ class BatchPoster(ServiceTaskBase):
     def do_work(self):
         print("Starting....")
         batch = []
+
         with open(self.objects_file) as rows:
-            for idx, row in enumerate(rows)[self.start]:
+            i = 0
+            for row in rows:
+                i += 1
+                if i < self.start:
+                    continue
                 try:
                     json_rec = json.loads(row.split("\t")[-1])
                     self.processed_rows += 1
