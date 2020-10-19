@@ -22,21 +22,19 @@ class BatchPoster(ServiceTaskBase):
         self.users_per_group = {}
         self.failed_fields = set()
         self.num_failures = 0
-        self.start = 0
+        self.start = 0 # TODO: add this as argument
 
     def do_work(self):
         print("Starting....")
         batch = []
 
         with open(self.objects_file) as rows:
-            i = 0
             for row in rows:
-                i += 1
-                if i < self.start:
+                self.processed_rows += 1
+                if self.processed_rows > self.start:
                     continue
                 try:
                     json_rec = json.loads(row.split("\t")[-1])
-                    self.processed_rows += 1
                     batch.append(json_rec)
                     if len(batch) == int(self.batch_size):
                         self.post_batch(batch)
