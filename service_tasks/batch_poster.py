@@ -22,7 +22,7 @@ class BatchPoster(ServiceTaskBase):
         self.users_per_group = {}
         self.failed_fields = set()
         self.num_failures = 0
-        self.start = 0 # TODO: add this as argument
+        self.start = 0 # TODO: add this as an argument
 
     def do_work(self):
         print("Starting....")
