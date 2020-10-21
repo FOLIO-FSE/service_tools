@@ -36,7 +36,7 @@ class MigrateOpenLoans(ServiceTaskBase):
         self.failed = {}
         self.num_legacy_loans_processed = 0
         self.failed_and_not_dupe = {}
-        self.starting_point = 50500  # TODO: Set as arg
+        self.starting_point = 0  # TODO: Set as arg
         print("Init completed", flush=True)
 
     def do_work(self):
