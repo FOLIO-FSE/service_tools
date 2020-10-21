@@ -16,6 +16,10 @@ class ServiceTaskBase():
         else:
             self.stats[measure_to_add] += 1
 
+    def wrap_up(self):
+        self.print_stats()
+        self.print_migration_report()
+
     @staticmethod
     def print_dict_to_md_table(my_dict, h1="", h2=""):
         d_sorted = {k: my_dict[k] for k in sorted(my_dict)}

@@ -32,8 +32,7 @@ class MARCChecker(ServiceTaskBase):
             print(f"processing {file_name}", flush=True)
             try:
                 with open(file_name, "rb") as marc_file:
-                    reader = MARCReader(marc_file, "rb")
-                    reader.hide_utf8_warnings = True
+                    reader = MARCReader(marc_file, "rb", hide_utf8_warnings=False, permissive=False)
                     for idx, marc_record in enumerate(reader):
                         i += 1
                         if i % 1000 == 0:
@@ -69,4 +68,3 @@ class MARCChecker(ServiceTaskBase):
     @abstractmethod
     def add_cli_arguments(parser):
         ServiceTaskBase.add_cli_argument(parser, "marc_files", help="Path to the file")
-

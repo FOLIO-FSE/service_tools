@@ -21,16 +21,20 @@ class BatchPoster(ServiceTaskBase):
         self.objects_file = args.objects_file
         self.users_per_group = {}
         self.failed_fields = set()
+        self.num_failures = 0
+        self.start = 0 # TODO: add this as an argument
 
     def do_work(self):
         print("Starting....")
         batch = []
+
         with open(self.objects_file) as rows:
             for row in rows:
-                json_rec = json.loads(row.split("\t")[-1])
-                print(json.dumps(json_rec, indent=4))
                 self.processed_rows += 1
+                if self.processed_rows > self.start:
+                    continue
                 try:
+                    json_rec = json.loads(row.split("\t")[-1])
                     batch.append(json_rec)
                     if len(batch) == int(self.batch_size):
                         self.post_batch(batch)
@@ -39,6 +43,10 @@ class BatchPoster(ServiceTaskBase):
                     print(f"{exception} row failed", flush=True)
                     batch = []
                     traceback.print_exc()
+                    self.num_failures +=0
+                    if self.num_failures > 5:
+                        print(f"Exceeded number of failures at row {idx}")
+                        raise exception
             # Last batch
         self.post_batch(batch)
         print(json.dumps(self.failed_objects), flush=True)
@@ -115,7 +123,7 @@ class BatchPoster(ServiceTaskBase):
             payload = {"records": list(batch), "totalRecords": len(batch)}
         else:
             payload = {kind["object_name"]: batch}
-        print(json.dumps(payload, ensure_ascii=True))
+        # print(json.dumps(payload, ensure_ascii=True))
         return requests.post(
             url, data=json.dumps(payload), headers=self.folio_client.okapi_headers
         )
@@ -141,6 +149,7 @@ class BatchPoster(ServiceTaskBase):
         ServiceTaskBase.add_cli_argument(parser, "object_name", "What objects to batch post",
                                          choices=list(list_objects().keys())
                                          )
+
 
 
 def list_objects():
