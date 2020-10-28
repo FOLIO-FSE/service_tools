@@ -31,7 +31,7 @@ class BatchPoster(ServiceTaskBase):
         with open(self.objects_file) as rows:
             for row in rows:
                 self.processed_rows += 1
-                if self.processed_rows > self.start:
+                if self.processed_rows < self.start:
                     continue
                 try:
                     json_rec = json.loads(row.split("\t")[-1])
