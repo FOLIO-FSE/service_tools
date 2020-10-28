@@ -22,7 +22,7 @@ class BatchPoster(ServiceTaskBase):
         self.users_per_group = {}
         self.failed_fields = set()
         self.num_failures = 0
-        self.start = 0 # TODO: add this as an argument
+        self.start = 0  # TODO: add this as an argument
 
     def do_work(self):
         print("Starting....")
@@ -43,7 +43,7 @@ class BatchPoster(ServiceTaskBase):
                     print(f"{exception} row failed", flush=True)
                     batch = []
                     traceback.print_exc()
-                    self.num_failures +=0
+                    self.num_failures += 0
                     if self.num_failures > 5:
                         print(f"Exceeded number of failures at row {idx}")
                         raise exception
@@ -151,7 +151,6 @@ class BatchPoster(ServiceTaskBase):
                                          )
 
 
-
 def list_objects():
     return {
         "Items": {"object_name": "items", "api_endpoint": "/item-storage/batch/synchronous", "total_records": False},
@@ -160,7 +159,9 @@ def list_objects():
         "Instances": {"object_name": "instances", "api_endpoint": "/instance-storage/batch/synchronous",
                       "total_records": False},
         "Source Records - Batch": {"object_name": "records", "api_endpoint": "/source-storage/batch/records",
-                                   "total_records": True}
+                                   "total_records": True},
+        "InventoryInstances": {"object_name": "instances", "api_endpoint": "/inventory/instances/batch",
+                               "total_records": False},
     }
 
 
