@@ -1,3 +1,4 @@
+import multiprocessing
 import time
 import traceback
 from abc import abstractmethod
@@ -8,6 +9,7 @@ from os.path import isfile, join
 from pymarc import MARCReader
 
 from service_tasks.service_task_base import ServiceTaskBase
+import asyncio
 
 
 class MARCChecker(ServiceTaskBase):
@@ -36,6 +38,7 @@ class MARCChecker(ServiceTaskBase):
                     for idx, marc_record in enumerate(reader):
                         i += 1
                         if i % 1000 == 0:
+                            parse_stuff(marc_record)
                             elapsed = i / (time.time() - start)
                             elapsed_formatted = "{0:.2f}".format(elapsed)
                             print(
@@ -64,7 +67,24 @@ class MARCChecker(ServiceTaskBase):
                                      "marc_files", help="Path to the file", widget="MultiFileChooser"
                                      )
 
+
+
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
         ServiceTaskBase.add_cli_argument(parser, "marc_files", help="Path to the file")
+
+
+def background(f):
+    def wrapped(*args, **kwargs):
+        return asyncio.get_event_loop().run_in_executor(None, f, *args, **kwargs)
+
+    return wrapped
+
+@background
+def parse_stuff(marc_record):
+    if '245' in marc_record:
+        f = marc_record['245'].format_field()
+    if '100' in marc_record:
+        for f in marc_record.get_fields('100'):
+            ff = f.format_field()

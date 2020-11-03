@@ -1,8 +1,12 @@
 import argparse
+import io
 import os
 import pathlib
+import traceback
 import json
 from abc import abstractmethod
+
+import pymarc
 from sickle import Sickle
 import requests
 import codecs
@@ -26,19 +30,32 @@ class OAIHarvest(ServiceTaskBase):
         if self.metadata_prefix not in formats:
             print(f"{self.metadata_prefix} is not amongst accepted metadata formats ({formats}")
             raise ValueError("metadata format")
-        records = sickle.ListRecords(metadataPrefix=self.metadata_prefix, set='all')
+        records = sickle.ListRecords(**{"metadataPrefix": self.metadata_prefix,
+                                        "set": 'all', 'from': self.from_date})
         i = 0
+        deleted = 0
         with codecs.open(os.path.join(self.results_folder, f"{i}.json"), "w+", "utf-8") as harvest_file:
             for record in records:
                 i += 1
                 if i % 10 == 0:
-                    print(i)
+                    print(f"Records fetched: {i}, of which are deleted: {deleted}")
 
                 try:
-                    harvest_file.write(record.raw.replace("<marc:", "<").replace("</marc:", "</"))
+                    my_io = io.StringIO(record.raw)
+                    marc = pymarc.marcxml.parse_xml_to_array(my_io)[0]
+                    if len(marc.get_fields()) > 1:
+                        harvest_file.write(marc.as_json())
+                    else:
+                        if '<header status="deleted"' in record.raw:
+                            deleted += 1
+                        else:
+                            print(f"raw record: {record.raw}")
+                            print(f"record: {record}")
                 except Exception as ee:
                     print(ee)
                     print(record.raw)
+                    print(marc)
+                    traceback.print_exc()
         print("Finished!")
 
     @staticmethod
