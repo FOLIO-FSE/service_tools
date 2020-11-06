@@ -39,7 +39,7 @@ class OAIHarvest(ServiceTaskBase):
             for record in records:
                 i += 1
                 if i % 1000 == 0:
-                    print(f"{datetime.now().isoformat()}\tRecords fetched: {i}, of which are deleted: {deleted}", flush=True)
+                    print(f"{datetime.utcnow().isoformat()}\tRecords fetched: {i}, of which are deleted: {deleted}", flush=True)
 
                 try:
                     my_io = io.StringIO(record.raw)
