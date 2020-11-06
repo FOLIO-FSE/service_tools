@@ -58,6 +58,7 @@ class OAIHarvest(ServiceTaskBase):
                     print(marc)
                     traceback.print_exc()
         print("Finished!")
+        print(f"{datetime.now().isoformat()}\tRecords fetched: {i}, of which are deleted: {deleted}")
 
     @staticmethod
     @abstractmethod
