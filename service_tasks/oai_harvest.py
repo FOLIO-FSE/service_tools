@@ -39,13 +39,13 @@ class OAIHarvest(ServiceTaskBase):
             for record in records:
                 i += 1
                 if i % 1000 == 0:
-                    print(f"{datetime.now().isoformat()}\tRecords fetched: {i}, of which are deleted: {deleted}")
+                    print(f"{datetime.now().isoformat()}\tRecords fetched: {i}, of which are deleted: {deleted}", flush=True)
 
                 try:
                     my_io = io.StringIO(record.raw)
                     marc = pymarc.marcxml.parse_xml_to_array(my_io)[0]
                     if len(marc.get_fields()) > 1:
-                        harvest_file.write(marc.as_json())
+                        harvest_file.write(marc.as_json()+'\n')
                     else:
                         if '<header status="deleted"' in record.raw:
                             deleted += 1
