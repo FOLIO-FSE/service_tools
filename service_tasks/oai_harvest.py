@@ -5,6 +5,7 @@ import pathlib
 import traceback
 import json
 from abc import abstractmethod
+from datetime import datetime
 
 import pymarc
 from sickle import Sickle
@@ -37,8 +38,8 @@ class OAIHarvest(ServiceTaskBase):
         with codecs.open(os.path.join(self.results_folder, f"{i}.json"), "w+", "utf-8") as harvest_file:
             for record in records:
                 i += 1
-                if i % 10 == 0:
-                    print(f"Records fetched: {i}, of which are deleted: {deleted}")
+                if i % 1000 == 0:
+                    print(f"{datetime.now().isoformat()}\tRecords fetched: {i}, of which are deleted: {deleted}")
 
                 try:
                     my_io = io.StringIO(record.raw)
