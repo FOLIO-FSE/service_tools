@@ -1,35 +1,29 @@
+import time
+from datetime import datetime
 from service_tasks.service_task_base import ServiceTaskBase
+
 
 class ListRecallsWithAvailableItems(ServiceTaskBase):
     def __init__(self, folio_client, args):
         super().__init__(folio_client)
-        print("init")
+        print("Let's go!")
         self.ui_url = args.ui_url
-        print(folio_client.okapi_token)
+        self.loan_type = args.loan_type
+        self.outfile = args.results_file_path
 
+        # Start timers
+        self.start_date_time = datetime.now()
+        self.start = time.time()
+        self.num_records = 0
 
-    # Define a function that makes a GET request with a query
-    def make_get_request_w_query_and_limit(self, endpoint, query, records):
-        request_url = f"{self.folio_client.okapi_url}{endpoint}"
-
-        # Make a GET request. Not sure correctly formatted for folio_client... eg where to put the limit parameter?
-        response = self.folio_client.folio_get_all(request_url, records, query)
-        # As I understand I get the list of returned records back. Errors already handled?
-        return response
+        # Start recall stat counters
+        self.has_available_items = 0
+        self.no_available_items = 0
+        self.recalls_to_move = []
 
     def do_work(self):
-        # Start recall stat counters
-        has_available_items = 0
-        no_available_items = 0
-
-        recalls_to_move = []
-
         # Fetch all open recall requests
-
-        recalls = make_get_request_w_query_and_limit(
-            "circulation/requests",
-            "requestType==\"Recall\" AND status==\"Open - Not yet filled\"",
-            500, "requests")
+        recalls = self.folio_client.folio_get_all("/circulation/requests", "requests", "?query=(requestType==\"Recall\" AND status==\"Open - Not yet filled\")")
 
         # Loop through fetched recall requests
         for recall in recalls:
@@ -38,11 +32,7 @@ class ListRecallsWithAvailableItems(ServiceTaskBase):
             title = recall["item"]["title"]
 
             # Fetch items associated with the instance that are available and loanable
-            available_items = make_get_request_w_query_and_limit(
-                "inventory/items",
-                f"instance.id=={linked_instance} AND status.name==\"Available\" AND permanentLoanTypeId==\"11fbed26-571e-40fb-9e26-80605602021d\"",
-                100, "items"
-            )
+            available_items = self.folio_client.folio_get_all("/inventory/items", "items", f"?query=(instance.id=={linked_instance} AND status.name==\"Available\" AND permanentLoanTypeId==\"{self.loan_type}\")")
 
             # If there are any items available and loanable, add the recall request to list recalls_to_move
             if available_items:
@@ -52,40 +42,52 @@ class ListRecallsWithAvailableItems(ServiceTaskBase):
 
                 recall_info = f"{linked_instance}    {recall_url}    ({request_date} {requester})    {title}"
 
-                recalls_to_move.append(recall_info)
-                has_available_items += 1
+                self.recalls_to_move.append(recall_info)
+                self.has_available_items += 1
 
             else:
-                no_available_items += 1
+                self.no_available_items += 1
+
+            # TODO Check if FOLIO client does this
+            self.num_records += 1
+            if self.num_records % 10 == 0:
+                print(f"{round(self.num_records / (time.time() - self.start))} recs/s\t{self.num_records}", flush=True)
+
+            # TODO Check if FOLIO client does this
+            time.sleep(0.01)
 
         # Wrapping up... print summary to console
         print(
-            f"Number of recalls with available items: {has_available_items}"
+            f"Number of recalls with available items: {self.has_available_items}"
         )
         print(
-            f"Number of recalls with no available items: {no_available_items}"
+            f"Number of recalls with no available items: {self.no_available_items}"
         )
 
         # Print results and list of recalls to move to a file in directory results. If a file by the name already exists, it will be overwritten.
 
-        sorted_recalls_to_move = sorted(recalls_to_move)
-
-        with open("results/recalls_to_move.txt", "w") as f:
-            # TODO Get time from service tasks
-            # print(f"This search was inititalized on: {start_date_time}", file=f)
-            print(f"Number of recalls with available items: {has_available_items}", file=f)
-            print(f"Number of recalls with no available items: {no_available_items}", file=f)
+        with open(self.outfile, "w") as f:
+            print(f"This search was initialized on: {self.start_date_time}", file=f)
+            print(f"Number of recalls with available items: {self.has_available_items}", file=f)
+            print(f"Number of recalls with no available items: {self.no_available_items}", file=f)
             print(f"\nRecalls that can be moved to available items:", file=f)
-            print(*sorted_recalls_to_move, sep="\n", file=f)
+            print(*sorted(self.recalls_to_move), sep="\n", file=f)
 
 
     @staticmethod
     def add_arguments(sub_parser):
         ServiceTaskBase.add_common_arguments(sub_parser)
+        
         ServiceTaskBase.add_argument(sub_parser,
                                      "ui_url",
                                      "The UI URL to the FOLIO environment, to be used in librarian-friendly output", "")
-
+        # TODO Think about how to let the user input a list of loan types to include (or exclude) in the search for available items -- but also about how to avoid request too long error if the list is very long
+        ServiceTaskBase.add_argument(sub_parser,
+                                     "loan_type",
+                                     "UUID of a loanable loan type (TODO: list of loan types)", "")
+        ServiceTaskBase.add_argument(sub_parser,
+                                     "results_file_path",
+                                     "Where do you want to save the file with requests to move? E.g. C:/MyFolder/results.txt (N.B. If you select an existing file, contents will be over-written.)", "FileChooser")
 
     @staticmethod
     def add_cli_arguments(sub_parser):
@@ -93,3 +95,10 @@ class ListRecallsWithAvailableItems(ServiceTaskBase):
         ServiceTaskBase.add_cli_argument(sub_parser,
                                          "ui_url",
                                          "The UI URL to the FOLIO environment, to be used in librarian-friendly output")
+        # TODO Think about how to let the user input a list of loan types to include (or exclude) in the search for available items -- but also about how to avoid request too long error if the list is very long
+        ServiceTaskBase.add_argument(sub_parser,
+                                     "loan_type",
+                                     "UUID of a loanable loan type (TODO: list of loan types)")
+        ServiceTaskBase.add__cli_argument(sub_parser,
+                                     "results_file_path",
+                                     "Where do you want to save the file with Recalls to move? E.g. C:/MyFolder/results.txt (N.B. If you select an existing file, contents will be over-written.")
