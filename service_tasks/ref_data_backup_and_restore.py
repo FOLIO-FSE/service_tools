@@ -17,8 +17,9 @@ class RefDataBackupDeleteAndLoad(ServiceTaskBase):
         super().__init__(folio_client)
         self.action = args.action
         self.path = args.path
-        self.ref_data_sets = self.get_sets()
+        self.ref_data_sets = get_sets()
         self.ref_data_set = self.ref_data_sets.get(args.ref_data_set, {})
+        self.ref_data_set["name"] = args.ref_data_set
 
     def do_work(self):
         print(f"Performing {self.action} of {self.ref_data_set}")
@@ -28,11 +29,11 @@ class RefDataBackupDeleteAndLoad(ServiceTaskBase):
             backup.backup()
         if self.action == "restore":
             print("Restore")
-            restore = Restore(self.folio_client, self.path, self.ref_data_se)
+            restore = Restore(self.folio_client, self.path, self.ref_data_set)
             restore.restore()
         if self.action == "purge":
             print("purge")
-            purge = Purge(self.folio_client, self.path, self.ref_data_se)
+            purge = Purge(self.folio_client, self.path, self.ref_data_set)
             purge.purge()
 
     @staticmethod
@@ -279,11 +280,12 @@ class Purge:
     def purge(self):
         if self.set:
             print("purge setting {}".format(self.set))
-            self.purge_one_setting(set)
+            self.purge_one_setting(self.set)
         else:
             raise Exception("No setting provided. Halting...")
 
     def purge_one_setting(self, config):
+        print(config)
         save_entire_respones = config["saveEntireResponse"]
         query = ("queryString" in config and config["queryString"]) or ""
         query = (
@@ -421,7 +423,7 @@ class Restore:
         self.set = set
         print("initializing Restore")
 
-    def restore(self, settings):
+    def restore(self):
         if self.set:
             print("restoring setting {}".format(self.set))
             self.restore_one_setting(self.set)
