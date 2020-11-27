@@ -25,8 +25,14 @@ def parse_args(task_classes):
     required_cols = 1,
     optional_cols=0,
     default_size=[1100,800],
-    program_name="FOLIO Service task helper"
+    program_name="FOLIO Service task helper",
+    header_bg_color='#FFFFFF',
+    body_bg_color='#FFFFFF',
+    footer_bg_color='#FFFFFF',
+    image_dir='./local_data/',
+
 )
+
 def main():
     try:
         task_classes = inheritors(ServiceTaskBase)
