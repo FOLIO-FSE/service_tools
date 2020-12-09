@@ -93,11 +93,11 @@ class BatchPoster(ServiceTaskBase):
     def handle_failed_batch(self, batch):
         # new_batch = [f for f in batch]  # if f["instanceId"] not in self.failed_ids]
         ff = list(self.failed_fields)
-        if "holdingsrecordid" in ff:
+        if "holdingsRecordId" in ff:
             new_batch = [
                 f for f in batch if (f["holdingsRecordId"] not in self.failed_ids)
             ]
-        elif "instanceid" in ff:
+        elif "instanceId" in ff:
             new_batch = [f for f in batch if f["instanceId"] not in self.failed_ids]
         else:
             raise Exception(f"unhandled failed fields: {ff}")
