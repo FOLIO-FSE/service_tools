@@ -32,10 +32,10 @@ class ListRecallsWithAvailableItems(ServiceTaskBase):
             title = recall["item"]["title"]
 
             # Fetch items associated with the instance that are available and loanable
-            available_items = self.folio_client.folio_get_all("/inventory/items", "items", f"?query=(instance.id=={linked_instance} AND status.name==\"Available\" AND permanentLoanTypeId==\"{self.loan_type}\")")
+            available_items = self.folio_client.folio_get("/inventory/items", query=f"?query=(instance.id=={linked_instance} AND status.name==\"Available\" AND permanentLoanTypeId==\"{self.loan_type}\")&limit=0")
 
             # If there are any items available and loanable, add the recall request to list recalls_to_move
-            if available_items:
+            if available_items.get("totalRecords") > 0:
                 recall_id = recall["id"]
                 recall_url = self.ui_url + f"/requests/view/{recall_id}"
                 requester = recall["requester"]["lastName"]
