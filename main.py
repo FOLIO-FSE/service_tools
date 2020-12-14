@@ -29,8 +29,7 @@ def parse_args(task_classes):
     header_bg_color='#FFFFFF',
     body_bg_color='#FFFFFF',
     footer_bg_color='#FFFFFF',
-    image_dir='./local_data/',
-
+    image_dir='./local_data/'
 )
 
 def main():
