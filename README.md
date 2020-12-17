@@ -13,8 +13,6 @@ Works on Windows as well as Linux. Might work on MacOS
   * [Running the GUI](#running-the-gui)
 - [Available tasks](#available-tasks)
  
-
-
 # Installation
 ## Prerequisites
 * [pipenv](https://pipenv.pypa.io/en/latest/)
@@ -41,6 +39,8 @@ From the command line, run ```pipenv run python main.py```
 You then should see something like this:   
 ![](image.png?raw=true)
 
+# Extending / Contributing
+TBA
 
 # Available tasks
 ## ElasticLoader
