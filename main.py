@@ -50,9 +50,10 @@ def main():
             task_obj = task_class(args)
         task_obj.do_work()
     except Exception as ee:
-        print("FEL!")
+        print("ERROR!")
         print(ee)
         traceback.print_exc()
+        raise ee
 
 
 def inheritors(base_class):
