@@ -15,7 +15,7 @@ class DeleteInstances(ServiceTaskBase):
     def do_work(self):
         instance_ids = self.instances_to_delete.split(',')
         print(f"Working on deleting {len(instance_ids)} instances")
-        for instance_id in [id.strip() for id in instance_ids]:
+        for instance_id in [id.strip() for id in instance_ids if id]:
             if not uuid.UUID(instance_id) and not uuid.UUID(instance_id).version >= 4:
                 raise Exception(f"id {instance_id} of Object to delete is not a proper UUID")
             instance_to_delete = self.folio_client.folio_get_single_object(f"/instance-storage/instances/{instance_id}")
