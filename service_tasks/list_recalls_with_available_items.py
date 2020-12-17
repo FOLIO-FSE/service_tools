@@ -109,7 +109,7 @@ class ListRecallsWithAvailableItems(ServiceTaskBase):
         ServiceTaskBase.add_cli_argument(sub_parser,
                                          "loan_type",
                                          "UUID of a loanable loan type (TODO: list of loan types)")
-        ServiceTaskBase.add__cli_argument(sub_parser,
+        ServiceTaskBase.add_cli_argument(sub_parser,
                                           "results_file_path",
                                           "Where do you want to save the file with Recalls to move? E.g. "
                                           "C:/MyFolder/results.txt (N.B. If you select an existing file, "
