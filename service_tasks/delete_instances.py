@@ -9,8 +9,8 @@ from service_tasks.service_task_base import ServiceTaskBase
 class DeleteInstances(ServiceTaskBase):
     def __init__(self, folio_client, args):
         super().__init__(folio_client)
-        self.instances_to_delete = args.instances_to_delete
-        self.dry_run = args.dry_run
+        self.instances_to_delete = args.instance_ids
+        self.dry_run = False # args.dry_run
 
     def do_work(self):
         instance_ids = self.instances_to_delete.split(',')
@@ -21,7 +21,7 @@ class DeleteInstances(ServiceTaskBase):
             instance_to_delete = self.folio_client.folio_get_single_object(f"/instance-storage/instances/{instance_id}")
             print(f'Will delete {instance_to_delete["title"]}. Just checking for holdings first')
             query = f'?query=(instanceId="{instance_id}")'
-            holdings = self.folio_client.get_all("/holdings-storage/holdings", "holdingsRecords", query)
+            holdings = list(self.folio_client.get_all("/holdings-storage/holdings", "holdingsRecords", query))
             if len(holdings) > 0:
                 print(f"{len(holdings)} attached found. Halting. Delete holdings and other attached records first")
             else:
