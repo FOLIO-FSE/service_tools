@@ -21,5 +21,5 @@ This repo can either be run through its GUI, using python main.py, or the comman
 ## Running the GUI
 *You must use the environment that you will run the program in. Using WSL2 to run this in windows will not work*   
 From the command line, run ```pipenv run python main.py```
-You then should see something like this:
+You then should see something like this:   
 ![](image.png?raw=true)
