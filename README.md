@@ -11,6 +11,7 @@ Works on Windows as well as Linux. Might work on MacOS
 - [Running](#running)
   * [Running the CLI version](#running-the-cli-version)
   * [Running the GUI](#running-the-gui)
+- [Extending/contributing](#extending)
 - [Available tasks](#available-tasks)
  
 # Installation
