@@ -23,7 +23,9 @@ class ListRecallsWithAvailableItems(ServiceTaskBase):
 
     def do_work(self):
         # Fetch all open recall requests
-        recalls = self.folio_client.folio_get_all("/circulation/requests", "requests", "?query=(requestType==\"Recall\" AND status==\"Open - Not yet filled\")")
+        recalls = self.folio_client.folio_get_all("/circulation/requests", "requests",
+                                                  "?query=(requestType==\"Recall\" "
+                                                  "AND status==\"Open - Not yet filled\")")
 
         # Loop through fetched recall requests
         for recall in recalls:
@@ -32,7 +34,10 @@ class ListRecallsWithAvailableItems(ServiceTaskBase):
             title = recall["item"]["title"]
 
             # Fetch items associated with the instance that are available and loanable
-            available_items = self.folio_client.folio_get("/inventory/items", query=f"?query=(instance.id=={linked_instance} AND status.name==\"Available\" AND permanentLoanTypeId==\"{self.loan_type}\")&limit=0")
+            available_items = self.folio_client.folio_get("/inventory/items",
+                                                          query=f"?query=(instance.id=={linked_instance} "
+                                                                "AND status.name==\"Available\" "
+                                                                "AND permanentLoanTypeId==\"{self.loan_type}\")&limit=0")
 
             # If there are any items available and loanable, add the recall request to list recalls_to_move
             if available_items.get("totalRecords") > 0:
@@ -64,7 +69,8 @@ class ListRecallsWithAvailableItems(ServiceTaskBase):
             f"Number of recalls with no available items: {self.no_available_items}"
         )
 
-        # Print results and list of recalls to move to a file in directory results. If a file by the name already exists, it will be overwritten.
+        # Print results and list of recalls to move to a file in directory results. If a file by the name already
+        # exists, it will be overwritten.
 
         with open(self.outfile, "w") as f:
             print(f"This search was initialized on: {self.start_date_time}", file=f)
@@ -73,21 +79,24 @@ class ListRecallsWithAvailableItems(ServiceTaskBase):
             print(f"\nRecalls that can be moved to available items:", file=f)
             print(*sorted(self.recalls_to_move), sep="\n", file=f)
 
-
     @staticmethod
     def add_arguments(sub_parser):
         ServiceTaskBase.add_common_arguments(sub_parser)
-        
+
         ServiceTaskBase.add_argument(sub_parser,
                                      "ui_url",
                                      "The UI URL to the FOLIO environment, to be used in librarian-friendly output", "")
-        # TODO Think about how to let the user input a list of loan types to include (or exclude) in the search for available items -- but also about how to avoid request too long error if the list is very long
+        # TODO Think about how to let the user input a list of loan types to include (or exclude) in the search for
+        #  available items -- but also about how to avoid request too long error if the list is very long
         ServiceTaskBase.add_argument(sub_parser,
                                      "loan_type",
                                      "UUID of a loanable loan type (TODO: list of loan types)", "")
         ServiceTaskBase.add_argument(sub_parser,
                                      "results_file_path",
-                                     "Where do you want to save the file with requests to move? E.g. C:/MyFolder/results.txt (N.B. If you select an existing file, contents will be over-written.)", "FileChooser")
+                                     "Where do you want to save the file with requests to move? E.g. "
+                                     "C:/MyFolder/results.txt (N.B. If you select an existing file, contents will be "
+                                     "over-written.)",
+                                     "FileChooser")
 
     @staticmethod
     def add_cli_arguments(sub_parser):
@@ -95,10 +104,13 @@ class ListRecallsWithAvailableItems(ServiceTaskBase):
         ServiceTaskBase.add_cli_argument(sub_parser,
                                          "ui_url",
                                          "The UI URL to the FOLIO environment, to be used in librarian-friendly output")
-        # TODO Think about how to let the user input a list of loan types to include (or exclude) in the search for available items -- but also about how to avoid request too long error if the list is very long
-        ServiceTaskBase.add_argument(sub_parser,
-                                     "loan_type",
-                                     "UUID of a loanable loan type (TODO: list of loan types)")
+        # TODO Think about how to let the user input a list of loan types to include (or exclude) in the search for
+        #  available items -- but also about how to avoid request too long error if the list is very long
+        ServiceTaskBase.add_cli_argument(sub_parser,
+                                         "loan_type",
+                                         "UUID of a loanable loan type (TODO: list of loan types)")
         ServiceTaskBase.add__cli_argument(sub_parser,
-                                     "results_file_path",
-                                     "Where do you want to save the file with Recalls to move? E.g. C:/MyFolder/results.txt (N.B. If you select an existing file, contents will be over-written.")
+                                          "results_file_path",
+                                          "Where do you want to save the file with Recalls to move? E.g. "
+                                          "C:/MyFolder/results.txt (N.B. If you select an existing file, "
+                                          "contents will be over-written.")
