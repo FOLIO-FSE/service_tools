@@ -29,8 +29,7 @@ def parse_args(task_classes):
     header_bg_color='#FFFFFF',
     body_bg_color='#FFFFFF',
     footer_bg_color='#FFFFFF',
-    image_dir='./local_data/',
-
+    image_dir='./local_data/'
 )
 
 def main():
@@ -51,9 +50,10 @@ def main():
             task_obj = task_class(args)
         task_obj.do_work()
     except Exception as ee:
-        print("FEL!")
+        print("ERROR!")
         print(ee)
         traceback.print_exc()
+        raise ee
 
 
 def inheritors(base_class):
