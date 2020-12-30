@@ -11,7 +11,7 @@ class CountRegExOccurrences(ServiceTaskBase):
         with open (self.input_file, "r", encoding="utf8") as inputfile:
             searchdata=inputfile.read()
 
-        regex = re.compile(self.regex_wanted, re.UNICODE)
+        regex = re.compile(self.regex_wanted, re.IGNORECASE)
         regex_list = re.findall(regex, searchdata)
         series = pd.Series(regex_list)
         print(series.value_counts())
