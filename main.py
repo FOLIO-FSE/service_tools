@@ -17,7 +17,6 @@ def parse_args(task_classes):
     args = parser.parse_args()
     return args
 
-
 @Gooey(
     advanced=True,
     progress_regex=r"^progress: (?P<current>\d+)/(?P<total>\d+)$",
@@ -29,7 +28,7 @@ def parse_args(task_classes):
     header_bg_color='#FFFFFF',
     body_bg_color='#FFFFFF',
     footer_bg_color='#FFFFFF',
-    image_dir='./local_data/'
+    image_dir='./icons/'
 )
 
 def main():
