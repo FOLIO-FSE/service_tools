@@ -9,7 +9,7 @@ class JSONtoCSV(ServiceTaskBase):
 
     def do_work(self):
         df = pd.read_json(self.jsonfile)
-        root_element = df.keys()[0]
+        root_element = df.keys()[1]
 
         source_data = df[root_element]
 
@@ -31,8 +31,10 @@ class JSONtoCSV(ServiceTaskBase):
                next_record.append(str(record[field]))
 
             csv_writer.writerow(next_record)
+            print(next_record)
 
         data_file.close()
+        print(f"Records are written to {self.csvfile}") 
             
     @staticmethod
     @abstractmethod
