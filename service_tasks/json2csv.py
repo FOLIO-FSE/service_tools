@@ -26,9 +26,9 @@ class JSONtoCSV(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_arguments(parser):
-        ServiceTaskBase.add_argument(parser, "jsonfile", "JSON file containing reference data to convert to CSV", "FileChooser")
+        ServiceTaskBase.add_argument(parser, "jsonfile", "Reference data JSON file to convert to CSV", "FileChooser")
 
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
-        ServiceTaskBase.add_argument(parser, "jsonfile", "JSON file containing reference data to convert to CSV", "FileChooser")
+        ServiceTaskBase.add_argument(parser, "jsonfile", "Reference data JSON file to convert to CSV", "FileChooser")
