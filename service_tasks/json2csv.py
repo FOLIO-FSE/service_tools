@@ -9,31 +9,11 @@ class JSONtoCSV(ServiceTaskBase):
 
     def do_work(self):
         df = pd.read_json(self.jsonfile)
-        root_element = df.keys()[1]
+        source_data = df.from_records(df["data"])
 
-        source_data = df[root_element]
+        print(source_data)
 
-        data_file = open(self.csvfile, 'w', newline='')
-        csv_writer = csv.writer(data_file) 
-
-        count  = 0
-        
-        for record in source_data:
-            if count == 0:
-                # write headers
-                header = record.keys()
-                csv_writer.writerow(header)
-                count += 1
-
-            next_record = []
-
-            for field in header:
-               next_record.append(str(record[field]))
-
-            csv_writer.writerow(next_record)
-            print(next_record)
-
-        data_file.close()
+        source_data.to_csv(self.csvfile, index=False) 
         print(f"Records are written to {self.csvfile}") 
             
     @staticmethod
