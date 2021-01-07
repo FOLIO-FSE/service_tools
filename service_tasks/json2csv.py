@@ -1,8 +1,8 @@
 from service_tasks.service_task_base import ServiceTaskBase, abstractmethod
-import sys, csv, json
+import csv
 import pandas as pd
 
-class JSONtoCSV(ServiceTaskBase):
+class ReferenceJSONtoCSV(ServiceTaskBase):
     def __init__(self, args):
         self.jsonfile = args.jsonfile
         self.csvfile = self.jsonfile[:-4] + "csv"
@@ -19,9 +19,9 @@ class JSONtoCSV(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_arguments(parser):
-        ServiceTaskBase.add_argument(parser, "jsonfile", "JSON file to convert to CSV", "FileChooser")
+        ServiceTaskBase.add_argument(parser, "jsonfile", "JSON file containing reference data to convert to CSV", "FileChooser")
 
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
-        ServiceTaskBase.add_argument(parser, "jsonfile", "JSON file to convert to CSV", "FileChooser")
+        ServiceTaskBase.add_argument(parser, "jsonfile", "JSON file containing reference data to convert to CSV", "FileChooser")
