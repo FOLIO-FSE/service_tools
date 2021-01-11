@@ -34,4 +34,4 @@ class ListJSONkeys(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
-        ServiceTaskBase.add_argument(parser, "json_file", "JSON file", "FileChooser")
+        ServiceTaskBase.add_cli_argument(parser, "json_file", "JSON file")

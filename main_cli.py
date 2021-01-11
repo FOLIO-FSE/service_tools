@@ -11,10 +11,13 @@ def parse_args(task_classes):
     subs = parser.add_subparsers(help="commands", dest="command")
     for task_class in task_classes:
         sub_parser = subs.add_parser(task_class.__name__)
-        task_class.add_cli_arguments(sub_parser)
+        try:
+            task_class.add_cli_arguments(sub_parser)
+        except Exception as ee:
+            print(task_class.__name__)
+            raise ee
     args = parser.parse_args()
     return args
-
 
 def main():
     task_classes = inheritors(ServiceTaskBase)

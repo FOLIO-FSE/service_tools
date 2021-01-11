@@ -26,5 +26,5 @@ class CountRegExOccurrences(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
-        ServiceTaskBase.add_argument(parser, "input_file", "File to analyze", "FileChooser")
-        ServiceTaskBase.add_argument(parser, "regex_wanted", "Regular expression to match", "")
+        ServiceTaskBase.add_cli_argument(parser, "input_file", "File to analyze")
+        ServiceTaskBase.add_cli_argument(parser, "regex_wanted", "Regular expression to match")

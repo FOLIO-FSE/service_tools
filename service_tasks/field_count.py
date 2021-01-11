@@ -22,5 +22,5 @@ class CountOccurrences(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
-        ServiceTaskBase.add_argument(parser, "csv_file", "Delimited file containing field to analyze", "FileChooser")
-        ServiceTaskBase.add_argument(parser, "field_wanted", "Name of field to analyze, must be at top of column", "")
+        ServiceTaskBase.add_cli_argument(parser, "csv_file", "Delimited file containing field to analyze")
+        ServiceTaskBase.add_cli_argument(parser, "field_wanted", "Name of field to analyze, must be at top of column")
