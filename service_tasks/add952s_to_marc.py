@@ -15,7 +15,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 import asyncio
 
 
-class Add852ToMarc(ServiceTaskBase):
+class Add952ToMarc(ServiceTaskBase):
     def __init__(self, folio_client, args):
         super().__init__(folio_client)
         print("Fetching locations")
