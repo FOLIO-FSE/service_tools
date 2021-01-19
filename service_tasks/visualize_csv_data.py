@@ -1,6 +1,7 @@
 import csv
 import pandas
 import matplotlib.pyplot as plt
+from service_tasks.service_task_base import ServiceTaskBase
 
 
 class VisualizeCsvData(ServiceTaskBase):
