@@ -23,14 +23,6 @@ class VisualizeCsvData(ServiceTaskBase):
 
         self.mdFile.new_paragraph("Scroll down to learn about your legacy data.")
 
-        # Create a bar chart showing how many times a field occurs in the data
-        plt.rcParams["font.size"] = 12.0
-        data.count().plot.barh(figsize=(10, 10), color = "royalblue")
-        plt.title("Field occurences")
-
-        filepath = self.save_to_folder + "/" + "field_occurences.svg"
-        plt.savefig(filepath)
-        plt.close()
 
         # Print overview to md file
         self.mdFile.new_header(level=2, title="Data overview")
@@ -39,6 +31,17 @@ class VisualizeCsvData(ServiceTaskBase):
         for name in data.columns.values:
             self.mdFile.new_line(str(name))
 
+        # Create a bar chart showing how many times a field occurs in the data
+        plt.rcParams["font.size"] = 12.0
+        data.count().plot.barh(figsize=(10, 10), color = "royalblue")
+        plt.title("Field occurences")
+
+        filename = "field_occurences.svg"
+        filepath = self.save_to_folder + "/" + filename
+        plt.savefig(filepath)
+        plt.close()
+        self.mdFile.new_line(self.mdFile.new_inline_image(text= "Chart", path=filename))
+
         self.mdFile.new_header(level=2, title="A closer look at the different fields")
 
 
@@ -46,17 +49,23 @@ class VisualizeCsvData(ServiceTaskBase):
 
         # Show number of occurences for each unique value per column (truncated if many)
         for column in data.columns:
-            value_counts = data[column].value_counts(ascending=True)
+            value_counts = data[column].value_counts()
             value_names_raw = value_counts.index.tolist()
             self.mdFile.new_header(level=3, title=column)
             
             if value_counts.any():
+                value_counts_dict = value_counts.to_dict()
+                form_value_counts = []
+                for value in value_counts_dict:
+                    form_value_counts.append(f"{value}   {value_counts[value]}")
+
                 value_names = [str(name).replace("$","|") for name in value_names_raw]
                 # Creating plot 
-                plt.figure(figsize =(13, 10))
+                plt.figure(figsize =(14, 7))
                 plt.title(column)
+                plt.tight_layout()
                 plt.pie(value_counts, labels = value_names, colors = plt.cm.tab20.colors)
-                plt.legend(value_names, loc="best", ncol = 2) 
+                plt.legend(form_value_counts, loc="center left", ncol = 2, bbox_to_anchor=(1, 0.5))
 
                 # Save plot as svg image
                 filename = column.replace(" ","_") + ".svg"
@@ -64,9 +73,6 @@ class VisualizeCsvData(ServiceTaskBase):
                 plt.savefig(filepath)
                 plt.close()
 
-                
-                self.mdFile.new_line(str(value_counts))
-                
                 self.mdFile.new_line(self.mdFile.new_inline_image(text= "Chart", path=filename))
     
 
