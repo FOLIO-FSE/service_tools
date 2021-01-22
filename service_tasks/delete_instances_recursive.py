@@ -32,7 +32,7 @@ class DeleteInstancesRecursive(ServiceTaskBase):
             srs = self.folio_client.folio_get_single_object(f"/source-storage/records/{instance_id}/formatted?idType=INSTANCE")
             self.delete_srs(srs)
             print(f"Deleting instance {instance_id}")
-            #self.delete_request("/instance-storage/instances", instance_id)
+            self.delete_request("/instance-storage/instances", instance_id)
 
     def delete_items(self, instance_to_delete):
         item_iterator = 0
@@ -56,7 +56,7 @@ class DeleteInstancesRecursive(ServiceTaskBase):
             for holding in holdings:
                 holding = holding["id"]
                 print("Deleting holding: " + holding)
-                self.delete_request(f"/holdings-storage/holdings/{holding}", holding)
+                self.delete_request(f"/holdings-storage/holdings", holding)
         else:
             print("No holdings detected")
 
@@ -65,7 +65,7 @@ class DeleteInstancesRecursive(ServiceTaskBase):
 
         if id is not None:
             print("Deleting SRS: " + id)
-            self.delete_request(f"/source-storage/records/{id}", id)
+            self.delete_request(f"/source-storage/records", id)
         else:
             print("No SRS detected")
 
