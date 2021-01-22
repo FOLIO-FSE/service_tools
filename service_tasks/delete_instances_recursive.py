@@ -56,7 +56,7 @@ class DeleteInstancesRecursive(ServiceTaskBase):
             for holding in holdings:
                 holding = holding["id"]
                 print("Deleting holding: " + holding)
-                self.delete_request("/holdings-storage/holdings", holding)
+                self.delete_request(f"/holdings-storage/holdings/{holding}", holding)
         else:
             print("No holdings detected")
 
@@ -65,7 +65,7 @@ class DeleteInstancesRecursive(ServiceTaskBase):
 
         if id is not None:
             print("Deleting SRS: " + id)
-            self.delete_request("/source-storage/records/{id}", id)
+            self.delete_request(f"/source-storage/records/{id}", id)
         else:
             print("No SRS detected")
 
