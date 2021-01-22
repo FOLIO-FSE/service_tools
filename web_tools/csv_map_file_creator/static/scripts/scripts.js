@@ -8,7 +8,7 @@ document.addEventListener('click', function (event) {
 	// Don't follow the link
   event.preventDefault();
   document.getElementById('section2').scrollIntoView()
-
+  $('form').html("")
 	// Log the clicked element in the console
   $(".set_schema").removeClass('active');  
   var dataAttribute = event.target.getAttribute('data-schema-file');
@@ -53,7 +53,7 @@ document.getElementById('start').onclick = function () {
               myarr.forEach( obj => renameKey( obj, 'value', 'legacy_field' ) );
               var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(myarr));
 
-              document.getElementById("apa").html = ""
+              $("#apa").html("")
               $('<a class="btn btn-primary mb2" href="data:' + data + '" download="data.json">Download Mapping File</a>').appendTo('#apa');
               console.log("!")
               document.getElementById('section4').scrollIntoView(true)
