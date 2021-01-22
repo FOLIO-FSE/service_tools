@@ -29,28 +29,45 @@ class DeleteInstancesRecursive(ServiceTaskBase):
             holdings = list(self.folio_client.get_all("/holdings-storage/holdings", "holdingsRecords", query))
             self.delete_holdings(holdings)
             
+            srs = self.folio_client.folio_get_single_object(f"/source-storage/records/{instance_id}/formatted?idType=INSTANCE")
+            self.delete_srs(srs)
             print(f"Deleting instance {instance_id}")
-            self.delete_request("/instance-storage/instances", instance_id)
+            #self.delete_request("/instance-storage/instances", instance_id)
 
     def delete_items(self, instance_to_delete):
-        items_to_delete = []
         item_iterator = 0
+
+        totalRecords = instance_to_delete["totalRecords"]
     
-        for item in instance_to_delete:
-            item = instance_to_delete["items"][item_iterator]["id"]
-            holding = instance_to_delete["items"][item_iterator]["holdingsRecordId"]
-            item_iterator += 1
-            print("Deleting item: " + item + " associated with holding ID " + holding)
-            self.delete_request("/item-storage/items", item)
+        if totalRecords > 0: 
+            for item in instance_to_delete:
+                item = instance_to_delete["items"][item_iterator]["id"]
+                holding = instance_to_delete["items"][item_iterator]["holdingsRecordId"]
+                item_iterator += 1
+                print("Deleting item: " + item + " associated with holding ID " + holding)
+                self.delete_request("/item-storage/items", item)
+        else:
+            print("No items detected")
 	
-    def delete_holdings(self, instance_to_delete):
-        holdings_to_delete = []
+    def delete_holdings(self, holdings):
         holding_iterator = 0
-    
-        for holding in instance_to_delete:
-            holding = holding["id"]
-            print("Deleting holding: " + holding)
-            self.delete_request("/holdings-storage/holdings", holding)
+        
+        if holdings != []:
+            for holding in holdings:
+                holding = holding["id"]
+                print("Deleting holding: " + holding)
+                self.delete_request("/holdings-storage/holdings", holding)
+        else:
+            print("No holdings detected")
+
+    def delete_srs(self, srs):
+        id = srs["id"]
+
+        if id is not None:
+            print("Deleting SRS: " + id)
+            self.delete_request("/source-storage/records/{id}", id)
+        else:
+            print("No SRS detected")
 
     def delete_request(self, path, object_id):
         parsed_path = path.rstrip("/").lstrip("/")
