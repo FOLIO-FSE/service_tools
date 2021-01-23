@@ -7,7 +7,7 @@ from folioclient import FolioClient
 from service_tasks.service_task_base import ServiceTaskBase
 
 
-class CreateRequestPolicies(ServiceTaskBase):
+class CreateCircPolicies(ServiceTaskBase):
     def __init__(self, folio_client: FolioClient, args):
         print(args)
         super().__init__(folio_client)
