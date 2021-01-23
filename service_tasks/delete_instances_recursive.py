@@ -36,11 +36,11 @@ class DeleteInstancesRecursive(ServiceTaskBase):
 
     def delete_items(self, instance_to_delete):
         item_iterator = 0
+        totalRecords = 0
 
-        totalRecords = instance_to_delete["totalRecords"]
-    
         if totalRecords > 0: 
-            for item in instance_to_delete:
+            while item_iterator < totalRecords:
+                print("start item process")
                 item = instance_to_delete["items"][item_iterator]["id"]
                 holding = instance_to_delete["items"][item_iterator]["holdingsRecordId"]
                 item_iterator += 1
