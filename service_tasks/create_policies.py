@@ -595,11 +595,11 @@ class CreateCircPolicies(ServiceTaskBase):
                 }
             })
 
-        #self.add_policy("Request", rp, "request-policy-storage/request-policies")
-        #self.add_policy("Patron Notice Templates", pn, "templates")
-        #self.add_policy("Patron Notice", pnp, "patron-notice-policy-storage/patron-notice-policies")
-        #self.add_policy("Lost Item, lif, "lost-item-fees-policies")
-        #self.add_policy("Overdue Fine", od, "overdue-fines-policies")
+        self.add_policy("Request", rp, "request-policy-storage/request-policies")
+        self.add_policy("Patron Notice Templates", pn, "templates")
+        self.add_policy("Patron Notice", pnp, "patron-notice-policy-storage/patron-notice-policies")
+        self.add_policy("Lost Item", lif, "lost-item-fees-policies")
+        self.add_policy("Overdue Fine", od, "overdue-fines-policies")
         self.add_policy("Loan", lp, "loan-policy-storage/loan-policies")
 
     def add_policy(self, description, policy_array, url):
