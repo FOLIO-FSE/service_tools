@@ -606,7 +606,6 @@ class CreateCircPolicies(ServiceTaskBase):
         print(f"\n------------------- Creating {description} policies --------------\n")
 
         for policy in policy_array:
-            print(policy)
             resp = requests.post(f"{self.folio_client.okapi_url}/{url}", data=json.dumps(policy), headers=self.folio_client.okapi_headers)
             print(f"{resp.content}")
 
