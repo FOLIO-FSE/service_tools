@@ -224,7 +224,7 @@ class CreateCircPolicies(ServiceTaskBase):
                 "intervalId" : "Days"
                 },
             "chargeAmountItem" : {
-                "chargeType" : "actualCost",
+                "chargeType" : "anotherCost",
                 "amount" : 0.0
                 },
             "lostItemProcessingFee" : 0.0,
