@@ -240,7 +240,7 @@ class CreateCircPolicies(ServiceTaskBase):
             "replacementAllowed" : "true",
             "lostItemReturned" : "Remove",
             "id" : "dc39c32c-b2fb-4097-b50d-04ab2d6c3f87"
-            })
+                })
         lif.append({
             "name" : "Standard cost with fee",
             "itemAgedLostOverdue" : {
@@ -270,7 +270,7 @@ class CreateCircPolicies(ServiceTaskBase):
             "id" : "ca0cbf21-172a-45ff-a081-fd289b40e4a4"
             })
         lif.append({
-            "name" : "Bill actual cost",
+            "name" : "Bill actual cost, no fee",
             "itemAgedLostOverdue" : {
                 "duration" : 30,
                 "intervalId" : "Days"
