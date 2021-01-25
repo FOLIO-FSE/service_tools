@@ -14,6 +14,7 @@ class DeleteInstancesRecursive(ServiceTaskBase):
         self.dry_run = False # args.dry_run
 
     def do_work(self):
+        stubrecord = ""
         instance_ids = self.instances_to_delete.split(',')
         print(f"Working on deleting {len(instance_ids)} instances")
         for instance_id in [id.strip() for id in instance_ids if id]:
@@ -33,6 +34,10 @@ class DeleteInstancesRecursive(ServiceTaskBase):
             self.delete_srs(srs)
             print(f"Deleting instance {instance_id}")
             self.delete_request("/instance-storage/instances", instance_id)
+            stubrecord += "=LDR  00000dam  2200000Ia 4500\n=999  ff$i" + instance_id + "\n\n"
+
+        print(f"The stub record(s) below can be pasted into Marcedit to create records tofacilitate record deletion in EDS\n-------------------------------\n")
+        print(stubrecord)
 
     def delete_items(self, instance_to_delete):
         item_iterator = 0
