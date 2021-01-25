@@ -23,8 +23,6 @@ class DeleteInstancesRecursive(ServiceTaskBase):
             #instance_to_delete = self.folio_client.folio_get_single_object(f"/instance-storage/instances/{instance_id}")
             
             instance_to_delete = self.folio_client.folio_get_single_object(f"/inventory/items?query=instance.id=={instance_id}")
-            print(instance_to_delete)
-            quit()
             print(f"Processing instance {instance_id}")
             self.delete_items(instance_to_delete)
 
