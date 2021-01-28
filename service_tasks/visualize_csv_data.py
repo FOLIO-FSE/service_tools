@@ -51,13 +51,19 @@ class VisualizeCsvData(ServiceTaskBase):
         for column in data.columns:
             value_counts = data[column].value_counts()
             value_names_raw = value_counts.index.tolist()
+            value_counts_dict = value_counts.to_dict()
+            formatted_value_counts = []
+            for value in value_counts_dict:
+                formatted_value_counts.append(f"{value}   {value_counts[value]}\n")
+
             self.mdFile.new_header(level=3, title=column)
+            self.mdFile.new_paragraph(f"{str(value_counts[value_counts > 1])}\n\n")
+
+            unique_values = data[column].nunique()
+            print(unique_values)
+
             
-            if value_counts.any():
-                value_counts_dict = value_counts.to_dict()
-                form_value_counts = []
-                for value in value_counts_dict:
-                    form_value_counts.append(f"{value}   {value_counts[value]}")
+            if 1 <= unique_values <= 100:
 
                 value_names = [str(name).replace("$","|") for name in value_names_raw]
                 # Creating plot 
@@ -65,7 +71,7 @@ class VisualizeCsvData(ServiceTaskBase):
                 plt.title(column)
                 plt.tight_layout()
                 plt.pie(value_counts, labels = value_names, colors = plt.cm.tab20.colors)
-                plt.legend(form_value_counts, loc="center left", ncol = 2, bbox_to_anchor=(1, 0.5))
+                plt.legend(formatted_value_counts, loc="center left", bbox_to_anchor=(1, 0.5))
 
                 # Save plot as svg image
                 filename = column.replace(" ","_") + ".svg"
