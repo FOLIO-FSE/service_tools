@@ -47,16 +47,12 @@ class RefDataBackupDeleteAndLoad(ServiceTaskBase):
         ServiceTaskBase.add_argument(parser, "ref_data_set",
                                      "Choose a ref data set",
                                      "Dropdown",
-                                     metavar='Pick ref data set',
-                                     dest="ref_data_set",
                                      choices=get_sets().keys()
                                      )
 
         ServiceTaskBase.add_argument(parser, "action",
                                      "Which action to perform",
                                      "Dropdown",
-                                     metavar='Which action to perform',
-                                     dest="action",
                                      choices=["backup", "purge", "restore"]
                                      )
 

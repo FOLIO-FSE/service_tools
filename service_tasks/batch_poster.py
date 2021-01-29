@@ -136,8 +136,6 @@ class BatchPoster(ServiceTaskBase):
         ServiceTaskBase.add_argument(parser, "objects_file", "path data file", "FileChooser")
         ServiceTaskBase.add_argument(parser, "batch_size", "batch size", "")
         ServiceTaskBase.add_argument(parser, "object_name", "What objects to batch post", "Dropdown",
-                                     metavar='What objects to batch post',
-                                     dest='object_name',
                                      choices=list(list_objects().keys()),
                                      )
 

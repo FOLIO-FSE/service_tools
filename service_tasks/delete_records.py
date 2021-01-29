@@ -44,7 +44,8 @@ class DeleteRecords(ServiceTaskBase):
     @abstractmethod
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        ServiceTaskBase.add_argument(parser, "form_data", "Record type to delete", "Dropdown", metavar='All attached records must be removed', dest='record_type', choices=list(list_objects().keys()),)
+        ServiceTaskBase.add_argument(parser, "record_type", "Record type to delete. Remove all attached records",
+                                     "Dropdown", choices=list(list_objects().keys()))
         ServiceTaskBase.add_argument(parser, "record_ids", "Comma separated list of record ids to delete", "Textarea") 
 
     @staticmethod

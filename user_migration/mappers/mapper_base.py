@@ -46,11 +46,11 @@ class MapperBase():
             self.mapped_legacy_fields[field_name][0] += int(was_mapped)
             self.mapped_legacy_fields[field_name][1] += int(was_empty)
 
-    def report_folio_mapping(self, field_name, was_mapped, was_empty=False):
+    def report_folio_mapping(self, field_name, transformed, was_empty=False):
         if field_name not in self.mapped_folio_fields:
-            self.mapped_folio_fields[field_name] = [int(was_mapped), int(was_empty)]
+            self.mapped_folio_fields[field_name] = [int(transformed), int(was_empty)]
         else:
-            self.mapped_folio_fields[field_name][0] += int(was_mapped)
+            self.mapped_folio_fields[field_name][0] += int(transformed)
             self.mapped_folio_fields[field_name][1] += int(was_empty)
 
     def instantiate_user(self):
