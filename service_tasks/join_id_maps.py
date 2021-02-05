@@ -8,8 +8,8 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class JoinIdMaps(ServiceTaskBase):
     def __init__(self, args):
-        self.files = args.files
-        self.result_path = args.folder
+        self.files = args.data_path
+        self.result_path = args.result_path
         self.results = {}
 
     def do_work(self):
@@ -35,10 +35,10 @@ class JoinIdMaps(ServiceTaskBase):
     @abstractmethod
     def add_arguments(parser):
         ServiceTaskBase.add_argument(parser,
-                                     "files", "Path to the file", "DirChooser"
+                                     "data_path", "Path to the file", "DirChooser"
                                      )
         ServiceTaskBase.add_argument(parser,
-                                     "folder", "Path to the file", "DirChooser"
+                                     "result_path", "Path to the file", "DirChooser"
                                      )
 
     @staticmethod
