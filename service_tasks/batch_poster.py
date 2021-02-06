@@ -12,6 +12,7 @@ class BatchPoster(ServiceTaskBase):
     def __init__(self, folio_client: FolioClient, args):
         super().__init__(folio_client)
         self.failed_ids = []
+        self.first_batch = True
         self.api_path = list_objects()[args.object_name]
         self.object_name = args.object_name
         self.failed_objects = []
@@ -29,6 +30,7 @@ class BatchPoster(ServiceTaskBase):
         batch = []
 
         with open(self.objects_file) as rows:
+
             for row in rows:
                 if self.processed_rows < self.start:
                     continue
@@ -125,6 +127,9 @@ class BatchPoster(ServiceTaskBase):
         else:
             payload = {kind["object_name"]: batch}
         # print(json.dumps(payload, ensure_ascii=True))
+        if self.first_batch:
+            print(json.dumps(payload))
+            self.first_batch = False
         return requests.post(
             url, data=json.dumps(payload), headers=self.folio_client.okapi_headers
         )
