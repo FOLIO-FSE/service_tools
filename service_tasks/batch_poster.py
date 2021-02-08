@@ -127,9 +127,9 @@ class BatchPoster(ServiceTaskBase):
         else:
             payload = {kind["object_name"]: batch}
         # print(json.dumps(payload, ensure_ascii=True))
-        if self.first_batch:
-            print(json.dumps(payload))
-            self.first_batch = False
+        # if self.first_batch:
+        #    print(json.dumps(payload))
+        #    self.first_batch = False
         return requests.post(
             url, data=json.dumps(payload), headers=self.folio_client.okapi_headers
         )
