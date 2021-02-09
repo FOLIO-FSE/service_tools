@@ -58,7 +58,7 @@ class BatchPoster(ServiceTaskBase):
     def post_batch(self, batch, repost=False):
         response = self.do_post(batch)
         if response.status_code == 201:
-            req_size = get_human_readable(len(response.request.prepare().encode('utf-8')))
+            req_size = get_human_readable(len(response.prepare().encode('utf-8')))
             print(
                 f"Posting successful! Total rows: {self.processed_rows}  {response.elapsed.total_seconds()}s "
                 f"Batch Size: {len(batch)} Request size: {req_size}",
