@@ -58,10 +58,9 @@ class BatchPoster(ServiceTaskBase):
     def post_batch(self, batch, repost=False):
         response = self.do_post(batch)
         if response.status_code == 201:
-            req_size = get_human_readable(len(response.prepare().encode('utf-8')))
             print(
                 f"Posting successful! Total rows: {self.processed_rows}  {response.elapsed.total_seconds()}s "
-                f"Batch Size: {len(batch)} Request size: {req_size}",
+                f"Batch Size: {len(batch)} Request size: {get_req_size(response)}",
                 flush=True,
             )
         elif response.status_code == 422:
@@ -184,3 +183,11 @@ def get_human_readable(size, precision=2):
         suffix_index += 1 # increment the index of the suffix
         size = size/1024.0 # apply the division
     return "%.*f%s"%(precision, size, suffixes[suffix_index])
+
+
+def get_req_size(response):
+    size = response.request.method
+    size += response.request.url
+    size += '\r\n'.join('{}{}'.format(k, v) for k, v in response.request.headers.items())
+    size += response.request.body if response.request.body else []
+    return get_human_readable(len(size.encode('utf-8')))
