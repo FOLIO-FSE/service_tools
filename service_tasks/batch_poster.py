@@ -58,8 +58,10 @@ class BatchPoster(ServiceTaskBase):
     def post_batch(self, batch, repost=False):
         response = self.do_post(batch)
         if response.status_code == 201:
+            req_size = get_human_readable(len(response.request.prepare().encode('utf-8')))
             print(
-                f"Posting successful! {self.processed_rows} {response.elapsed.total_seconds()}s {len(batch)}",
+                f"Posting successful! Total rows: {self.processed_rows}  {response.elapsed.total_seconds()}s "
+                f"Batch Size: {len(batch)} Request size: {req_size}",
                 flush=True,
             )
         elif response.status_code == 422:
@@ -173,3 +175,12 @@ def chunks(records, number_of_chunks):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(records), number_of_chunks):
         yield records[i: i + number_of_chunks]
+
+
+def get_human_readable(size, precision=2):
+    suffixes = ['B', 'KB', 'MB', 'GB', "TB"]
+    suffix_index = 0
+    while size > 1024 and suffix_index < 4:
+        suffix_index += 1 # increment the index of the suffix
+        size = size/1024.0 # apply the division
+    return "%.*f%s"%(precision, size, suffixes[suffix_index])
