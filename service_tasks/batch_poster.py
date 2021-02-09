@@ -64,7 +64,7 @@ class BatchPoster(ServiceTaskBase):
                 flush=True,
             )
         elif response.status_code == 422:
-            print(f"{response.status_code}\t{response.text}")
+            print(f"{response.status_code}\t{response.text} Request size: {get_req_size(response)}")
             resp = json.loads(response.text)
 
             for error in resp["errors"]:
@@ -78,7 +78,7 @@ class BatchPoster(ServiceTaskBase):
                 raise Exception(f"Reposting despite handling. {self.failed_ids}")"""
         elif response.status_code in [500, 413]:
             # Error handling is sparse. Need to identify failing records
-            print(f"{response.status_code}\t{response.text}")
+            print(f"{response.status_code}\tRequest size: {get_req_size(response)}\n{response.text} ")
             if not len(batch) == 1:
                 # split the batch in 2
                 my_chunks = chunks(batch, 2)
@@ -91,7 +91,7 @@ class BatchPoster(ServiceTaskBase):
                 )
                 self.failed_objects = batch[0]
         else:
-            raise Exception(f"ERROR! HTTP {response.status_code}\t{response.text}")
+            raise Exception(f"ERROR! HTTP {response.status_code}\t{response.text}Request size: {get_req_size(response)}")
 
     def handle_failed_batch(self, batch):
         # new_batch = [f for f in batch]  # if f["instanceId"] not in self.failed_ids]
