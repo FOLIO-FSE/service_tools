@@ -22,7 +22,7 @@ class IiiBoundWithCsvProcessor(ServiceTaskBase):
                 num_boundwiths = int((len(lrow) - num_fields)/2)
                 boundwiths = lrow[:num_boundwiths]
                 itemno = lrow[num_boundwiths]
-                itemcalls = lrow[num_boundwiths + 1:(num_boundwiths + 1)*2]
+                itemcalls = lrow[num_boundwiths + 1:(num_boundwiths + 1)*2 - 1]
                 rest_of_row = lrow[(num_boundwiths + 1)*2:]
 
                 # reformat the rows for output
@@ -30,7 +30,7 @@ class IiiBoundWithCsvProcessor(ServiceTaskBase):
                 itemcalls = "{{'" + "' '".join(itemcalls) + "'}},"
                 #
                 rest_of_row = ",".join(rest_of_row)
-                print(boundwiths + itemcalls + rest_of_row)
+                print(boundwiths + "'" + itemno + "'," + itemcalls + rest_of_row)
                 outfile.write(boundwiths + itemcalls + rest_of_row + "\n")
 
             outfile.close()
