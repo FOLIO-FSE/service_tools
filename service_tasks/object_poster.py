@@ -61,10 +61,8 @@ class SingleObjectsPoster(ServiceTaskBase):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_argument(parser, "objects_file_path", "path data file", "FileChooser")
         ServiceTaskBase.add_argument(parser, "skip", "Number of records to skip", "")
-        ServiceTaskBase.add_argument(parser, "", "What objects to post", "Dropdown",
-                                     metavar='What objects to post',
-                                     dest='object_name',
-                                     choices=list(list_objects().keys()),
+        ServiceTaskBase.add_argument(parser, "object_name", "What objects to post", "Dropdown",
+                                      choices=list(list_objects().keys()),
                                      )
 
     @staticmethod

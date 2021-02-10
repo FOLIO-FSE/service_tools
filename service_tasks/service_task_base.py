@@ -57,7 +57,7 @@ class ServiceTaskBase():
         # print(parser.__class__.__name__)
         # print(destination)
         parser.add_argument(dest=destination, help=help, widget=widget, metavar=kwargs.get('metavar'),
-                            choices=kwargs.get('choices'))
+                            choices=kwargs.get('choices'), gooey_options=kwargs.get('gooey_options'))
 
     @staticmethod
     def add_cli_argument(parser: ArgumentParser, destination, help, **kwargs):

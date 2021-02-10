@@ -28,10 +28,8 @@ class HarvestSierraData(ServiceTaskBase):
         ServiceTaskBase.add_argument(parser, "public_key", "Public Key for Sierra API", "")
         ServiceTaskBase.add_argument(parser, "private_key", "Private Key for Sierra API", "")
         ServiceTaskBase.add_argument(parser, "data_feed",
-                                     "Choose a data feed",
+                                     "Choose a data feed/Pick ref data set",
                                      "Dropdown",
-                                     metavar='Pick ref data set',
-                                     dest="ref_data_set",
                                      choices=["apa"])
 
     @staticmethod

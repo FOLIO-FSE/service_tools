@@ -12,6 +12,7 @@ class BatchPoster(ServiceTaskBase):
     def __init__(self, folio_client: FolioClient, args):
         super().__init__(folio_client)
         self.failed_ids = []
+        self.first_batch = True
         self.api_path = list_objects()[args.object_name]
         self.object_name = args.object_name
         self.failed_objects = []
@@ -29,6 +30,7 @@ class BatchPoster(ServiceTaskBase):
         batch = []
 
         with open(self.objects_file) as rows:
+
             for row in rows:
                 if self.processed_rows < self.start:
                     continue
@@ -57,11 +59,12 @@ class BatchPoster(ServiceTaskBase):
         response = self.do_post(batch)
         if response.status_code == 201:
             print(
-                f"Posting successful! {self.processed_rows} {response.elapsed.total_seconds()}s {len(batch)}",
+                f"Posting successful! Total rows: {self.processed_rows}  {response.elapsed.total_seconds()}s "
+                f"Batch Size: {len(batch)} Request size: {get_req_size(response)}",
                 flush=True,
             )
         elif response.status_code == 422:
-            print(f"{response.status_code}\t{response.text}")
+            print(f"{response.status_code}\t{response.text} Request size: {get_req_size(response)}")
             resp = json.loads(response.text)
 
             for error in resp["errors"]:
@@ -75,7 +78,7 @@ class BatchPoster(ServiceTaskBase):
                 raise Exception(f"Reposting despite handling. {self.failed_ids}")"""
         elif response.status_code in [500, 413]:
             # Error handling is sparse. Need to identify failing records
-            print(f"{response.status_code}\t{response.text}")
+            print(f"{response.status_code}\tRequest size: {get_req_size(response)}\n{response.text} ")
             if not len(batch) == 1:
                 # split the batch in 2
                 my_chunks = chunks(batch, 2)
@@ -88,7 +91,7 @@ class BatchPoster(ServiceTaskBase):
                 )
                 self.failed_objects = batch[0]
         else:
-            raise Exception(f"ERROR! HTTP {response.status_code}\t{response.text}")
+            raise Exception(f"ERROR! HTTP {response.status_code}\t{response.text}Request size: {get_req_size(response)}")
 
     def handle_failed_batch(self, batch):
         # new_batch = [f for f in batch]  # if f["instanceId"] not in self.failed_ids]
@@ -125,6 +128,9 @@ class BatchPoster(ServiceTaskBase):
         else:
             payload = {kind["object_name"]: batch}
         # print(json.dumps(payload, ensure_ascii=True))
+        # if self.first_batch:
+        #    print(json.dumps(payload))
+        #    self.first_batch = False
         return requests.post(
             url, data=json.dumps(payload), headers=self.folio_client.okapi_headers
         )
@@ -136,8 +142,6 @@ class BatchPoster(ServiceTaskBase):
         ServiceTaskBase.add_argument(parser, "objects_file", "path data file", "FileChooser")
         ServiceTaskBase.add_argument(parser, "batch_size", "batch size", "")
         ServiceTaskBase.add_argument(parser, "object_name", "What objects to batch post", "Dropdown",
-                                     metavar='What objects to batch post',
-                                     dest='object_name',
                                      choices=list(list_objects().keys()),
                                      )
 
@@ -170,3 +174,20 @@ def chunks(records, number_of_chunks):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(records), number_of_chunks):
         yield records[i: i + number_of_chunks]
+
+
+def get_human_readable(size, precision=2):
+    suffixes = ['B', 'KB', 'MB', 'GB', "TB"]
+    suffix_index = 0
+    while size > 1024 and suffix_index < 4:
+        suffix_index += 1 # increment the index of the suffix
+        size = size/1024.0 # apply the division
+    return "%.*f%s"%(precision, size, suffixes[suffix_index])
+
+
+def get_req_size(response):
+    size = response.request.method
+    size += response.request.url
+    size += '\r\n'.join('{}{}'.format(k, v) for k, v in response.request.headers.items())
+    size += response.request.body if response.request.body else []
+    return get_human_readable(len(size.encode('utf-8')))

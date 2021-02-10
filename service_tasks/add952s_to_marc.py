@@ -141,15 +141,13 @@ class Add952ToMarc(ServiceTaskBase):
     @abstractmethod
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        ServiceTaskBase.add_argument(parser,
-                                     "marc_files", help="Path to the file", widget="DirChooser"
-                                     )
+        ServiceTaskBase.add_argument(parser, "marc_files", "Path to the file", "DirChooser")
 
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        ServiceTaskBase.add_cli_argument(parser, "marc_files", help="Path to the file")
+        ServiceTaskBase.add_cli_argument(parser, "marc_files", "Path to the file")
 
 
 def background(f):

@@ -4,10 +4,11 @@ Pipfile.lock
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+.python-version
 *.pyc
 # C extensions
 *.so
-
+.vscode/
 # Distribution / packaging
 bin/
 build/
