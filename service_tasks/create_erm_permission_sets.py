@@ -16,7 +16,7 @@ class CreateErmPermissionSets(ServiceTaskBase):
         ps = []
         ps.append({
                 "permissionName" : "c1b35cb5-a1ff-4d2c-a6a4-b8a8dbe3edae",
-                "displayName" : "Electronic Resource Management",
+                "displayName" : "erm-user",
                 "id" : "02f05a09-60f1-46d3-8e14-930bb8ce81c0",
                 "description" : "For users who manage electronic resources.", 
                 "tags" : [ ],
@@ -26,7 +26,7 @@ class CreateErmPermissionSets(ServiceTaskBase):
                 })
         ps.append({
                 "permissionName" : "ce7f73f4-6714-4973-aeff-c7af887564b2",
-                "displayName" : "ERM Admin",
+                "displayName" : "erm-admin",
                 "id" : "26b717c6-0d13-4e96-aeda-dfb63c432a29",
                 "description" : "All authorizations for ERM and also permissions for system settings", 
                 "tags" : [ ],
@@ -36,7 +36,7 @@ class CreateErmPermissionSets(ServiceTaskBase):
                 })
         ps.append({
                 "permissionName" : "9399d79e-e500-44ee-8466-f55652596131",
-                "displayName" : "ERM view only",
+                "displayName" : "erm-viewonly",
                 "id" : "a53b7dac-13b1-497e-9581-c2144a437ad7",
                 "description" : "For users that look at but never edit agreements and licenses. E.g. staff who work with publishing support for researchers.", 
                 "tags" : [ ],
