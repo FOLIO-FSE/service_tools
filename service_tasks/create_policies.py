@@ -168,7 +168,7 @@ class CreateCircPolicies(ServiceTaskBase):
                 "attachments" : [ ]
                 }
                 },
-                "name" : "Page Request Notice",
+                "name" : "Recall Request Notice",
                 "active" : "true",
                 "category" : "Request"
                 })
@@ -340,10 +340,18 @@ class CreateCircPolicies(ServiceTaskBase):
                                 "sendWhen" : "Hold request"
                                 }
                         }, {
+                            "templateId" : "a21ed25b-1d08-421e-b540-2f90176248cb",
+                            "format" : "Email",
+                            "realTime" : "true",
+                            "sendOptions" : {
+                                "sendWhen" : "Paging request"
+                                }
+                        }, {
                             "templateId" : "9a3d6293-b744-4d39-b56b-20019e6be5e1",
                             "format" : "Email",
                             "realTime" : "true",
                             "sendOptions" : {
+                                "sendHow" : "Upon At",
                                 "sendWhen" : "Hold expiration"
                                 }
                         }, {
@@ -736,11 +744,11 @@ class CreateCircPolicies(ServiceTaskBase):
             })
 
         self.add_policy("Request", rp, "request-policy-storage/request-policies")
-        self.add_policy("Patron Notice Templates", pn, "templates")
         self.add_policy("Patron Notice", pnp, "patron-notice-policy-storage/patron-notice-policies")
         self.add_policy("Lost Item", lif, "lost-item-fees-policies")
         self.add_policy("Overdue Fine", od, "overdue-fines-policies")
         self.add_policy("Loan", lp, "loan-policy-storage/loan-policies")
+        self.add_policy("Patron Notice Templates", pn, "templates")
 
     def add_policy(self, description, policy_array, url):
         print(f"\n------------------- Creating {description} policies --------------\n")
