@@ -220,7 +220,7 @@ class CreateFullPermissionSets(ServiceTaskBase):
                 "id" : "02f05a09-60f1-46d3-8e14-930bb8ce81c0",
                 "description" : "For users who manage electronic resources.", 
                 "tags" : [ ],
-                "subPermissions" : ["ui-organizations.settings","ui-organizations.delete","ui-organizations.create","ui-organizations.edit","ui-organizations.view","ui-agreements.agreements.edit","ui-agreements.agreements.view","ui-eholdings.titles-packages.create-delete","ui-eholdings.records.edit","ui-eholdings.package-title.select-unselect","ui-erm-usage.view","ui-licenses.licenses.edit","ui-licenses.licenses.view","ui-notes.item.assign-unassign","ui-notes.item.create","ui-notes.item.delete","ui-notes.item.edit","ui-notes.item.view","ui-organizations.creds.view","ui-organizations.creds.manage","settings.agreements.enabled","ui-eholdings.settings.kb","ui-eholdings.settings.root-proxy","settings.licenses.enabled","settings.notes.enabled","settings.organizations.enabled","settings.tags.enabled","module.search.enabled","module.eholdings.enabled","module.organizations.enabled","module.agreements.enabled","module.notes.enabled","ui-users.view"],
+                "subPermissions" : ["ui-organizations.settings","ui-organizations.delete","ui-organizations.create","ui-organizations.edit","ui-organizations.view","ui-agreements.agreements.edit","ui-agreements.agreements.view","ui-eholdings.titles-packages.create-delete","ui-eholdings.records.edit","ui-eholdings.package-title.select-unselect","ui-licenses.licenses.edit","ui-licenses.licenses.view","ui-notes.item.assign-unassign","ui-notes.item.create","ui-notes.item.delete","ui-notes.item.edit","ui-notes.item.view","ui-organizations.creds.view","ui-organizations.creds.manage","settings.agreements.enabled","ui-eholdings.settings.kb","ui-eholdings.settings.root-proxy","settings.licenses.enabled","settings.notes.enabled","settings.organizations.enabled","settings.tags.enabled","module.search.enabled","module.eholdings.enabled","module.organizations.enabled","module.agreements.enabled","module.notes.enabled","ui-users.view"],
                 "mutable" : "true",
                 "visible" : "true"
                 })
@@ -240,7 +240,7 @@ class CreateFullPermissionSets(ServiceTaskBase):
                 "id" : "a53b7dac-13b1-497e-9581-c2144a437ad7",
                 "description" : "For users that look at but never edit agreements and licenses. E.g. staff who work with publishing support for researchers.", 
                 "tags" : [ ],
-                "subPermissions" : ["ui-erm-usage.view","module.agreements.enabled","ui-notes.item.view","ui-licenses.licenses.view","ui-organizations.view","ui-notes.item.create","ui-agreements.agreements.view","ermusage.view"],
+                "subPermissions" : ["module.agreements.enabled","ui-notes.item.view","ui-licenses.licenses.view","ui-organizations.view","ui-notes.item.create","ui-agreements.agreements.view"],
                 "mutable" : "true",
                 "visible" : "true"
                 })
