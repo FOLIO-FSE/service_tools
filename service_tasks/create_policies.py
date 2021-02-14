@@ -44,7 +44,7 @@ class CreateCircPolicies(ServiceTaskBase):
             "localizedTemplates" : {
             "en" : {
             "header" : "Cancellation Notice",
-            "body" : "<div>{{item.effectiveLocationLibrary}}</div><div><br></div><div>Dear {{user.firstName}} {{user.lastName}}:</div><div><br></div><div>We regret that your request for the following item(s) has been cancelled.</div><div><br></div><div><strong>Title</strong>: {{item.title}}</div><div><strong>Author</strong>: {{item.primaryContributor}}</div><div><strong>Item ID</strong>: {{item.barcode}}</div><div><strong>Call #</strong>: {{item.callNumber}}</div><div><br></div><div>In most cases cancellations occur because the item was not available by the \"not needed after\" date you specified in your original request.</div><div>&nbsp;</div><div>Please contact the library staff if you still have a need for this item.</div><div>&nbsp;</div><div>If you have any questions please contact us at the indicated location.</div><div><strong>Location</strong>: {{item.effectiveLocationLibrary}}</div><div><strong>Phone: </strong>(XXX)XXX-XXXX</div>",  
+            "body" : "<div>{{item.effectiveLocationLibrary}}</div><div><br></div><div>Dear {{user.firstName}} {{user.lastName}}:</div><div><br></div><div>We regret that your request for the following item was cancelled.</div><div><br></div><div><strong>Title</strong>: {{item.title}}</div><div><strong>Author</strong>: {{item.primaryContributor}}</div><div><strong>Item ID</strong>: {{item.barcode}}</div><div><strong>Call #</strong>: {{item.callNumber}}</div><div><br></div><div>In most cases cancellations occur because the item was not available by the \"not needed after\" date you specified in your original request.</div><div>&nbsp;</div><div>Please contact the library staff if you still have a need for this item.</div><div>&nbsp;</div><div>If you have any questions please contact us at the indicated location.</div><div><strong>Location</strong>: {{item.effectiveLocationLibrary}}</div><div><strong>Phone: </strong>(XXX)XXX-XXXX</div>",  
             "attachments" : [ ] 
             }
             },
@@ -59,7 +59,7 @@ class CreateCircPolicies(ServiceTaskBase):
             "localizedTemplates" : {
                 "en" : {
                     "header" : "Item Available Notice",
-                    "body" : "<div>{{request.servicePointPickup}}</div><div><br></div><div>Dear {{user.firstName}} {{user.lastName}}:</div><div><br></div><div>The item(s) that you requested are now available at the location(s) shown below. Please pick up item(s) before the indicated expiration date.</div><div><br></div><div><strong>Location</strong>: {{request.servicePointPickup}}</div><div><strong>Title</strong>: {{item.title}}</div><div><strong>Author</strong>: {{item.primaryContributor}}</div><div><strong>Item ID</strong>: {{item.barcode}}</div><div><strong>Call #</strong>: {{item.callNumber}}</div><div><strong>Expiration Date</strong>: {{request.holdShelfExpirationDate}}</div><div><br></div><div>If you have any questions please contact us at the indicated location.</div><div><strong>Location</strong>: {{request.servicePointPickup}}</div><div><strong>Phone:</strong> (XXX)XXX-XXXX</div>",
+                    "body" : "<div>{{request.servicePointPickup}}</div><div><br></div><div>Dear {{user.firstName}} {{user.lastName}}:</div><div><br></div><div>The item that you requested are now available at the location(s) shown below. Please pick up item(s) before the indicated expiration date.</div><div><br></div><div><strong>Location</strong>: {{request.servicePointPickup}}</div><div><strong>Title</strong>: {{item.title}}</div><div><strong>Author</strong>: {{item.primaryContributor}}</div><div><strong>Item ID</strong>: {{item.barcode}}</div><div><strong>Call #</strong>: {{item.callNumber}}</div><div><strong>Expiration Date</strong>: {{request.holdShelfExpirationDate}}</div><div><br></div><div>If you have any questions please contact us at the indicated location.</div><div><strong>Location</strong>: {{request.servicePointPickup}}</div><div><strong>Phone:</strong> (XXX)XXX-XXXX</div>",
                     "attachments" : [ ]
                     }
                 },
@@ -96,6 +96,111 @@ class CreateCircPolicies(ServiceTaskBase):
                 "name" : "Courtesy Notice",
                 "active" : "true",
                 "category" : "Loan"
+                })
+        pn.append({
+            "id" : "0460ad04-5653-45ca-929b-9197d1183cdf",
+            "outputFormats" : [ "text/html" ],
+            "templateResolver" : "mustache",
+            "localizedTemplates" : {
+                "en" : {
+                    "header" : "Thank You for Borrowing!",
+                    "body" : "<div><br></div><div>Dear {{user.firstName}} {{user.lastName}}:</div><div><br></div><div>This a confirmation that you checked out the following:</div><div><br></div><div>{{#loans}}</div><div><strong>Location</strong>: {{item.effectiveLocationLibrary}}</div><div><strong>Title</strong>: {{item.title}}</div><div><strong>Author</strong>: {{item.primaryContributor}}</div><div><strong>Item ID</strong>: {{item.barcode}}</div><div><strong>Copy #</strong>: {{item.copy}}</div><div><strong>Call #</strong>: {{item.callNumber}}</div><div><strong>Due Date</strong>: {{loan.dueDate}}</div><div><br></div><div>{{/loans}}</div><div>If you have any questions please contact us at the indicated location.</div><div><br></div><div><strong>Phone:</strong> (XXX)XXX-XXXX</div><div><br></div>",
+                "attachments" : [ ]
+                }
+                },
+                "name" : "Check out Notice",
+                "active" : "true",
+                "category" : "Loan"
+                })
+        pn.append({
+            "id" : "fe19d649-05b1-4ee5-ac74-7a04cb3dbf11",
+            "outputFormats" : [ "text/html" ],
+            "templateResolver" : "mustache",
+            "localizedTemplates" : {
+                "en" : {
+                    "header" : "Thank you for returning library materials",
+                    "body" : "<div><br></div><div>Dear {{user.firstName}} {{user.lastName}}:</div><div><br></div><div>This a confirmation that you returned the following:</div><div><br></div><div>{{#loans}}</div><div><strong>Location</strong>: {{item.effectiveLocationLibrary}}</div><div><strong>Title</strong>: {{item.title}}</div><div><strong>Author</strong>: {{item.primaryContributor}}</div><div><strong>Item ID</strong>: {{item.barcode}}</div><div><strong>Copy #</strong>: {{item.copy}}</div><div><strong>Call #</strong>: {{item.callNumber}}</div><div><br></div><div>{{/loans}}</div><div>If you have any questions please contact us at the indicated location.</div><div><br></div><div><strong>Phone:</strong> (XXX)XXX-XXXX</div><div><br></div>",
+                "attachments" : [ ]
+                }
+                },
+                "name" : "Check in Notice",
+                "active" : "true",
+                "category" : "Loan"
+                })
+        pn.append({
+            "id" : "bca86b8e-7ca6-49f8-9f83-14c56f3e71db",
+            "outputFormats" : [ "text/html" ],
+            "templateResolver" : "mustache",
+            "localizedTemplates" : {
+                "en" : {
+                    "header" : "Your hold was successfully placed",
+                    "body" : "<div><br></div><div>Dear {{user.firstName}} {{user.lastName}}:</div><div><br></div><div>This a notice that you have successfully placed a hold on: </div><div><br></div><div>{{#loans}}</div><div><strong>Location</strong>: {{item.effectiveLocationLibrary}}</div><div><strong>Title</strong>: {{item.title}}</div><div><strong>Author</strong>: {{item.primaryContributor}}</div><div><strong>Item ID</strong>: {{item.barcode}}</div><div><strong>Copy #</strong>: {{item.copy}}</div><div><strong>Call #</strong>: {{item.callNumber}}</div><div><br></div><div>{{/loans}}</div><div>You will be contacted when it is ready to pick up. If you have any questions please contact us at the indicated location.</div><div><br></div><div><strong>Phone:</strong> (XXX)XXX-XXXX</div><div><br></div>",
+                "attachments" : [ ]
+                }
+                },
+                "name" : "Hold Placed Notice",
+                "active" : "true",
+                "category" : "Request"
+                })
+        pn.append({
+            "id" : "a21ed25b-1d08-421e-b540-2f90176248cb",
+            "outputFormats" : [ "text/html" ],
+            "templateResolver" : "mustache",
+            "localizedTemplates" : {
+                "en" : {
+                    "header" : "Your page request has been received",
+                    "body" : "<div><br></div><div>Dear {{user.firstName}} {{user.lastName}}:</div><div><br></div><div>This a notice that you have successfully requested a page for: </div><div><br></div><div>{{#loans}}</div><div><strong>Location</strong>: {{item.effectiveLocationLibrary}}</div><div><strong>Title</strong>: {{item.title}}</div><div><strong>Author</strong>: {{item.primaryContributor}}</div><div><strong>Item ID</strong>: {{item.barcode}}</div><div><strong>Copy #</strong>: {{item.copy}}</div><div><strong>Call #</strong>: {{item.callNumber}}</div><div><br></div><div>{{/loans}}</div><div>You will be contacted when it is ready to pick up. If you have any questions please contact us at the indicated location.</div><div><br></div><div><strong>Phone:</strong> (XXX)XXX-XXXX</div><div><br></div>",
+                "attachments" : [ ]
+                }
+                },
+                "name" : "Page Request Notice",
+                "active" : "true",
+                "category" : "Request"
+                })
+        pn.append({
+            "id" : "6e7f6980-46d7-4ef3-b201-a3fac1b4922f",
+            "outputFormats" : [ "text/html" ],
+            "templateResolver" : "mustache",
+            "localizedTemplates" : {
+                "en" : {
+                    "header" : "Your recall request has been made",
+                    "body" : "<div><br></div><div>Dear {{user.firstName}} {{user.lastName}}:</div><div><br></div><div>This a notice that you have successfully requested the following item be recalled: </div><div><br></div><div>{{#loans}}</div><div><strong>Location</strong>: {{item.effectiveLocationLibrary}}</div><div><strong>Title</strong>: {{item.title}}</div><div><strong>Author</strong>: {{item.primaryContributor}}</div><div><strong>Item ID</strong>: {{item.barcode}}</div><div><strong>Copy #</strong>: {{item.copy}}</div><div><strong>Call #</strong>: {{item.callNumber}}</div><div><br></div><div>{{/loans}}</div><div>You will be contacted when it is ready to pick up. If you have any questions please contact us at the indicated location.</div><div><br></div><div><strong>Phone:</strong> (XXX)XXX-XXXX</div><div><br></div>",
+                "attachments" : [ ]
+                }
+                },
+                "name" : "Recall Request Notice",
+                "active" : "true",
+                "category" : "Request"
+                })
+        pn.append({
+            "id" : "9a3d6293-b744-4d39-b56b-20019e6be5e1",
+            "outputFormats" : [ "text/html" ],
+            "templateResolver" : "mustache",
+            "localizedTemplates" : {
+                "en" : {
+                    "header" : "Your Hold has Expired",
+                    "body" : "<div><br></div><div>Dear {{user.firstName}} {{user.lastName}}:</div><div><br></div><div>This a notice that hold(s) expired you made for:</div><div><br></div><div>{{#loans}}</div><div><strong>Location</strong>: {{item.effectiveLocationLibrary}}</div><div><strong>Title</strong>: {{item.title}}</div><div><strong>Author</strong>: {{item.primaryContributor}}</div><div><strong>Item ID</strong>: {{item.barcode}}</div><div><strong>Copy #</strong>: {{item.copy}}</div><div><strong>Call #</strong>: {{item.callNumber}}</div><div><br></div><div>{{/loans}}</div><div>If you have any questions please contact us at the indicated location.</div><div><br></div><div><strong>Phone:</strong> (XXX)XXX-XXXX</div><div><br></div>",
+                "attachments" : [ ]
+                }
+                },
+                "name" : "Hold Expiration Notice",
+                "active" : "true",
+                "category" : "Request"
+                })
+        pn.append({
+            "id" : "4f0fb369-b79f-4768-ad46-473b090cafe6",
+            "outputFormats" : [ "text/html" ],
+            "templateResolver" : "mustache",
+            "localizedTemplates" : {
+                "en" : {
+                    "header" : "Your Request has Expired",
+                    "body" : "<div><br></div><div>Dear {{user.firstName}} {{user.lastName}}:</div><div><br></div><div>This a notice that request(s) expired you made for:</div><div><br></div><div>{{#loans}}</div><div><strong>Location</strong>: {{item.effectiveLocationLibrary}}</div><div><strong>Title</strong>: {{item.title}}</div><div><strong>Author</strong>: {{item.primaryContributor}}</div><div><strong>Item ID</strong>: {{item.barcode}}</div><div><strong>Copy #</strong>: {{item.copy}}</div><div><strong>Call #</strong>: {{item.callNumber}}</div><div><br></div><div>{{/loans}}</div><div>If you have any questions please contact us at the indicated location.</div><div><br></div><div><strong>Phone:</strong> (XXX)XXX-XXXX</div><div><br></div>",
+                "attachments" : [ ]
+                }
+                },
+                "name" : "Request Expiration Notice",
+                "active" : "true",
+                "category" : "Request"
                 })
         pn.append({
             "id" : "bffeef62-1913-4643-b776-ed4e67d4a483",
@@ -173,6 +278,20 @@ class CreateCircPolicies(ServiceTaskBase):
                             }
                         }
                     }, {
+                        "templateId" : "fe19d649-05b1-4ee5-ac74-7a04cb3dbf11",
+                        "format" : "Email",
+                        "realTime" : "false",
+                        "sendOptions" : {
+                            "sendWhen" : "Check in"
+                        }
+                    }, {
+                        "templateId" : "0460ad04-5653-45ca-929b-9197d1183cdf",
+                        "format" : "Email",
+                        "realTime" : "false",
+                        "sendOptions" : {
+                            "sendWhen" : "Check out"
+                        }
+                    }, {
                         "templateId" : "c3213107-c92b-40d2-9710-6293cbc111b9",
                         "format" : "Email",
                         "frequency" : "Recurring",
@@ -202,10 +321,39 @@ class CreateCircPolicies(ServiceTaskBase):
                     "requestNotices" : [ {
                         "templateId" : "61d89ecf-887b-4699-abb7-707ab22da821",
                         "format" : "Email",
-                        "realTime" : "false",
+                        "realTime" : "true",
                         "sendOptions" : {
                             "sendWhen" : "Request cancellation"
                             }
+                        }, {
+                            "templateId" : "6e7f6980-46d7-4ef3-b201-a3fac1b4922f",
+                            "format" : "Email",
+                            "realTime" : "true",
+                            "sendOptions" : {
+                                "sendWhen" : "Recall request"
+                                }
+                        }, {
+                            "templateId" : "bca86b8e-7ca6-49f8-9f83-14c56f3e71db",
+                            "format" : "Email",
+                            "realTime" : "true",
+                            "sendOptions" : {
+                                "sendWhen" : "Hold request"
+                                }
+                        }, {
+                            "templateId" : "a21ed25b-1d08-421e-b540-2f90176248cb",
+                            "format" : "Email",
+                            "realTime" : "true",
+                            "sendOptions" : {
+                                "sendWhen" : "Paging request"
+                                }
+                        }, {
+                            "templateId" : "9a3d6293-b744-4d39-b56b-20019e6be5e1",
+                            "format" : "Email",
+                            "realTime" : "true",
+                            "sendOptions" : {
+                                "sendHow" : "Upon At",
+                                "sendWhen" : "Hold expiration"
+                                }
                         }, {
                             "templateId" : "6571d5e8-e2ce-4636-b271-41553cf33a62",
                             "format" : "Email",
@@ -596,11 +744,11 @@ class CreateCircPolicies(ServiceTaskBase):
             })
 
         self.add_policy("Request", rp, "request-policy-storage/request-policies")
-        self.add_policy("Patron Notice Templates", pn, "templates")
         self.add_policy("Patron Notice", pnp, "patron-notice-policy-storage/patron-notice-policies")
         self.add_policy("Lost Item", lif, "lost-item-fees-policies")
         self.add_policy("Overdue Fine", od, "overdue-fines-policies")
         self.add_policy("Loan", lp, "loan-policy-storage/loan-policies")
+        self.add_policy("Patron Notice Templates", pn, "templates")
 
     def add_policy(self, description, policy_array, url):
         print(f"\n------------------- Creating {description} policies --------------\n")
