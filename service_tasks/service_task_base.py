@@ -10,6 +10,23 @@ class ServiceTaskBase():
         self.migration_report = {}
         self.folio_client = folio_client
 
+    def write_migration_report(self, report_file):
+
+        for a in self.migration_report:
+            report_file.write(f"   \n")
+            report_file.write(f"## {a}    \n")
+            report_file.write(
+                f"<details><summary>Click to expand all {len(self.migration_report[a])} things</summary>     \n"
+            )
+            report_file.write(f"   \n")
+            report_file.write(f"Measure | Count   \n")
+            report_file.write(f"--- | ---:   \n")
+            b = self.migration_report[a]
+            sortedlist = [(k, b[k]) for k in sorted(b, key=as_str)]
+            for b in sortedlist:
+                report_file.write(f"{b[0]} | {b[1]}   \n")
+            report_file.write("</details>   \n")
+
     def add_stats(self, measure_to_add):
         if measure_to_add not in self.stats:
             self.stats[measure_to_add] = 1
@@ -73,3 +90,10 @@ class ServiceTaskBase():
             "okapi_credentials_string", help="Space delimited string containing "
                                              "OKAPI_URL, TENANT_ID,  USERNAME, PASSWORD in that oreder."
         )
+
+
+def as_str(s):
+    try:
+        return str(s), ''
+    except ValueError:
+        return '', s
