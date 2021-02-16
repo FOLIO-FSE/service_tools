@@ -156,7 +156,7 @@ class SierraItemMigrator(ServiceTaskBase):
     @abstractmethod
     def add_cli_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        ServiceTaskBase.add_argument(parser, "item_file", "File of Sierra Items")
-        ServiceTaskBase.add_argument(parser, "instance_id_dict_path", "")
-        ServiceTaskBase.add_argument(parser, "results_folder", "Results folder")
-        ServiceTaskBase.add_argument(parser, "mappings_files_folder", "Mapping files folder")
+        ServiceTaskBase.add_cli_argument(parser, "item_file", "File of Sierra Items")
+        ServiceTaskBase.add_cli_argument(parser, "instance_id_dict_path", "")
+        ServiceTaskBase.add_cli_argument(parser, "results_folder", "Results folder")
+        ServiceTaskBase.add_cli_argument(parser, "mappings_files_folder", "Mapping files folder")
