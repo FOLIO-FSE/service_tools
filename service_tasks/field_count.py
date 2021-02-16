@@ -9,7 +9,7 @@ class CountOccurrences(ServiceTaskBase):
 
     def do_work(self):
         print(f"Occurrences of {self.field_wanted} in reverse frequency order") 
-        field_values = pd.read_csv(self.csv_file)
+        field_values = pd.read_csv(self.csv_file, encoding = 'unicode_escape', engine ='python')
         print(field_values[self.field_wanted].value_counts())
 
             
