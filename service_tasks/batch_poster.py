@@ -64,13 +64,13 @@ class BatchPoster(ServiceTaskBase):
                 flush=True,
             )
         elif response.status_code == 422:
-            print(f"{response.status_code}\t{response.text} Request size: {get_req_size(response)}")
+            print(f"{response.status_code}\t{response.text} Request size: {get_req_size(response)}", flush=True)
             resp = json.loads(response.text)
 
             for error in resp["errors"]:
                 self.failed_fields.add(error["parameters"][0]["key"])
                 self.failed_ids.append(error["parameters"][0]["value"])
-            print(f"1 {len(batch)}")
+            print(f"1 {len(batch)}", flush=True)
             self.handle_failed_batch(batch)
             """if not repost:
                 self.handle_failed_batch(batch)
@@ -78,17 +78,17 @@ class BatchPoster(ServiceTaskBase):
                 raise Exception(f"Reposting despite handling. {self.failed_ids}")"""
         elif response.status_code in [500, 413]:
             # Error handling is sparse. Need to identify failing records
-            print(f"{response.status_code}\tRequest size: {get_req_size(response)}\n{response.text} ")
+            print(f"{response.status_code}\tRequest size: {get_req_size(response)}\n{response.text} ", flush=True)
             if not len(batch) == 1:
                 # split the batch in 2
                 my_chunks = chunks(batch, 2)
                 for chunk in my_chunks:
-                    print(f"chunks with {len(chunk)} objects. " "posting chunk...")
+                    print(f"chunks with {len(chunk)} objects. " "posting chunk...", flush=True)
                     self.post_batch(chunk)
             else:
                 print(
                     f"Only one object left. Adding {batch[0]['id']} to failed_objects"
-                )
+                , flush=True)
                 self.failed_objects = batch[0]
         else:
             raise Exception(f"ERROR! HTTP {response.status_code}\t{response.text}Request size: {get_req_size(response)}")

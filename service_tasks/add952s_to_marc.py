@@ -125,7 +125,7 @@ class Add952ToMarc(ServiceTaskBase):
         if dict_key not in self.ref_data_dicts:
             d = {}
             for r in ref_data:
-                d[r[key_type].lower()] = (r["id"], r["name"])
+                d[r[key_type].lower()] = (r["id"], r["discoveryDisplayName"])
             self.ref_data_dicts[dict_key] = d
         ref_object = (
             self.ref_data_dicts[dict_key][key_value.lower()]
