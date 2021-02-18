@@ -85,7 +85,7 @@ class SierraItemTransformer(MapperBase):
             self.add_stats(self.stats, "Item connected to more than one Bib/Instance")
         sierra_bib_id = next(f for f in sierra_item["bibIds"])
 
-        new_instance_id = self.instance_id_map.get(sierra_bib_id, {}).get("id", "")
+        new_instance_id = self.instance_id_map.get(sierra_bib_id, {}).get("folio_id", "")
 
         if not new_instance_id:
             self.add_stats(self.stats, f"Bib Id not in list of migrated records")
