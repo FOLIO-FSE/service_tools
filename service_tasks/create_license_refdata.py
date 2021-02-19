@@ -173,19 +173,9 @@ class CreateLicensePolicies(ServiceTaskBase):
                 "internal": "false",
                 "values": [
                     {
-                        "id": "2c91808b7445501601764e0501490038",
-                        "value": "prohibited_implied",
-                        "label": "Prohibited Implied"
-                        },
-                    {
                         "id": "2c9180857445294501764e04ba0b0060",
-                        "value": "permitted_explicit",
-                        "label": "Permitted Explicit"
-                        },
-                    {
-                        "id": "2c91808b7445501601764e04a3c80035",
-                        "value": "not_specified_in_agreement",
-                        "label": "Not Specified in Agreement"
+                        "value": "permitted",
+                        "label": "Permitted"
                         },
                     {
                         "id": "2c91808b7445501601764d8e5fa00032",
@@ -199,18 +189,13 @@ class CreateLicensePolicies(ServiceTaskBase):
                         },
                     {
                         "id": "2c91808b7445501601764e04ea730037",
-                        "value": "prohibited_explicit",
-                        "label": "Prohibited Explicit"
+                        "value": "prohibited",
+                        "label": "Prohibited"
                         },
                     {
                         "id": "2c91808f725c72b30172718dc8340066",
                         "value": "unmentioned",
                         "label": "Unmentioned"
-                        },
-                    {
-                        "id": "2c91808b7445501601764e04d1560036",
-                        "value": "permitted_implied",
-                        "label": "Permitted Implied"
                         }
                     ]
                 })
@@ -298,16 +283,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Yes"
         },
         {
-        "id": "2c91808b7445501601764d8de3730031",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
-        "id": "2c9180857445294501764d8e0ba6005a",
-        "value": "unspecified",
-        "label": "Unspecified"
-        },
-        {
         "id": "2c91808f725c72b30172718dc802005f",
         "value": "other",
         "label": "Other"
@@ -330,29 +305,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -360,14 +320,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -407,16 +362,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Yes"
         },
         {
-        "id": "2c91808b7445501601764d8de3730031",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
-        "id": "2c9180857445294501764d8e0ba6005a",
-        "value": "unspecified",
-        "label": "Unspecified"
-        },
-        {
         "id": "2c91808f725c72b30172718dc802005f",
         "value": "other",
         "label": "Other"
@@ -439,29 +384,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -469,14 +399,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -526,16 +451,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Yes"
         },
         {
-        "id": "2c91808b7445501601764d8de3730031",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
-        "id": "2c9180857445294501764d8e0ba6005a",
-        "value": "unspecified",
-        "label": "Unspecified"
-        },
-        {
         "id": "2c91808f725c72b30172718dc802005f",
         "value": "other",
         "label": "Other"
@@ -568,16 +483,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Yes"
         },
         {
-        "id": "2c91808b7445501601764d8de3730031",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
-        "id": "2c9180857445294501764d8e0ba6005a",
-        "value": "unspecified",
-        "label": "Unspecified"
-        },
-        {
         "id": "2c91808f725c72b30172718dc802005f",
         "value": "other",
         "label": "Other"
@@ -600,29 +505,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -630,14 +520,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -657,29 +542,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -687,14 +557,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -714,29 +579,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -744,14 +594,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -771,29 +616,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -801,14 +631,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -828,29 +653,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -858,14 +668,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -893,16 +698,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "id": "2c91808f725c72b30172718dc7f6005d",
         "value": "yes",
         "label": "Yes"
-        },
-        {
-        "id": "2c91808b7445501601764d8de3730031",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
-        "id": "2c9180857445294501764d8e0ba6005a",
-        "value": "unspecified",
-        "label": "Unspecified"
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
@@ -935,16 +730,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "id": "2c91808f725c72b30172718dc7f6005d",
         "value": "yes",
         "label": "Yes"
-        },
-        {
-        "id": "2c91808b7445501601764d8de3730031",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
-        "id": "2c9180857445294501764d8e0ba6005a",
-        "value": "unspecified",
-        "label": "Unspecified"
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
@@ -989,29 +774,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -1019,14 +789,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -1046,29 +811,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -1076,14 +826,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -1103,29 +848,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -1133,14 +863,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -1180,29 +905,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -1210,14 +920,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -1237,29 +942,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -1267,14 +957,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -1314,16 +999,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Yes"
         },
         {
-        "id": "2c91808b7445501601764d8de3730031",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
-        "id": "2c9180857445294501764d8e0ba6005a",
-        "value": "unspecified",
-        "label": "Unspecified"
-        },
-        {
         "id": "2c91808f725c72b30172718dc802005f",
         "value": "other",
         "label": "Other"
@@ -1346,29 +1021,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -1376,14 +1036,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -1413,16 +1068,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Yes"
         },
         {
-        "id": "2c91808b7445501601764d8de3730031",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
-        "id": "2c9180857445294501764d8e0ba6005a",
-        "value": "unspecified",
-        "label": "Unspecified"
-        },
-        {
         "id": "2c91808f725c72b30172718dc802005f",
         "value": "other",
         "label": "Other"
@@ -1445,29 +1090,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -1475,14 +1105,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -1502,29 +1127,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -1532,14 +1142,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -1569,16 +1174,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Yes"
         },
         {
-        "id": "2c91808b7445501601764d8de3730031",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
-        "id": "2c9180857445294501764d8e0ba6005a",
-        "value": "unspecified",
-        "label": "Unspecified"
-        },
-        {
         "id": "2c91808f725c72b30172718dc802005f",
         "value": "other",
         "label": "Other"
@@ -1601,29 +1196,14 @@ class CreateLicensePolicies(ServiceTaskBase):
         "internal": "false",
         "values": [
         {
-        "id": "2c91808b7445501601764e0501490038",
-        "value": "prohibited_implied",
-        "label": "Prohibited Implied"
-        },
-        {
-        "id": "2c91808b7445501601764e04a3c80035",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
         "id": "2c91808b7445501601764d8e5fa00032",
         "value": "limited_-_see_notes",
         "label": "Limited - See Notes"
         },
         {
         "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited_explicit",
-        "label": "Prohibited Explicit"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8340066",
-        "value": "unmentioned",
-        "label": "Unmentioned"
+        "value": "prohibited",
+        "label": "Prohibited"
         },
         {
         "id": "2c91808f725c72b30172718dc8390067",
@@ -1631,14 +1211,9 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Not applicable"
         },
         {
-        "id": "2c91808b7445501601764e04d1560036",
-        "value": "permitted_implied",
-        "label": "Permitted Implied"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted_explicit",
-        "label": "Permitted Explicit"
+        "value": "permitted",
+        "label": "Permitted"
         }
         ]
         },
@@ -1666,16 +1241,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "id": "2c91808f725c72b30172718dc7f6005d",
         "value": "yes",
         "label": "Yes"
-        },
-        {
-        "id": "2c91808b7445501601764d8de3730031",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
-        "id": "2c9180857445294501764d8e0ba6005a",
-        "value": "unspecified",
-        "label": "Unspecified"
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
@@ -1708,16 +1273,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "id": "2c91808f725c72b30172718dc7f6005d",
         "value": "yes",
         "label": "Yes"
-        },
-        {
-        "id": "2c91808b7445501601764d8de3730031",
-        "value": "not_specified_in_agreement",
-        "label": "Not Specified in Agreement"
-        },
-        {
-        "id": "2c9180857445294501764d8e0ba6005a",
-        "value": "unspecified",
-        "label": "Unspecified"
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
