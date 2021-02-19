@@ -183,11 +183,6 @@ class CreateLicensePolicies(ServiceTaskBase):
                         "label": "Limited - See Notes"
                         },
                     {
-                        "id": "2c91808f725c72b30172718dc8390067",
-                        "value": "not_applicable",
-                        "label": "Not applicable"
-                        },
-                    {
                         "id": "2c91808b7445501601764e04ea730037",
                         "value": "prohibited",
                         "label": "Prohibited"
@@ -315,11 +310,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Prohibited"
         },
         {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
         "value": "permitted",
         "label": "Permitted"
@@ -331,16 +321,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "description": "Specifies whether alumni have access to the licensed resource",
         "weight": "0",
         "type": "Refdata"
-        })
-        lt.append({
-        "id": "2c91808b7445501601764d8d1fcc0030",
-        "name": "CopyrightLaw",
-        "primary": "true",
-        "defaultInternal": "true",
-        "label": "Applicable Copyright Law",
-        "description": "Specifies the copyright law applicable to the licensed resource",
-        "weight": "0",
-        "type": "Text"
         })
         lt.append({
         "id": "2c91808b7445501601764d8cc248002f",
@@ -371,43 +351,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "defaultInternal": "true",
         "label": "Archiving Allowed",
         "description": "Specifies whether the license agreement allows archiving of the licensed resource",
-        "weight": "0",
-        "type": "Refdata"
-        })
-        lt.append({
-        "id": "2c9180857445294501764d84aacd004d",
-        "name": "ArticleReach",
-        "primary": "true",
-        "category": {
-        "id": "2c91808f725c72b30172718dc8080060",
-        "desc": "Permitted/Prohibited",
-        "internal": "false",
-        "values": [
-        {
-        "id": "2c91808b7445501601764d8e5fa00032",
-        "value": "limited_-_see_notes",
-        "label": "Limited - See Notes"
-        },
-        {
-        "id": "2c91808b7445501601764e04ea730037",
-        "value": "prohibited",
-        "label": "Prohibited"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
-        },
-        {
-        "id": "2c9180857445294501764e04ba0b0060",
-        "value": "permitted",
-        "label": "Permitted"
-        }
-        ]
-        },
-        "defaultInternal": "true",
-        "label": "ArticleReach",
-        "description": "Specifies whether the licensed resource can be included in ArticleReach",
         "weight": "0",
         "type": "Refdata"
         })
@@ -515,11 +458,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Prohibited"
         },
         {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
         "value": "permitted",
         "label": "Permitted"
@@ -550,11 +488,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "id": "2c91808b7445501601764e04ea730037",
         "value": "prohibited",
         "label": "Prohibited"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
         },
         {
         "id": "2c9180857445294501764e04ba0b0060",
@@ -589,11 +522,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Prohibited"
         },
         {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
         "value": "permitted",
         "label": "Permitted"
@@ -624,11 +552,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "id": "2c91808b7445501601764e04ea730037",
         "value": "prohibited",
         "label": "Prohibited"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
         },
         {
         "id": "2c9180857445294501764e04ba0b0060",
@@ -663,11 +586,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Prohibited"
         },
         {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
         "value": "permitted",
         "label": "Permitted"
@@ -677,38 +595,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "defaultInternal": "true",
         "label": "Distance Education",
         "description": "Specifies whether the licensed resource can be used in distance education",
-        "weight": "0",
-        "type": "Refdata"
-        })
-        lt.append({
-        "id": "2c91808b7445501601764d862662002a",
-        "name": "FairDealingClause",
-        "primary": "true",
-        "category": {
-        "id": "2c91808f725c72b30172718dc7ef005c",
-        "desc": "Yes/No/Other",
-        "internal": "false",
-        "values": [
-        {
-        "id": "2c91808f725c72b30172718dc7fd005e",
-        "value": "no",
-        "label": "No"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc7f6005d",
-        "value": "yes",
-        "label": "Yes"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other",
-        "label": "Other"
-        }
-        ]
-        },
-        "defaultInternal": "true",
-        "label": "Fair Dealing Clause",
-        "description": "Specifies whether an agreement contains a fair dealing clause and provides information pertaining to the clause, when applicable",
         "weight": "0",
         "type": "Refdata"
         })
@@ -784,11 +670,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Prohibited"
         },
         {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
         "value": "permitted",
         "label": "Permitted"
@@ -821,11 +702,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Prohibited"
         },
         {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
         "value": "permitted",
         "label": "Permitted"
@@ -856,11 +732,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "id": "2c91808b7445501601764e04ea730037",
         "value": "prohibited",
         "label": "Prohibited"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
         },
         {
         "id": "2c9180857445294501764e04ba0b0060",
@@ -915,11 +786,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Prohibited"
         },
         {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
         "value": "permitted",
         "label": "Permitted"
@@ -950,11 +816,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "id": "2c91808b7445501601764e04ea730037",
         "value": "prohibited",
         "label": "Prohibited"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
         },
         {
         "id": "2c9180857445294501764e04ba0b0060",
@@ -1031,11 +892,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Prohibited"
         },
         {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
         "value": "permitted",
         "label": "Permitted"
@@ -1100,11 +956,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "label": "Prohibited"
         },
         {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
-        },
-        {
         "id": "2c9180857445294501764e04ba0b0060",
         "value": "permitted",
         "label": "Permitted"
@@ -1135,11 +986,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "id": "2c91808b7445501601764e04ea730037",
         "value": "prohibited",
         "label": "Prohibited"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
         },
         {
         "id": "2c9180857445294501764e04ba0b0060",
@@ -1204,11 +1050,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "id": "2c91808b7445501601764e04ea730037",
         "value": "prohibited",
         "label": "Prohibited"
-        },
-        {
-        "id": "2c91808f725c72b30172718dc8390067",
-        "value": "not_applicable",
-        "label": "Not applicable"
         },
         {
         "id": "2c9180857445294501764e04ba0b0060",
