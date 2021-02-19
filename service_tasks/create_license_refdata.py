@@ -1103,6 +1103,645 @@ class CreateLicensePolicies(ServiceTaskBase):
         "weight": "0",
         "type": "Refdata"
         })
+        lt.append({
+        "id": "2c9180857445294501764d89d1640054",
+        "name": "ILLPrint",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc8080060",
+        "desc": "Permitted/Prohibited",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808b7445501601764e0501490038",
+        "value": "prohibited_implied",
+        "label": "Prohibited Implied"
+        },
+        {
+        "id": "2c91808b7445501601764e04a3c80035",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c91808b7445501601764d8e5fa00032",
+        "value": "limited_-_see_notes",
+        "label": "Limited - See Notes"
+        },
+        {
+        "id": "2c91808b7445501601764e04ea730037",
+        "value": "prohibited_explicit",
+        "label": "Prohibited Explicit"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8340066",
+        "value": "unmentioned",
+        "label": "Unmentioned"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8390067",
+        "value": "not_applicable",
+        "label": "Not applicable"
+        },
+        {
+        "id": "2c91808b7445501601764e04d1560036",
+        "value": "permitted_implied",
+        "label": "Permitted Implied"
+        },
+        {
+        "id": "2c9180857445294501764e04ba0b0060",
+        "value": "permitted_explicit",
+        "label": "Permitted Explicit"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "ILL - Print",
+        "description": "Specifies whether the resource is licensed for print ILL",
+        "weight": "0",
+        "type": "Refdata"
+        })
+        lt.append({
+        "id": "2c9180857445294501764d83b3e9004c",
+        "name": "IndemLicensee",
+        "primary": "true",
+        "defaultInternal": "true",
+        "label": "Indemnification by Licensee",
+        "description": "Indemnification by Licensee",
+        "weight": "0",
+        "type": "Text"
+        })
+        lt.append({
+        "id": "2c91808b7445501601764d834a780024",
+        "name": "IndemLicensor",
+        "primary": "true",
+        "defaultInternal": "true",
+        "label": "Indemnification by Licensor",
+        "description": "Indemnification by Licensor",
+        "weight": "0",
+        "type": "Text"
+        })
+        lt.append({
+        "id": "2c9180857445294501764d868c77004e",
+        "name": "LMS",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc8080060",
+        "desc": "Permitted/Prohibited",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808b7445501601764e0501490038",
+        "value": "prohibited_implied",
+        "label": "Prohibited Implied"
+        },
+        {
+        "id": "2c91808b7445501601764e04a3c80035",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c91808b7445501601764d8e5fa00032",
+        "value": "limited_-_see_notes",
+        "label": "Limited - See Notes"
+        },
+        {
+        "id": "2c91808b7445501601764e04ea730037",
+        "value": "prohibited_explicit",
+        "label": "Prohibited Explicit"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8340066",
+        "value": "unmentioned",
+        "label": "Unmentioned"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8390067",
+        "value": "not_applicable",
+        "label": "Not applicable"
+        },
+        {
+        "id": "2c91808b7445501601764e04d1560036",
+        "value": "permitted_implied",
+        "label": "Permitted Implied"
+        },
+        {
+        "id": "2c9180857445294501764e04ba0b0060",
+        "value": "permitted_explicit",
+        "label": "Permitted Explicit"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "Learning Management System",
+        "description": "Specifies whether access to the licensed resource can be provided via the licensee's LMS",
+        "weight": "0",
+        "type": "Refdata"
+        })
+        lt.append({
+        "id": "2c9180857445294501764d8906e10053",
+        "name": "LinkElectronic",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc8080060",
+        "desc": "Permitted/Prohibited",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808b7445501601764e0501490038",
+        "value": "prohibited_implied",
+        "label": "Prohibited Implied"
+        },
+        {
+        "id": "2c91808b7445501601764e04a3c80035",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c91808b7445501601764d8e5fa00032",
+        "value": "limited_-_see_notes",
+        "label": "Limited - See Notes"
+        },
+        {
+        "id": "2c91808b7445501601764e04ea730037",
+        "value": "prohibited_explicit",
+        "label": "Prohibited Explicit"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8340066",
+        "value": "unmentioned",
+        "label": "Unmentioned"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8390067",
+        "value": "not_applicable",
+        "label": "Not applicable"
+        },
+        {
+        "id": "2c91808b7445501601764e04d1560036",
+        "value": "permitted_implied",
+        "label": "Permitted Implied"
+        },
+        {
+        "id": "2c9180857445294501764e04ba0b0060",
+        "value": "permitted_explicit",
+        "label": "Permitted Explicit"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "Link Electronic",
+        "description": "Specifies whether the licensed resource can be linked electronically for use in courses",
+        "weight": "0",
+        "type": "Refdata"
+        })
+        lt.append({
+        "id": "2c9180857445294501764d8282c8004a",
+        "name": "OtherRestrictions",
+        "primary": "true",
+        "defaultInternal": "true",
+        "label": "Other Restrictions",
+        "description": "A blanket term to capture restrictions on a licensed resource not covered by established terms",
+        "weight": "0",
+        "type": "Text"
+        })
+        lt.append({
+        "id": "2c9180857445294501764d8c5a100058",
+        "name": "PerpetualAccess",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc7ef005c",
+        "desc": "Yes/No/Other",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808f725c72b30172718dc7fd005e",
+        "value": "no",
+        "label": "No"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc7f6005d",
+        "value": "yes",
+        "label": "Yes"
+        },
+        {
+        "id": "2c91808b7445501601764d8de3730031",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c9180857445294501764d8e0ba6005a",
+        "value": "unspecified",
+        "label": "Unspecified"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc802005f",
+        "value": "other_(see_notes)",
+        "label": "Other (see notes)"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "Perpetual Access",
+        "description": "Specifies whether the agreement provides perpetual access to the licensed resource",
+        "weight": "0",
+        "type": "Refdata"
+        })
+        lt.append({
+        "id": "2c9180857445294501764d874d52004f",
+        "name": "PersonsPerceptualDisabilities",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc8080060",
+        "desc": "Permitted/Prohibited",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808b7445501601764e0501490038",
+        "value": "prohibited_implied",
+        "label": "Prohibited Implied"
+        },
+        {
+        "id": "2c91808b7445501601764e04a3c80035",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c91808b7445501601764d8e5fa00032",
+        "value": "limited_-_see_notes",
+        "label": "Limited - See Notes"
+        },
+        {
+        "id": "2c91808b7445501601764e04ea730037",
+        "value": "prohibited_explicit",
+        "label": "Prohibited Explicit"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8340066",
+        "value": "unmentioned",
+        "label": "Unmentioned"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8390067",
+        "value": "not_applicable",
+        "label": "Not applicable"
+        },
+        {
+        "id": "2c91808b7445501601764e04d1560036",
+        "value": "permitted_implied",
+        "label": "Permitted Implied"
+        },
+        {
+        "id": "2c9180857445294501764e04ba0b0060",
+        "value": "permitted_explicit",
+        "label": "Permitted Explicit"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "Persons with Perceptual Disabilities",
+        "description": "Specifies usage guidelines for persons with perceptual disabilities",
+        "weight": "0",
+        "type": "Refdata"
+        })
+        lt.append({
+        "id": "2c9180857445294501764d8072020047",
+        "name": "SERU",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc7ef005c",
+        "desc": "Yes/No/Other",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808f725c72b30172718dc7fd005e",
+        "value": "no",
+        "label": "No"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc7f6005d",
+        "value": "yes",
+        "label": "Yes"
+        },
+        {
+        "id": "2c91808b7445501601764d8de3730031",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c9180857445294501764d8e0ba6005a",
+        "value": "unspecified",
+        "label": "Unspecified"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc802005f",
+        "value": "other_(see_notes)",
+        "label": "Other (see notes)"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "Publisher Accepts SERU",
+        "description": "Publisher Accepts SERU",
+        "weight": "0",
+        "type": "Refdata"
+        })
+        lt.append({
+        "id": "2c9180857445294501764d88a8390052",
+        "name": "ReservesElectronic",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc8080060",
+        "desc": "Permitted/Prohibited",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808b7445501601764e0501490038",
+        "value": "prohibited_implied",
+        "label": "Prohibited Implied"
+        },
+        {
+        "id": "2c91808b7445501601764e04a3c80035",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c91808b7445501601764d8e5fa00032",
+        "value": "limited_-_see_notes",
+        "label": "Limited - See Notes"
+        },
+        {
+        "id": "2c91808b7445501601764e04ea730037",
+        "value": "prohibited_explicit",
+        "label": "Prohibited Explicit"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8340066",
+        "value": "unmentioned",
+        "label": "Unmentioned"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8390067",
+        "value": "not_applicable",
+        "label": "Not applicable"
+        },
+        {
+        "id": "2c91808b7445501601764e04d1560036",
+        "value": "permitted_implied",
+        "label": "Permitted Implied"
+        },
+        {
+        "id": "2c9180857445294501764e04ba0b0060",
+        "value": "permitted_explicit",
+        "label": "Permitted Explicit"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "Reserves - Electronic",
+        "description": "Specifies whether and how the licensed content can be used in electronic reserves",
+        "weight": "0",
+        "type": "Refdata"
+        })
+        lt.append({
+        "id": "2c9180857445294501764d8807a80051",
+        "name": "ReservesPrint",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc8080060",
+        "desc": "Permitted/Prohibited",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808b7445501601764e0501490038",
+        "value": "prohibited_implied",
+        "label": "Prohibited Implied"
+        },
+        {
+        "id": "2c91808b7445501601764e04a3c80035",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c91808b7445501601764d8e5fa00032",
+        "value": "limited_-_see_notes",
+        "label": "Limited - See Notes"
+        },
+        {
+        "id": "2c91808b7445501601764e04ea730037",
+        "value": "prohibited_explicit",
+        "label": "Prohibited Explicit"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8340066",
+        "value": "unmentioned",
+        "label": "Unmentioned"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8390067",
+        "value": "not_applicable",
+        "label": "Not applicable"
+        },
+        {
+        "id": "2c91808b7445501601764e04d1560036",
+        "value": "permitted_implied",
+        "label": "Permitted Implied"
+        },
+        {
+        "id": "2c9180857445294501764e04ba0b0060",
+        "value": "permitted_explicit",
+        "label": "Permitted Explicit"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "Reserves - Print",
+        "description": "Specifies whether and how the licensed content can be used in print reserves",
+        "weight": "0",
+        "type": "Refdata"
+        })
+        lt.append({
+        "id": "2c91808b7445501601764d85c8030029",
+        "name": "DepositRights",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc7ef005c",
+        "desc": "Yes/No/Other",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808f725c72b30172718dc7fd005e",
+        "value": "no",
+        "label": "No"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc7f6005d",
+        "value": "yes",
+        "label": "Yes"
+        },
+        {
+        "id": "2c91808b7445501601764d8de3730031",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c9180857445294501764d8e0ba6005a",
+        "value": "unspecified",
+        "label": "Unspecified"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc802005f",
+        "value": "other_(see_notes)",
+        "label": "Other (see notes)"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "Right to Deposit",
+        "description": "Specifies who retains the right to deposit the licensed resource",
+        "weight": "0",
+        "type": "Refdata"
+        })
+        lt.append({
+        "id": "2c91808b7445501601764d8138210022",
+        "name": "ScholarlySharing",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc8080060",
+        "desc": "Permitted/Prohibited",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808b7445501601764e0501490038",
+        "value": "prohibited_implied",
+        "label": "Prohibited Implied"
+        },
+        {
+        "id": "2c91808b7445501601764e04a3c80035",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c91808b7445501601764d8e5fa00032",
+        "value": "limited_-_see_notes",
+        "label": "Limited - See Notes"
+        },
+        {
+        "id": "2c91808b7445501601764e04ea730037",
+        "value": "prohibited_explicit",
+        "label": "Prohibited Explicit"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8340066",
+        "value": "unmentioned",
+        "label": "Unmentioned"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc8390067",
+        "value": "not_applicable",
+        "label": "Not applicable"
+        },
+        {
+        "id": "2c91808b7445501601764e04d1560036",
+        "value": "permitted_implied",
+        "label": "Permitted Implied"
+        },
+        {
+        "id": "2c9180857445294501764e04ba0b0060",
+        "value": "permitted_explicit",
+        "label": "Permitted Explicit"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "Scholarly Sharing",
+        "description": "Specifies whether a licensed resource permits scholarly sharing",
+        "weight": "0",
+        "type": "Refdata"
+        })
+        lt.append({
+        "id": "2c91808b7445501601764d8563350028",
+        "name": "TextDataMining",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc7ef005c",
+        "desc": "Yes/No/Other",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808f725c72b30172718dc7fd005e",
+        "value": "no",
+        "label": "No"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc7f6005d",
+        "value": "yes",
+        "label": "Yes"
+        },
+        {
+        "id": "2c91808b7445501601764d8de3730031",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c9180857445294501764d8e0ba6005a",
+        "value": "unspecified",
+        "label": "Unspecified"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc802005f",
+        "value": "other_(see_notes)",
+        "label": "Other (see notes)"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "Text / Data Mining",
+        "description": "Provides specification around text and data mining of the licensed resource",
+        "weight": "0",
+        "type": "Refdata"
+        })
+        lt.append({
+        "id": "2c9180857445294501764d87ab1e0050",
+        "name": "Walkins",
+        "primary": "true",
+        "category": {
+        "id": "2c91808f725c72b30172718dc7ef005c",
+        "desc": "Yes/No/Other",
+        "internal": "false",
+        "values": [
+        {
+        "id": "2c91808f725c72b30172718dc7fd005e",
+        "value": "no",
+        "label": "No"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc7f6005d",
+        "value": "yes",
+        "label": "Yes"
+        },
+        {
+        "id": "2c91808b7445501601764d8de3730031",
+        "value": "not_specified_in_agreement",
+        "label": "Not Specified in Agreement"
+        },
+        {
+        "id": "2c9180857445294501764d8e0ba6005a",
+        "value": "unspecified",
+        "label": "Unspecified"
+        },
+        {
+        "id": "2c91808f725c72b30172718dc802005f",
+        "value": "other_(see_notes)",
+        "label": "Other (see notes)"
+        }
+        ]
+        },
+        "defaultInternal": "true",
+        "label": "Walk-ins",
+        "description": "Specifies whether the licensed resource is available for use to walk-in users",
+        "weight": "0",
+        "type": "Refdata"
+        })
         self.add_policy("policies", lp, "licenses/refdata")
         self.add_policy("terms", lt, "licenses/custprops")
 
