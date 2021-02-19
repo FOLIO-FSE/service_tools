@@ -80,24 +80,14 @@ class CreateLicensePolicies(ServiceTaskBase):
                         "label": "Yes"
                         },
                     {
-                        "id": "2c91808b7445501601764d8de3730031",
-                        "value": "not_specified_in_agreement",
-                        "label": "Not Specified in Agreement"
-                        },
-                    {
-                        "id": "2c9180857445294501764d8e0ba6005a",
-                        "value": "unspecified",
-                        "label": "Unspecified"
-                        },
-                    {
-                        "id": "2c91808f725c72b30172718dc802005f",
-                        "value": "other_(see_notes)",
-                        "label": "Other (see notes)"
-                        },
-                    {
                         "id": "2c91808f725c72b30172718dc7fd005e",
                         "value": "no",
                         "label": "No"
+                        },
+                    {
+                        "id": "2c91808f725c72b30172718dc802005f",
+                        "value": "other",
+                        "label": "Other"
                         }
                     ]
                 })
@@ -319,8 +309,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other_(see_notes)",
-        "label": "Other (see notes)"
+        "value": "other",
+        "label": "Other"
         }
         ]
         },
@@ -333,7 +323,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d80dc110048",
         "name": "AlumniAccess",
-        "primary": "true",
+        "primary": "false",
         "category": {
         "id": "2c91808f725c72b30172718dc8080060",
         "desc": "Permitted/Prohibited",
@@ -428,8 +418,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other_(see_notes)",
-        "label": "Other (see notes)"
+        "value": "other",
+        "label": "Other"
         }
         ]
         },
@@ -547,8 +537,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other_(see_notes)",
-        "label": "Other (see notes)"
+        "value": "other",
+        "label": "Other"
         }
         ]
         },
@@ -589,8 +579,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other_(see_notes)",
-        "label": "Other (see notes)"
+        "value": "other",
+        "label": "Other"
         }
         ]
         },
@@ -916,8 +906,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other_(see_notes)",
-        "label": "Other (see notes)"
+        "value": "other",
+        "label": "Other"
         }
         ]
         },
@@ -958,8 +948,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other_(see_notes)",
-        "label": "Other (see notes)"
+        "value": "other",
+        "label": "Other"
         }
         ]
         },
@@ -1335,8 +1325,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other_(see_notes)",
-        "label": "Other (see notes)"
+        "value": "other",
+        "label": "Other"
         }
         ]
         },
@@ -1434,8 +1424,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other_(see_notes)",
-        "label": "Other (see notes)"
+        "value": "other",
+        "label": "Other"
         }
         ]
         },
@@ -1590,8 +1580,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other_(see_notes)",
-        "label": "Other (see notes)"
+        "value": "other",
+        "label": "Other"
         }
         ]
         },
@@ -1689,8 +1679,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other_(see_notes)",
-        "label": "Other (see notes)"
+        "value": "other",
+        "label": "Other"
         }
         ]
         },
@@ -1731,8 +1721,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         },
         {
         "id": "2c91808f725c72b30172718dc802005f",
-        "value": "other_(see_notes)",
-        "label": "Other (see notes)"
+        "value": "other",
+        "label": "Other"
         }
         ]
         },
@@ -1742,8 +1732,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         "weight": "0",
         "type": "Refdata"
         })
-        self.add_policy("policies", lp, "licenses/refdata")
         self.add_policy("terms", lt, "licenses/custprops")
+        self.add_policy("policies", lp, "licenses/refdata")
 
     def add_policy(self, description, policy_array, url):
         print(f"\n------------------- Creating license {description} --------------\n")
