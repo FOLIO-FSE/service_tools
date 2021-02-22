@@ -57,6 +57,8 @@ class SierraItemTransformer(MapperBase):
             "materialTypeId": self.get_material_type_id(sierra_item),
             "permanentLoanTypeId": self.get_loan_type_id(sierra_item),
             "metadata": self.folio_client.get_metadata_construct(),
+            "itemLevelCallNumberTypeId": "6caca63e-5651-4db6-9247-3205156e9699",
+            "itemLevelCallNumber": sierra_item.get("callNumber", ""),
             # temporaryLoanTypeId
             # permanentLocationId
             # temporaryLocationId
@@ -108,9 +110,10 @@ class SierraItemTransformer(MapperBase):
             "formerIds": list(),
             "instanceId": new_instance_id,
             "permanentLocationId": self.get_location(sierra_item),
-            "callNumberTypeId": "6caca63e-5651-4db6-9247-3205156e9699",
-            "callNumber": sierra_item.get("callNumber", ""),
-            "callNumberSuffix": get_varfield(sierra_item, "c", "l", True).strip(),
+            # "callNumberTypeId": "6caca63e-5651-4db6-9247-3205156e9699",
+            # "callNumber": "",
+            # "callNumber": sierra_item.get("callNumber", ""),
+            # "callNumberSuffix": get_varfield(sierra_item, "c", "l", True).strip(),
             "notes": list(),
             "holdingsStatements": list(),
             "metadata": self.folio_client.get_metadata_construct(),
@@ -193,13 +196,8 @@ class SierraItemTransformer(MapperBase):
         try:
             """creates a key of key values in holding record
             to determine uniquenes"""
-            call_number = (
-                "".join(holding["callNumber"].split())
-                if "callNumber" in holding
-                else ""
-            )
             return "-".join(
-                [holding["instanceId"], call_number, holding["permanentLocationId"], ""]
+                [holding["instanceId"], "", holding["permanentLocationId"], ""]
             )
         except Exception as ee:
             print(holding)
