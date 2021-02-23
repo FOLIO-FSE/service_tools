@@ -32,7 +32,7 @@ class SierraItemMigrator(ServiceTaskBase):
         print("\tSaving results to {}".format(args.results_folder))
 
         self.migration_report_path = os.path.join(
-            args.results_folder, "instance_transformation_report.md"
+            args.results_folder, "iii_item_transformation_report.md"
         )
 
         # set up loan type mapping

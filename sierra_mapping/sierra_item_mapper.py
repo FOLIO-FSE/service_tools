@@ -203,28 +203,31 @@ class SierraItemTransformer(MapperBase):
             raise ee
 
     def get_material_type_id(self, sierra_item):
-        code = sierra_item["fixedFields"]["61"]["value"]
-        folio_id = self.material_type_map.get(code, self.material_type_map.get('*', ''))
-        if not folio_id:
+        try:
+            code = sierra_item.get("fixedFields", {}).get("61", {}).get("value", "").strip()
+            folio_id = self.material_type_map.get(code, self.material_type_map.get('*', ''))
+            self.add_to_migration_report("Material type mapping", f"{code} -> {folio_id} ", )
+            return folio_id
+        except Exception:
             self.add_to_migration_report(
-                "Sierra Item type code not mapped to Material type",
-                f"Sierra itype code {code} not mapped",
+                "Material type mapping - Unsuccessful",
+                f"Sierra i type code {code} not mapped",
             )
-            raise ValueError(f"Sierra itype code {code} not mapped to material type")
-        self.add_to_migration_report("Mapped Item types to Material types", f"{code} -> {folio_id} ", )
-        return folio_id
+            raise ValueError(f"Sierra i type code {code} not mapped to material type")
+
 
     def get_loan_type_id(self, sierra_item):
-        code = sierra_item["fixedFields"]["61"]["value"]
-        folio_id = self.loan_type_map.get(code, self.loan_type_map.get('*', ''))
-        if not folio_id:
+        try:
+            code = sierra_item.get("fixedFields", {}).get("61", {}).get("value", "").strip()
+            folio_id = self.loan_type_map.get(code, self.loan_type_map.get('*', ''))
+            self.add_to_migration_report("Loan type mapping", f"{code} -> {folio_id} ", )
+            return folio_id
+        except Exception:
             self.add_to_migration_report(
-                "Sierra Item type code not mapped to Loan type",
-                f"Sierra itype code {code} not mapped",
+                "Loan type mapping - Unsuccessful",
+                f"Sierra i type code {code} not mapped",
             )
-            raise ValueError(f"Sierra itype code {code} not mapped to Loan type")
-        self.add_to_migration_report("Mapped Item types To Loan types", f"{code} -> {folio_id} ", )
-        return folio_id
+            raise ValueError(f"Sierra i type code {code} not mapped to Loan type")
 
     def add_stats(self, stats, measure_to_add):
         if measure_to_add not in stats:
@@ -258,7 +261,7 @@ class SierraItemTransformer(MapperBase):
         }
         for note_m in get_varfields_no_subfield(sierra_item, "m"):
             if note_m:
-                self.add_stats(self.stats, f"Items with Circ notes - Var m")
+                self.add_to_migration_report("Circulation notes", "From Varfield m")
                 yield {
                     "id": str(uuid.uuid4()),
                     "noteType": "Check in",
@@ -277,33 +280,24 @@ class SierraItemTransformer(MapperBase):
                 }
         note_97 = sierra_item["fixedFields"].get("97", {}).get("value")
         if note_97:
-            # Strange. Why is it not set?
-            note = next(
-                (
-                    x["circulationNotes_note"]
-                    for x in self.circ_note_map
-                    if x["imessage_value"] == note_97
-                ),
-                None,
-            )
-            if note:
-                self.add_stats(self.stats, f"Items with Circ notes - Fixed 97")
-                yield {
-                    "id": str(uuid.uuid4()),
-                    "noteType": "Check in",
-                    "source": source,
-                    "note": note,
-                    "staffOnly": True,
-                    "date": "2019-06-29T13:37:01.071+0000",
-                }
-                yield {
-                    "id": str(uuid.uuid4()),
-                    "noteType": "Check out",
-                    "source": source,
-                    "note": note,
-                    "staffOnly": True,
-                    "date": "2019-06-29T13:37:01.071+0000",
-                }
+            self.add_to_migration_report("Circulation notes", "From fixed field 97")
+            self.add_stats(self.stats, f"Items with Circ notes - Fixed 97")
+            yield {
+                "id": str(uuid.uuid4()),
+                "noteType": "Check in",
+                "source": source,
+                "note": note_97,
+                "staffOnly": True,
+                "date": "2019-06-29T13:37:01.071+0000",
+            }
+            yield {
+                "id": str(uuid.uuid4()),
+                "noteType": "Check out",
+                "source": source,
+                "note": note_97,
+                "staffOnly": True,
+                "date": "2019-06-29T13:37:01.071+0000",
+            }
 
     def merge_holding(self, holdings_record):
         # TODO: Move to interface or parent class
