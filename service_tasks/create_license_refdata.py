@@ -73,7 +73,10 @@ class CreateLicensePolicies(ServiceTaskBase):
         # FOLIO ignores the IDs created for the policies, so we need to find what the real ones are before 
         # connecting them to the license terms
         #
+        # first add the policies
+        self.add_policy("policies", lp, "licenses/refdata")
 
+        # now figure out what they're called
         url = f'{self.folio_client.okapi_url}/licenses/refdata'
         resp = requests.get(url, headers=self.folio_client.okapi_headers)
         refdata = resp.json()
@@ -435,7 +438,6 @@ class CreateLicensePolicies(ServiceTaskBase):
         "type": "Refdata"
         })
         
-        self.add_policy("policies", lp, "licenses/refdata")
         self.add_policy("terms", lt, "licenses/custprops")
 
     def add_policy(self, description, policy_array, url):
