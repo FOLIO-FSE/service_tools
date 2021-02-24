@@ -442,10 +442,8 @@ class CreateLicensePolicies(ServiceTaskBase):
         print(f"\n------------------- Creating license {description} --------------\n")
         
         for policy in policy_array:
-            print(json.dumps(policy))
-            print("\n\n\n\n\n")
-           # resp = requests.post(f"{self.folio_client.okapi_url}/{url}", data=json.dumps(policy), headers=self.folio_client.okapi_headers)
-           # print(f"{resp.content}")
+            resp = requests.post(f"{self.folio_client.okapi_url}/{url}", data=json.dumps(policy), headers=self.folio_client.okapi_headers)
+            print(f"{resp.content}")
 
     @staticmethod
     @abstractmethod
