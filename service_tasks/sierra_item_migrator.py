@@ -138,7 +138,7 @@ class SierraItemMigrator(ServiceTaskBase):
                     print(value_error)
                     if self.value_errors > 1000:
                         raise value_error
-                if i % 10000 == 0:
+                if i % 1000 == 0:
                     print(f"{i} rows processed. {self.value_errors} valueerrors")
             print(f"Done. {i} rows processed")
             print(" Wrapping up...")
