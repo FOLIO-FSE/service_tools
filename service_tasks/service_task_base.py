@@ -85,7 +85,7 @@ class ServiceTaskBase():
         raise NotImplementedError
 
     @staticmethod
-    def add_common_arguments(parser):
+    def add_common_arguments(parser: object) -> object:
         parser.add_argument(
             "okapi_credentials_string", help="Space delimited string containing "
                                              "OKAPI_URL, TENANT_ID,  USERNAME, PASSWORD in that oreder."

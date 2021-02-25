@@ -215,7 +215,6 @@ class SierraItemTransformer(MapperBase):
             )
             raise ValueError(f"Sierra i type code {code} not mapped to material type")
 
-
     def get_loan_type_id(self, sierra_item):
         try:
             code = sierra_item.get("fixedFields", {}).get("61", {}).get("value", "").strip()
@@ -229,7 +228,8 @@ class SierraItemTransformer(MapperBase):
             )
             raise ValueError(f"Sierra i type code {code} not mapped to Loan type")
 
-    def add_stats(self, stats, measure_to_add):
+    @staticmethod
+    def add_stats(stats, measure_to_add):
         if measure_to_add not in stats:
             stats[measure_to_add] = 1
         else:
@@ -237,7 +237,7 @@ class SierraItemTransformer(MapperBase):
 
     def get_location(self, sierra_item):
         try:
-            iii_loc = sierra_item["location"]["code"]
+            iii_loc = sierra_item.get("location", {}).get("code", "")
             self.add_to_migration_report("Sierra Locations", f"{iii_loc}")
             if len(self.location_map) == 1:
                 self.add_to_migration_report("Folio Locations", f"{self.location_map['*']}")

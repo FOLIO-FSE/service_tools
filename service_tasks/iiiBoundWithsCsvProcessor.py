@@ -13,11 +13,12 @@ class IiiBoundWithCsvProcessor(ServiceTaskBase):
         with open(self.csv_file) as f:
             csv_reader = csv.reader(f)
             header = next(csv_reader)
-            # each boundwith has a .b number and call number, subtract 2 from length of the header to 
+            joined = '","'.join(header)
+            # each boundwith has a .b number and call number, subtract 2 from length of the header to
             # find number of fixed fields and then divide by 2 to find number of boundwidths
             num_fields = len(header) - 2
             rec = 1
-
+            outfile.write(f'"{joined}"')
             print("Processing file. Please wait....")
 
             for row in csv_reader:
@@ -32,9 +33,9 @@ class IiiBoundWithCsvProcessor(ServiceTaskBase):
                 boundwiths = "{{'" + "' '".join(boundwiths) + "'}},"
                 itemcalls = "{{'" + "' '".join(itemcalls) + "'}},"
                 #
-                rest_of_row = ",".join(rest_of_row)
+                rest_of_row = ''","''.join(rest_of_row)
                 rec += 1
-                outfile.write(boundwiths + "'" + itemno + "'," + itemcalls + rest_of_row + "\n")
+                outfile.write(f'{boundwiths}","{itemno}","{itemcalls}","{rest_of_row}"\n')
 
             outfile.close()
             total_records = str(rec)
