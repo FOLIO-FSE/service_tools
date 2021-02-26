@@ -79,6 +79,8 @@ class SierraItemMigrator(ServiceTaskBase):
                 if mapped_id.startswith('.b'):
                     mapped_id = map_object["legacy_id"][2:]
                 self.instance_id_map[mapped_id] = map_object
+                if index % 100000 == 0:
+                    print(f"{index} instance ids loaded to map", end='\r')
         print(f"loaded {index} migrated instance IDs")
 
         self.folio_items_file_path = os.path.join(args.results_folder, "folio_items.json")
@@ -141,8 +143,8 @@ class SierraItemMigrator(ServiceTaskBase):
                 except ValueError as value_error:
                     self.value_errors += 1
                     print(value_error)
-                    if self.value_errors > 1000:
-                        raise value_error
+                    if self.value_errors > 20000:
+                        raise Exception(f"More than 20 000 errors raised. Quitting.")
                 if i % 1000 == 0:
                     print(f"{i} rows processed. {self.value_errors} valueerrors")
             print(f"Done. {i} rows processed")
