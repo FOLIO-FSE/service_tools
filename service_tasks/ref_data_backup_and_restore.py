@@ -39,7 +39,6 @@ class RefDataBackupDeleteAndLoad(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_arguments(parser):
-        print("args")
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_argument(parser, "path",
                                      "Source or results folder depending on action",
@@ -59,7 +58,6 @@ class RefDataBackupDeleteAndLoad(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
-        print("args")
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_cli_argument(parser, "path",
                                          "Source or results folder depending on action")
