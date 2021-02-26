@@ -77,7 +77,7 @@ class SierraItemMigrator(ServiceTaskBase):
                 map_object = json.loads(json_string)
                 mapped_id = map_object["legacy_id"]
                 if mapped_id.startswith('.b'):
-                    mapped_id = map_object["legacy_id"][2:]
+                    mapped_id = map_object["legacy_id"][2:-1]
                 self.instance_id_map[mapped_id] = map_object
                 if index % 100000 == 0:
                     print(f"{index} instance ids loaded to map", end='\r')
