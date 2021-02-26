@@ -3,6 +3,7 @@ import json
 import os
 import time
 from abc import abstractmethod
+from typing import re
 
 import requests
 from folioclient import FolioClient
@@ -74,7 +75,8 @@ class SierraItemMigrator(ServiceTaskBase):
             for index, json_string in enumerate(json_file):
                 # {"legacy_id": legacy_id, "folio_id": folio_instance["id"], "instanceLevelCallNumber": instance_level_call_number}
                 map_object = json.loads(json_string)
-                self.instance_id_map[map_object["legacy_id"].replace(".", "")] = map_object
+                mapped_id = re.sub(r"^\.b|b", "", map_object["legacy_id"])
+                self.instance_id_map[mapped_id] = map_object
         print(f"loaded {index} migrated instance IDs")
 
         self.folio_items_file_path = os.path.join(args.results_folder, "folio_items.json")
