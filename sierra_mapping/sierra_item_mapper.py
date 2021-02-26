@@ -1,6 +1,6 @@
 import json
+import re
 import uuid
-from typing import re
 
 from folioclient import FolioClient
 

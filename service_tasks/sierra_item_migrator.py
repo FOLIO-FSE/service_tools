@@ -1,9 +1,9 @@
 import csv
 import json
 import os
+import re
 import time
 from abc import abstractmethod
-from typing import re
 
 import requests
 from folioclient import FolioClient
