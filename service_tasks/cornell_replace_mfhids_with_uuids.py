@@ -17,7 +17,7 @@ class CornellReplaceMfhdIdsWithUuids(ServiceTaskBase):
             for index, json_string in enumerate(holdings_id_file):
                 # {"legacy_id": legacy_id, "folio_id": folio_instance["id"], "instanceLevelCallNumber": instance_level_call_number}
                 map_object = json.loads(json_string)
-                self.instance_id_map[map_object["id"]] = map_object
+                self.instance_id_map[map_object] = map_object["id"]
         print(f"loaded {index} migrated instance IDs")
         with open(self.item_file_path, "r") as item_file, open(self.results_file_path, "w") as results_file:
             for index, json_item in enumerate(item_file):
