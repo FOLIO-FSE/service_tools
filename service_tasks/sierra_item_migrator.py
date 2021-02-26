@@ -72,15 +72,17 @@ class SierraItemMigrator(ServiceTaskBase):
         print(f"Loaded {len(self.locations_map)} location mappings")
 
         with open(args.instance_id_dict_path, "r") as json_file:
+            replaces = 0
             for index, json_string in enumerate(json_file):
                 # {"legacy_id": legacy_id, "folio_id": folio_instance["id"], "instanceLevelCallNumber": instance_level_call_number}
                 map_object = json.loads(json_string)
                 mapped_id = map_object["legacy_id"]
                 if mapped_id.startswith('.b'):
-                    mapped_id = map_object["legacy_id"][2:-1]
+                    mapped_id = mapped_id[2:-1]
+                    replaces += 1
                 self.instance_id_map[mapped_id] = map_object
                 if index % 100000 == 0:
-                    print(f"{index} instance ids loaded to map", end='\r')
+                    print(f"{index} instance ids loaded to map, {replaces} .b:s removed", end='\r')
         print(f"loaded {index} migrated instance IDs")
 
         self.folio_items_file_path = os.path.join(args.results_folder, "folio_items.json")
