@@ -14,20 +14,20 @@ class CornellReplaceMfhdIdsWithUuids(ServiceTaskBase):
 
     def do_work(self):
         with open(self.holdings_id_file_path, "r") as holdings_id_file:
-            for index, json_string in enumerate(holdings_id_file):
                 # {"legacy_id": legacy_id, "folio_id": folio_instance["id"], "instanceLevelCallNumber": instance_level_call_number}
-                map_object = json.loads(json_string)
-                self.instance_id_map[map_object] = map_object["id"]
-        print(f"loaded {index} migrated instance IDs")
+                self.instance_id_map = json.load(holdings_id_file)
+                print(len(self.instance_id_map))
         with open(self.item_file_path, "r") as item_file, open(self.results_file_path, "w") as results_file:
+            missing = 0
             for index, json_item in enumerate(item_file):
                 item = json.loads(json_item)
                 try:
-                    item['holdingsRecordId'] = self.instance_id_map[item['holdingsRecordId']]["folio_id"]
-                    results_file.write(json.dumps(item))
+                    item['holdingsRecordId'] = self.instance_id_map[item['holdingsRecordId']]["id"]
+                    results_file.write(f"{json.dumps(item)}\n")
                 except Exception:
-                    print(f"Missing Holdings id {item['holdingsRecordId']} from file!")
-        print("Done!")
+                    missing += 1
+        print(missing)
+        print("Done!", flush=True)
 
     @staticmethod
     @abstractmethod
