@@ -84,7 +84,6 @@ class SierraItemMigrator(ServiceTaskBase):
                 if index % 100000 == 0:
                     print(f"{index} instance ids loaded to map, {replaces} .b:s removed", end='\r')
         print(f"loaded {index} migrated instance IDs")
-
         self.folio_items_file_path = os.path.join(args.results_folder, "folio_items.json")
         self.holdings_file_path = os.path.join(args.results_folder, "folio_holdings.json")
         self.item_id_dict_path = os.path.join(args.results_folder, "item_id_map.json")

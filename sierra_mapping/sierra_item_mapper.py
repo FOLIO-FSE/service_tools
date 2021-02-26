@@ -84,13 +84,13 @@ class SierraItemTransformer(MapperBase):
     def convert_to_holding(self, sierra_item):
         if len(sierra_item["bibIds"]) > 1:
             self.add_stats(self.stats, "Item connected to more than one Bib/Instance")
-        sierra_bib_id = next(f[0] for f in sierra_item["bibIds"])
+        sierra_bib_id = next(f for f in sierra_item["bibIds"])
         if ',' in sierra_bib_id:
             sierra_bib_id = sierra_bib_id.split(',')[0]
         # sierra_bib_id = re.sub(r"^\.b|b", "", sierra_bib_id)
-        sierra_bib_id = sierra_bib_id
         # print(sierra_bib_id)
         new_instance_id = self.instance_id_map.get(sierra_bib_id, {}).get("folio_id", "")
+        sierra_bib_id = sierra_bib_id
 
         if not new_instance_id:
             self.add_stats(self.stats, f"Bib Id not in list of migrated records")
@@ -98,7 +98,7 @@ class SierraItemTransformer(MapperBase):
                 "Sierra Items without migrated Instances. Must be corrected",
                 f"Sierra Bib Id {sierra_bib_id} missing in migrated bibs for Sierra Item {sierra_item['id']}",
             )
-            print(f"{sierra_bib_id} {next(iter(self.instance_id_map.items()))}")
+            # print(f"{sierra_bib_id} {next(iter(self.instance_id_map.items()))}")
             raise ValueError(
                 f'Missing Instances in map - Sierra Item {sierra_item["id"]} with bibIds:{sierra_item["bibIds"]}'
             )
