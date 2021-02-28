@@ -1,6 +1,7 @@
 import json
 import traceback
 from abc import abstractmethod
+from datetime import datetime
 
 import requests
 from folioclient import FolioClient
@@ -60,11 +61,14 @@ class BatchPoster(ServiceTaskBase):
         if response.status_code == 201:
             print(
                 f"Posting successful! Total rows: {self.processed_rows}  {response.elapsed.total_seconds()}s "
-                f"Batch Size: {len(batch)} Request size: {get_req_size(response)}",
+                f"Batch Size: {len(batch)} Request size: {get_req_size(response)} "
+                f"{datetime.utcnow().isoformat()} UTC",
                 flush=True,
             )
         elif response.status_code == 422:
-            print(f"{response.status_code}\t{response.text} Request size: {get_req_size(response)}", flush=True)
+            print(f"{response.status_code}\t{response.text} "
+                  f"Request size: {get_req_size(response)} "
+                  f"{datetime.utcnow().isoformat()} UTC", flush=True)
             resp = json.loads(response.text)
 
             for error in resp["errors"]:
@@ -78,7 +82,10 @@ class BatchPoster(ServiceTaskBase):
                 raise Exception(f"Reposting despite handling. {self.failed_ids}")"""
         elif response.status_code in [500, 413]:
             # Error handling is sparse. Need to identify failing records
-            print(f"{response.status_code}\tRequest size: {get_req_size(response)}\n{response.text} ", flush=True)
+            print(f"{response.status_code}\t"
+                  "Request size: {get_req_size(response)}"
+                  f"\n{response.text} "
+                  f"{datetime.utcnow().isoformat()} UTC", flush=True)
             if not len(batch) == 1:
                 # split the batch in 2
                 my_chunks = chunks(batch, 2)
@@ -88,10 +95,13 @@ class BatchPoster(ServiceTaskBase):
             else:
                 print(
                     f"Only one object left. Adding {batch[0]['id']} to failed_objects"
-                , flush=True)
+                    , flush=True)
                 self.failed_objects = batch[0]
         else:
-            raise Exception(f"ERROR! HTTP {response.status_code}\t{response.text}Request size: {get_req_size(response)}")
+            raise Exception(
+                f"ERROR! HTTP {response.status_code}\t{response.text} "
+                f"Request size: {get_req_size(response)}"
+                f"{datetime.utcnow().isoformat()} UTC")
 
     def handle_failed_batch(self, batch):
         # new_batch = [f for f in batch]  # if f["instanceId"] not in self.failed_ids]
@@ -180,9 +190,9 @@ def get_human_readable(size, precision=2):
     suffixes = ['B', 'KB', 'MB', 'GB', "TB"]
     suffix_index = 0
     while size > 1024 and suffix_index < 4:
-        suffix_index += 1 # increment the index of the suffix
-        size = size/1024.0 # apply the division
-    return "%.*f%s"%(precision, size, suffixes[suffix_index])
+        suffix_index += 1  # increment the index of the suffix
+        size = size / 1024.0  # apply the division
+    return "%.*f%s" % (precision, size, suffixes[suffix_index])
 
 
 def get_req_size(response):
