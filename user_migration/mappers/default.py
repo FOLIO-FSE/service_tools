@@ -2,6 +2,8 @@ import csv
 import json
 import re
 import uuid
+from datetime import datetime
+
 from dateutil.parser import parse
 from typing import Dict
 
@@ -15,8 +17,9 @@ class Default(MapperBase):
         super().__init__(folio_client)
         self.args = args
         self.user_schema = MapperBase.get_user_schema()
-        with open(args.mapping_file_path) as json_file:
-            self.user_map = json.load(json_file)
+        with open(args.mapping_file_path) as mapping_file:
+            self.user_map = json.load(mapping_file)
+        print(f"User map loaded from {args.mapping_file_path}")
         self.legacy_id_map: Dict[str, str] = {}
         self.ids_dict: Dict[str, set] = {}
         self.use_map = True
@@ -52,7 +55,8 @@ class Default(MapperBase):
                                     for sub_prop_name2, sub_prop2 in sub_prop["items"]["properties"].items():
                                         temp[sub_prop_name2] = self.get_prop(legacy_user,
                                                                              sub_prop_key + "." + sub_prop_name2, i)
-                                    if all(value == "" for key, value in temp.items() if key not in ["id", "primaryAddress"]):
+                                    if all(value == "" for key, value in temp.items() if
+                                           key not in ["id", "primaryAddress"]):
                                         continue
                                     folio_user[prop_name][sub_prop_name].append(temp)
                                 else:
@@ -124,14 +128,14 @@ class Default(MapperBase):
             # return [row]
             yield row
 
-    def get_prop(self, user, folio_prop_name, i=0):
+    def get_prop(self, legacy_user, folio_prop_name, i=0):
         if self.use_map:
-            user_key = next((k["legacy_field"] for k in self.user_map["data"] if
-                             k["folio_field"].replace(f"[{i}]", "") == folio_prop_name), "")
+            legacy_user_key = next((k["legacy_field"] for k in self.user_map["data"] if
+                                    k["folio_field"].replace(f"[{i}]", "") == folio_prop_name), "")
             if folio_prop_name == "personal.addresses.id":
                 return str(uuid.uuid4())
             elif folio_prop_name == "expirationDate":
-                exp_date = parse(user[user_key], fuzzy=True)
+                exp_date = parse(legacy_user.get(legacy_user_key, datetime.utcnow().isoformat()), fuzzy=True)
                 return exp_date.isoformat()
             elif folio_prop_name.strip() == "personal.addresses.primaryAddress":
                 return i == self.user_map["primaryAddressIndex"]
@@ -142,21 +146,21 @@ class Default(MapperBase):
                     return address_type_id
                 except IndexError:
                     return ""
-            elif user_key:
+            elif legacy_user_key:
                 self.report_folio_mapping(f"{folio_prop_name}", True, False)
-                return user[user_key]
+                return legacy_user.get(legacy_user_key, "")
             else:
                 self.report_folio_mapping(f"{folio_prop_name}", False, False)
                 return ""
         else:
             self.report_folio_mapping(f"{folio_prop_name}", True, False)
-            return user[folio_prop_name]
+            return legacy_user[folio_prop_name]
 
     def has_property(self, user, folio_prop_name):
         if self.use_map:
             user_key = next((k["legacy_field"] for k in self.user_map["data"] if k["folio_field"] == folio_prop_name),
                             "")
-            return user_key and user_key not in ["", "Not mapped"] and user.get(user_key,"")
+            return user_key and user_key not in ["", "Not mapped"] and user.get(user_key, "")
         else:
             return folio_prop_name in user
 
@@ -165,5 +169,3 @@ class Default(MapperBase):
             return next(k["legacy_field"] for k in self.user_map["data"] if k["folio_field"] == folio_prop)
         else:
             return folio_prop
-
-
