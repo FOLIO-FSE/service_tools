@@ -34,7 +34,7 @@ class MigrateUsers(ServiceTaskBase):
         self.batch_size = int(args.batch_size)
         self.objects_file = args.objects_file
         self.results_path = os.path.join(args.results_folder, "users")
-        self.post_users = True
+        self.post_users = False
         # self.post_users = args.post_users
         if self.post_users:
             print("Will post users to FOLIO and save them to disk")
