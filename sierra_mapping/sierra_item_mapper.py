@@ -53,7 +53,7 @@ class SierraItemTransformer(MapperBase):
             # itemDamagedStatusId
             # itemDamagedStatusDate
             "notes": list(self.get_notes(sierra_item)),
-            # "circulationNotes": list(self.get_circ_notes(sierra_item)),
+            "circulationNotes": list(self.get_circ_notes(sierra_item)),
             "status": self.get_status(sierra_item),
             "materialTypeId": self.get_material_type_id(sierra_item),
             "permanentLoanTypeId": self.get_loan_type_id(sierra_item),
@@ -98,7 +98,7 @@ class SierraItemTransformer(MapperBase):
                 "Sierra Items without migrated Instances. Must be corrected",
                 f"Sierra Bib Id {sierra_bib_id} missing in migrated bibs for Sierra Item {sierra_item['id']}",
             )
-            # print(f"{sierra_bib_id} {next(iter(self.instance_id_map.items()))}")
+            print(f"{sierra_bib_id} {next(iter(self.instance_id_map.items()))}")
             raise ValueError(
                 f'Missing Instances in map - Sierra Item {sierra_item["id"]} with bibIds:{sierra_item["bibIds"]}'
             )
@@ -243,7 +243,7 @@ class SierraItemTransformer(MapperBase):
 
     def get_location(self, sierra_item):
         try:
-            iii_loc = sierra_item.get("location", {}).get("code", "")
+            iii_loc = sierra_item.get("location", {}).get("code","").strip()
             self.add_to_migration_report("Sierra Locations", f"{iii_loc}")
             if len(self.location_map) == 1:
                 self.add_to_migration_report("Folio Locations", f"{self.location_map['*']}")
