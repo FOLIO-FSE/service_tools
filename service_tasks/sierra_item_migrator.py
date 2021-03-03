@@ -81,7 +81,7 @@ class SierraItemMigrator(ServiceTaskBase):
                     mapped_id = mapped_id[2:-1]
                     replaces += 1
                 elif mapped_id.startswith('b'):
-                    mapped_id = mapped_id[1:-1]
+                    mapped_id = mapped_id[1:]
                     replaces += 1
                 self.instance_id_map[mapped_id] = map_object
                 if index % 100000 == 0:
