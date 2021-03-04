@@ -78,7 +78,7 @@ class SierraItemMigrator(ServiceTaskBase):
                 map_object = json.loads(json_string)
                 mapped_id = map_object["legacy_id"]
                 if mapped_id.startswith('.b'):
-                    mapped_id = mapped_id[2:-1]
+                    mapped_id = mapped_id[2:]
                     replaces += 1
                 elif mapped_id.startswith('b'):
                     mapped_id = mapped_id[1:]
@@ -147,9 +147,9 @@ class SierraItemMigrator(ServiceTaskBase):
                 except ValueError as value_error:
                     self.value_errors += 1
                     print(value_error)
-                    if self.value_errors > 20000:
+                    if self.value_errors > 500:
                         raise Exception(f"More than 20 000 errors raised. Quitting.")
-                if i % 1000 == 0:
+                if i % 10000 == 0:
                     print(f"{i} rows processed. {self.value_errors} valueerrors")
             print(f"Done. {i} rows processed")
             print(" Wrapping up...")
