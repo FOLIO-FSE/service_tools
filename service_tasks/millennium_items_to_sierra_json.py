@@ -1,5 +1,6 @@
 import csv
 import json
+import pandas
 import os
 import re
 from abc import abstractmethod
@@ -17,48 +18,64 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
         self.sierra_items = {}
 
     def do_work(self):
-        unequal = 0
-        print("here!")
+        print("Let's get this party started!")
         written = 0
+
         with open(self.millennium_items_path, "r") as millennium_items_file, open(self.result_file,
                                                                                   'w+') as results_file:
-            duplicate_positions = []
-            for row_index, row in enumerate(millennium_items_file):
-                # Remove trailing and leading quotes
-                if row_index == 0:
-                    # row = row + '"'
-                    row = row[1:-1] + '"'
-                    column_names = row.split('","')
-                    duplicate_positions = list_duplicates(column_names)
-                    for index in sorted(duplicate_positions, reverse=True):
-                        del column_names[index]
-                else:
-                    row = row[1:-2]
-                    columns = row.split('","')
-                    index_of_i = [i for i, item in enumerate(columns) if re.search('i[0-9]{7}[0-9x]', item)]
-                    b_numbers = columns[:(index_of_i[0])]
-                    num_bs = len(b_numbers)
-                    i_num = columns[index_of_i[0]]
-                    remaining_cols = columns[(index_of_i[0]) + 1:]
-                    for n in range(num_bs - 1):
-                        if any(remaining_cols):
-                            del remaining_cols[0]
-                    column_values = [b_numbers, i_num] + remaining_cols
-                    for index in sorted(duplicate_positions, reverse=True):
-                        del column_values[index]
-                    if len(column_values) != len(column_names):
-                        print(f"{len(column_names)} {column_names}")
-                        print(f"{len(column_values)} {json.dumps(column_values, indent=4)}")
-                        print(row)
-                        unequal += 1
-                        raise Exception("Unequal")
-                    else:
-                        name_to_value_dict = dict(zip(column_names, column_values))
-                        sierra_obj = self.dict_to_sierra_structure(name_to_value_dict)
-                        # print(json.dumps(sierra_obj, indent=4))
-                        results_file.write(f"{json.dumps(sierra_obj)}\n")
-                        written += 1
-        print(f"Done! {row_index} {unequal} {written}")
+            # Read the data!
+            item_data = list(csv.reader(millennium_items_file, delimiter = ","))
+            headers = item_data[0]
+            items = item_data[1:]
+            
+            # Delete duplicate columns in the header based on header name
+            excess_columns = list_duplicates(headers)
+            for column in sorted(excess_columns, reverse=True):
+                del headers[column]
+
+            # Loop through the items!
+            for item in items:
+                # Find the index if the item #
+                item_id_index = [i for i, item in enumerate(item) if re.search('i[0-9]{7}[0-9x]', item)][0]
+
+                # Put the bib IDs in a list 
+                bib_ids = item[:item_id_index]
+                del item[:item_id_index]
+                item.insert(0, bib_ids)
+
+                # Put the bib call nos in a list 
+                bib_call_nos = item[2:2 + len(bib_ids)]
+                del item[2:2 + len(bib_ids)]
+                item.insert(2, bib_call_nos)
+                
+                # Delete duplicate columns based on header name
+                for column in sorted(excess_columns, reverse=True):
+                    del item[column]
+                
+                if len(headers) != len(item):
+                    print(f"\nOh no! This item has too many/few columns: \n{item}")
+
+                # Create a dictionary with the headers as keys and item columns as values
+                item_as_dict = dict(zip(headers, item))
+
+                # Remove dictionary keys where value is empty or " " (space)
+                fields_to_remove = []
+                for key in item_as_dict:
+                    if (not item_as_dict[key]) or item_as_dict[key] == ' ':
+                        fields_to_remove.append(key)
+                for field in fields_to_remove:
+                    item_as_dict.pop(field)
+
+                # Translate the item dictionary into a Sierra style item object
+                sierra_object = self.dict_to_sierra_structure(item_as_dict)
+                # print(json.dumps(sierra_obj, indent=4))
+                results_file.write(f"{json.dumps(sierra_object, ensure_ascii=False)}\n")
+
+                # Report progress
+                written += 1
+                if written % 5000 == 0:
+                    print(f"{written} records processed!", flush=True)
+
 
     @staticmethod
     def dict_to_sierra_structure(millennium_dict):
