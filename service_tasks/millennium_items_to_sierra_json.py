@@ -102,6 +102,7 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
             "barcode": millennium_dict.get("BARCODE") if millennium_dict.get("BARCODE", "") else millennium_dict.get(
                 "CLASS NO.(ITEM)", ""),
             "callNumber": millennium_dict.get("CLASS NO.(ITEM)", ""),
+            "bwCallNumbers": millennium_dict.get("CLASS NO.(BIBLIO)", ""),
             "itemType": millennium_dict.get("I TYPE", ""),
             "fixedFields": {
                 "57": {
