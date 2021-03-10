@@ -10,7 +10,6 @@ from datetime import datetime as dt, timedelta
 
 from service_tasks.service_task_base import ServiceTaskBase
 
-
 class MillenniumItemsToSierraJson(ServiceTaskBase):
     def __init__(self, args):
         self.millennium_items_path = args.data_path
@@ -20,11 +19,13 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
     def do_work(self):
         print("Let's get this party started!")
         written = 0
+        unequal = 0
+        unequal_rows = []
 
         with open(self.millennium_items_path, "r") as millennium_items_file, open(self.result_file,
                                                                                   'w+') as results_file:
             # Read the data!
-            item_data = list(csv.reader(millennium_items_file, delimiter = ","))
+            item_data = list(csv.reader(millennium_items_file, doublequote=False))
             headers = item_data[0]
             items = item_data[1:]
             
@@ -53,7 +54,9 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
                     del item[column]
                 
                 if len(headers) != len(item):
-                    print(f"\nOh no! This item has too many/few columns: \n{item}")
+                    #print(f"\nOh no! This item has too many/few columns (transforming it anyway): \n{item}")
+                    unequal += 1
+                    unequal_rows.append(item[1])
 
                 # Create a dictionary with the headers as keys and item columns as values
                 item_as_dict = dict(zip(headers, item))
@@ -76,6 +79,7 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
                 written += 1
                 if written % 5000 == 0:
                     print(f"{written} records processed!", flush=True)
+            print(f"\nA total of {unequal} rows had unexpected column counts:\n {unequal_rows}")
 
 
     @staticmethod
