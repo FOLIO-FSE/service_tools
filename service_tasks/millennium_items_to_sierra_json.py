@@ -58,17 +58,26 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
                 # Create a dictionary with the headers as keys and item columns as values
                 item_as_dict = dict(zip(headers, item))
 
-                # Remove dictionary keys where value is empty or " " (space)
-                fields_to_remove = []
-                for key in item_as_dict:
-                    if (not item_as_dict[key]) or item_as_dict[key] == ' ':
-                        fields_to_remove.append(key)
-                for field in fields_to_remove:
-                    item_as_dict.pop(field)
+                # # Remove dictionary keys where value is empty or " " (space)
+                # fields_to_remove = []
+                # for key in item_as_dict:
+                #     if (not item_as_dict[key]) or item_as_dict[key] == ' ':
+                #         fields_to_remove.append(key)
+                # for field in fields_to_remove:
+                #     item_as_dict.pop(field)
 
                 # Translate the item dictionary into a Sierra style item object
                 sierra_object = self.dict_to_sierra_structure(item_as_dict)
                 # print(json.dumps(sierra_obj, indent=4))
+                
+                # Remove empty fields
+                elements_to_remove = []
+                for element in sierra_object["fixedFields"]:
+                    if sierra_object["fixedFields"][element]["value"] == "" or sierra_object["fixedFields"][element]["value"] == " ":
+                        elements_to_remove.append(element)          
+                for element in elements_to_remove:
+                    del sierra_object["fixedFields"][element]
+
                 results_file.write(f"{json.dumps(sierra_object, ensure_ascii=False)}\n")
 
                 # Report progress
