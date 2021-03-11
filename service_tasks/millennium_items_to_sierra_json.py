@@ -268,18 +268,18 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
     @abstractmethod
     def add_arguments(parser):
         ServiceTaskBase.add_argument(parser,
-                                     "data_path", "Path to the file", "FileChooser"
+                                     "data_path", "Path to the delimited file. Note that the script is tailored to handle a specific sequence of trailing characters.", "FileChooser"
                                      )
         ServiceTaskBase.add_argument(parser,
-                                     "result_path", "Path to the file", "DirChooser"
+                                     "result_path", "Folder where results will be saved", "DirChooser"
                                      )
 
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
         ServiceTaskBase.add_cli_argument(parser,
-                                         "data_path", help="path to millenium file")
-        ServiceTaskBase.add_cli_argument(parser, "result_path", help="path to results file")
+                                         "data_path", help="Path to the delimited file. Note that the script is tailored to handle a specific sequence of trailing characters.")
+        ServiceTaskBase.add_cli_argument(parser, "result_path", help="Folder where results will be saved")
 
 
 def list_duplicates(seq):
