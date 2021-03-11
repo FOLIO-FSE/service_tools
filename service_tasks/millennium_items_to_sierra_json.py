@@ -24,63 +24,71 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
 
         with open(self.millennium_items_path, "r") as millennium_items_file, open(self.result_file,
                                                                                   'w+') as results_file:
-            # Read the data!
-            item_data = list(csv.reader(millennium_items_file, doublequote=False))
-            headers = item_data[0]
-            items = item_data[1:]
-            
-            # Delete duplicate columns in the header based on header name
-            excess_columns = list_duplicates(headers)
-            for column in sorted(excess_columns, reverse=True):
-                del headers[column]
-
-            # Loop through the items!
-            for item in items:
-                # Find the index if the item #
-                item_id_index = [i for i, item in enumerate(item) if re.search('i[0-9]{7}[0-9x]', item)][0]
-
-                # Put the bib IDs in a list 
-                bib_ids = item[:item_id_index]
-                del item[:item_id_index]
-                item.insert(0, bib_ids)
-
-                # Put the bib call nos in a list 
-                bib_call_nos = item[2:2 + len(bib_ids)]
-                del item[2:2 + len(bib_ids)]
-                item.insert(2, bib_call_nos)
+            # Loop through all the rows
+            for row_index, row in enumerate(millennium_items_file):
                 
-                # Delete duplicate columns based on header name
-                for column in sorted(excess_columns, reverse=True):
-                    del item[column]
-                
-                if len(headers) != len(item):
-                    #print(f"\nOh no! This item has too many/few columns (transforming it anyway): \n{item}")
-                    unequal += 1
-                    unequal_rows.append(item[1])
+                # The first row contains the hearders from the first row
+                if row_index == 0:
+                    # Remove trailing and leading quotes
+                    row = row[1:-1] + '"'
+                    headers = row.split('","')
+                    # Delete duplicate columns based on header name
+                    duplicate_columns = list_duplicates(headers)
+                    for column in sorted(duplicate_columns, reverse=True):
+                        del headers[column]
 
-                # Create a dictionary with the headers as keys and item columns as values
-                item_as_dict = dict(zip(headers, item))
+                # The remaining rows each represent an item
+                else:
+                    # Remove trailing and leading quotes
+                    row = row[1:-2]
+                    item = row.split('","')
 
-                # Translate the item dictionary into a Sierra style item object
-                sierra_object = self.dict_to_sierra_structure(item_as_dict)
-                # print(json.dumps(sierra_obj, indent=4))
-                
-                # Remove fields with "" and " " values
-                elements_to_remove = []
-                for element in sierra_object["fixedFields"]:
-                    if sierra_object["fixedFields"][element]["value"] == "" or sierra_object["fixedFields"][element]["value"] == " ":
-                        elements_to_remove.append(element)          
-                for element in elements_to_remove:
-                    del sierra_object["fixedFields"][element]
+                    # Find the index of the first occuring item ID
+                    item_id_index = [i for i, item in enumerate(item) if re.search('i[0-9]{7}[0-9x]', item)][0]
 
-                results_file.write(f"{json.dumps(sierra_object, ensure_ascii=False)}\n")
+                    # Put the bib IDs that occur before the item_id_index in a list 
+                    bib_ids = item[:item_id_index]
+                    del item[:item_id_index]
+                    item.insert(0, bib_ids)
 
-                # Report progress
-                written += 1
-                if written % 5000 == 0:
-                    print(f"{written} records processed!", flush=True)
-            print(f"\nA total of {unequal} rows had unexpected column counts:\n {unequal_rows}")
+                    # Put the bib class numbers that occur before the item_id_index into another list 
+                    bib_call_nos = item[2:2 + len(bib_ids)]
+                    del item[2:2 + len(bib_ids)]
+                    item.insert(2, bib_call_nos)
+                    
+                    # Delete duplicate columns based on header name
+                    for column in sorted(duplicate_columns, reverse=True):
+                        del item[column]
+                    
+                    # Report any unexpected columns
+                    if len(headers) != len(item):
+                        unequal += 1
+                        unequal_rows.append(item[1])
 
+                    # Create a dictionary with the headers as keys and item columns as values
+                    item_as_dict = dict(zip(headers, item))
+
+                    # Translate the item dictionary into a Sierra style item object
+                    sierra_object = self.dict_to_sierra_structure(item_as_dict)
+                    # print(json.dumps(sierra_obj, indent=4))
+                    
+                    # Remove fields with "" and " " values
+                    elements_to_remove = []
+                    for element in sierra_object["fixedFields"]:
+                        if sierra_object["fixedFields"][element]["value"] == "" or sierra_object["fixedFields"][element]["value"] == " ":
+                            elements_to_remove.append(element)          
+                    for element in elements_to_remove:
+                        del sierra_object["fixedFields"][element]
+
+                    results_file.write(f"{json.dumps(sierra_object, ensure_ascii=False)}\n")
+                    written += 1
+                     # Report progress
+                    if written % 5000 == 0:
+                        print(f"{written} records created!", flush=True)
+
+
+
+            print(f"Done!\nNumber of rows processed: {row_index}\nNumber of Sierra-like records created: {written}\nA total of {unequal} rows had unexpected column counts:\n {unequal_rows}")
 
     @staticmethod
     def dict_to_sierra_structure(millennium_dict):
