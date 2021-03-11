@@ -1,6 +1,5 @@
 import csv
 import json
-import pandas
 import os
 import re
 from abc import abstractmethod
@@ -17,7 +16,7 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
         self.sierra_items = {}
 
     def do_work(self):
-        print("Let's get this party started!")
+        print("Let's get started!")
         written = 0
         unequal = 0
         unequal_rows = []
@@ -25,8 +24,7 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
         with open(self.millennium_items_path, "r") as millennium_items_file, open(self.result_file,
                                                                                   'w+') as results_file:
             # Loop through all the rows
-            for row_index, row in enumerate(millennium_items_file):
-                
+            for row_index, row in enumerate(millennium_items_file):      
                 # The first row contains the hearders from the first row
                 if row_index == 0:
                     # Remove trailing and leading quotes
@@ -85,8 +83,6 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
                      # Report progress
                     if written % 5000 == 0:
                         print(f"{written} records created!", flush=True)
-
-
 
             print(f"Done!\nNumber of rows processed: {row_index}\nNumber of Sierra-like records created: {written}\nA total of {unequal} rows had unexpected column counts:\n {unequal_rows}")
 
