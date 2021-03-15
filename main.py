@@ -13,7 +13,6 @@ def parse_args(task_classes):
     for task_class in task_classes:
         sub_parser = subs.add_parser(task_class.__name__)
         task_class.add_arguments(sub_parser)
-    print(parser)
     args = parser.parse_args()
     return args
 

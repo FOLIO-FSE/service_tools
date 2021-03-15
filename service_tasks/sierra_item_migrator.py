@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import re
 import time
 from abc import abstractmethod
 
@@ -10,6 +11,7 @@ from folioclient import FolioClient
 from service_tasks.service_task_base import ServiceTaskBase
 from sierra_mapping.sierra_item_mapper import SierraItemTransformer
 from datetime import datetime as dt
+
 
 class SierraItemMigrator(ServiceTaskBase):
     def __init__(self, folio_client: FolioClient, args):
@@ -70,12 +72,21 @@ class SierraItemMigrator(ServiceTaskBase):
         print(f"Loaded {len(self.locations_map)} location mappings")
 
         with open(args.instance_id_dict_path, "r") as json_file:
+            replaces = 0
             for index, json_string in enumerate(json_file):
                 # {"legacy_id": legacy_id, "folio_id": folio_instance["id"], "instanceLevelCallNumber": instance_level_call_number}
                 map_object = json.loads(json_string)
-                self.instance_id_map[map_object["legacy_id"].replace(".", "")] = map_object
+                mapped_id = map_object["legacy_id"]
+                if mapped_id.startswith('.b'):
+                    mapped_id = mapped_id[2:]
+                    replaces += 1
+                elif mapped_id.startswith('b'):
+                    mapped_id = mapped_id[1:]
+                    replaces += 1
+                self.instance_id_map[mapped_id] = map_object
+                if index % 100000 == 0:
+                    print(f"{index} instance ids loaded to map, {replaces} .b:s removed", end='\r')
         print(f"loaded {index} migrated instance IDs")
-
         self.folio_items_file_path = os.path.join(args.results_folder, "folio_items.json")
         self.holdings_file_path = os.path.join(args.results_folder, "folio_holdings.json")
         self.item_id_dict_path = os.path.join(args.results_folder, "item_id_map.json")
@@ -136,9 +147,9 @@ class SierraItemMigrator(ServiceTaskBase):
                 except ValueError as value_error:
                     self.value_errors += 1
                     print(value_error)
-                    if self.value_errors > 1000:
-                        raise value_error
-                if i % 1000 == 0:
+                    if self.value_errors > 500:
+                        raise Exception(f"More than 20 000 errors raised. Quitting.")
+                if i % 10000 == 0:
                     print(f"{i} rows processed. {self.value_errors} valueerrors")
             print(f"Done. {i} rows processed")
             print(" Wrapping up...")

@@ -66,7 +66,7 @@ class MapperBase():
     def validate(self, folio_user):
         failures = []
         self.add_to_migration_report("Number of addresses per user", len(folio_user["personal"].get("addresses", [])))
-        req_fields = ['username', 'externalSystemId']
+        req_fields = ['username', 'email', 'active']
         for req in req_fields:
             if req not in folio_user:
                 failures.append(req)

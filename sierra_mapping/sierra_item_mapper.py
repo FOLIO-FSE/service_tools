@@ -1,4 +1,5 @@
 import json
+import re
 import uuid
 
 from folioclient import FolioClient
@@ -52,7 +53,7 @@ class SierraItemTransformer(MapperBase):
             # itemDamagedStatusId
             # itemDamagedStatusDate
             "notes": list(self.get_notes(sierra_item)),
-            # "circulationNotes": list(self.get_circ_notes(sierra_item)),
+            "circulationNotes": list(self.get_circ_notes(sierra_item)),
             "status": self.get_status(sierra_item),
             "materialTypeId": self.get_material_type_id(sierra_item),
             "permanentLoanTypeId": self.get_loan_type_id(sierra_item),
@@ -83,11 +84,13 @@ class SierraItemTransformer(MapperBase):
     def convert_to_holding(self, sierra_item):
         if len(sierra_item["bibIds"]) > 1:
             self.add_stats(self.stats, "Item connected to more than one Bib/Instance")
-        sierra_bib_id = next(f[0] for f in sierra_item["bibIds"])
+        sierra_bib_id = next(f for f in sierra_item["bibIds"])
         if ',' in sierra_bib_id:
             sierra_bib_id = sierra_bib_id.split(',')[0]
+        sierra_bib_id = re.sub(r"^\.b|b", "", sierra_bib_id)
         # print(sierra_bib_id)
         new_instance_id = self.instance_id_map.get(sierra_bib_id, {}).get("folio_id", "")
+        sierra_bib_id = sierra_bib_id
 
         if not new_instance_id:
             self.add_stats(self.stats, f"Bib Id not in list of migrated records")
@@ -240,7 +243,7 @@ class SierraItemTransformer(MapperBase):
 
     def get_location(self, sierra_item):
         try:
-            iii_loc = sierra_item.get("location", {}).get("code", "")
+            iii_loc = sierra_item.get("location", {}).get("code","").strip()
             self.add_to_migration_report("Sierra Locations", f"{iii_loc}")
             if len(self.location_map) == 1:
                 self.add_to_migration_report("Folio Locations", f"{self.location_map['*']}")
