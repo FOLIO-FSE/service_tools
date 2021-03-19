@@ -1,16 +1,24 @@
 import csv
 import json
 import os
-import re
 import time
+import traceback
 from abc import abstractmethod
+from datetime import datetime as dt
+from os.path import isfile
 
-import requests
 from folioclient import FolioClient
 
+from helpers.custom_exceptions import TransformationProcessError, TransformationCriticalDataError
 from service_tasks.service_task_base import ServiceTaskBase
 from sierra_mapping.sierra_item_mapper import SierraItemTransformer
-from datetime import datetime as dt
+
+
+def setup_path(path, filename):
+    path = os.path.join(path, filename)
+    if not isfile(path):
+        raise Exception(f"No file called {filename} present in {path}")
+    return path
 
 
 class SierraItemMigrator(ServiceTaskBase):
@@ -20,79 +28,101 @@ class SierraItemMigrator(ServiceTaskBase):
         self.item_file = args.item_file
         self.instance_id_map = {}
         self.value_errors = 0
-        self.mappings_files_folder = args.mappings_files_folder
+        self.map_path = args.map_path
         self.num_rows = 0
         self.locations = {}
         self.stats = {}
-
+        self.results_path = args.result_path
         self.loan_type_map = {}
         self.material_type_map = {}
         self.locations_map = {}
         self.t0 = time.time()
 
-        print("\tFiles from {}".format(self.item_file))
-        print("\tSaving results to {}".format(args.results_folder))
-
+        print(f"Item file to process:{self.item_file}")
+        print(f"Saving results to {self.results_path}")
         self.migration_report_path = os.path.join(
-            args.results_folder, "iii_item_transformation_report.md"
+            self.results_path, "iii_item_transformation_report.md"
         )
 
-        # set up loan type mapping
-        self.loan_types = list(self.folio_client.folio_get_all("/loan-types", "loantypes"))
-        print(f"Fetched {len(self.loan_types)} loan types from server")
-        with open(os.path.join(args.mappings_files_folder, "loan_types.tsv")) as loan_type_file:
-            for t in csv.DictReader(loan_type_file, dialect="tsv"):
-                match = next(f for f in self.loan_types if f["name"].lower() == t['folio_name'].lower())
-                self.loan_type_map[t["legacy_code"]] = match["id"]
-        print(f"Loaded {len(self.loan_type_map)} loan type mappings")
+        try:
+            # All the paths...
+            instance_id_dict_path = setup_path(self.results_path, "instance_id_map.json")
+            # items_map_path = setup_path(args.map_path, "item_mapping.json")
+            # items_map_path = setup_path(args.map_path, "holdings_mapping.json")
 
-        # setup material type mapping
-        self.material_types = list(self.folio_client.folio_get_all("/material-types", "mtypes"))
-        print(f"Fetched {len(self.material_types)} material types from server")
-        with open(os.path.join(args.mappings_files_folder, "material_types.tsv")) as material_type_file:
-            for t in csv.DictReader(material_type_file, dialect="tsv"):
-                match = next(f for f in self.material_types if f["name"].lower() == t['folio_name'].lower())
-                self.material_type_map[t["legacy_code"]] = match["id"]
-        print(f"Loaded {len(self.material_type_map)} material_types mappings")
+            location_map_path = setup_path(self.map_path, "locations.tsv")
+            loans_type_map_path = setup_path(self.map_path, "loan_types.tsv")
+            call_number_type_map_path = setup_path(self.map_path, "call_number_type_mapping.tsv")
+            material_type_map_path = setup_path(args.map_path, "material_types.tsv")
+            self.folio_items_file_path = os.path.join(self.results_path, "folio_items.json")
+            self.holdings_file_path = os.path.join(self.results_path, "folio_holdings.json")
+            self.item_id_dict_path = os.path.join(self.results_path, "item_id_map.json")
+            error_file_path = os.path.join(self.results_path, "item_transform_errors.tsv")
 
-        # setup locations
-        print("Fetching locations...")
-        self.locations = list(self.folio_client.folio_get_all("/locations", "locations"))
-        print(f"Fetched {len(self.locations)} locations from server")
-        default_loc_id = next(f['id'] for f in self.locations if f["code"] == "tech")
-        with open(os.path.join(args.mappings_files_folder, "locations.tsv")) as loc_file:
-            for t in csv.DictReader(loc_file, dialect="tsv"):
-                try:
-                    match = next(f for f in self.locations if f["code"].lower() == t['folio_code'].lower())
-                    self.locations_map[t["legacy_code"]] = match["id"]
-                except StopIteration:
-                    self.add_to_migration_report("Legacy location codes not properly mapped", t["legacy_code"])
-                    self.locations_map[t["legacy_code"]] = default_loc_id
-            self.locations_map['*'] = default_loc_id
-        print(f"Loaded {len(self.locations_map)} location mappings")
+            # Material type mapping
+            with open(material_type_map_path) as material_type_file:
+                material_type_map = list(csv.DictReader(material_type_file, dialect="tsv"))
+                print(f"Found {len(material_type_map)} rows in material type map")
+                print(
+                    f'{",".join(material_type_map[0].keys())} will be used for determining Material type'
+                )
 
-        with open(args.instance_id_dict_path, "r") as json_file:
-            replaces = 0
-            for index, json_string in enumerate(json_file):
-                # {"legacy_id": legacy_id, "folio_id": folio_instance["id"], "instanceLevelCallNumber": instance_level_call_number}
-                map_object = json.loads(json_string)
-                mapped_id = map_object["legacy_id"]
-                if mapped_id.startswith('.b'):
-                    mapped_id = mapped_id[2:]
-                    replaces += 1
-                elif mapped_id.startswith('b'):
-                    mapped_id = mapped_id[1:]
-                    replaces += 1
-                self.instance_id_map[mapped_id] = map_object
-                if index % 100000 == 0:
-                    print(f"{index} instance ids loaded to map, {replaces} .b:s removed", end='\r')
-        print(f"loaded {index} migrated instance IDs")
-        self.folio_items_file_path = os.path.join(args.results_folder, "folio_items.json")
-        self.holdings_file_path = os.path.join(args.results_folder, "folio_holdings.json")
-        self.item_id_dict_path = os.path.join(args.results_folder, "item_id_map.json")
+            # Loan type mapping
+            with open(loans_type_map_path) as loans_type_file:
+                loan_type_map = list(csv.DictReader(loans_type_file, dialect="tsv"))
+                print(f"Found {len(loan_type_map)} rows in loan type map")
+                print(
+                    f'{",".join(loan_type_map[0].keys())} will be used for determining loan type'
+                )
 
-        self.transformer = SierraItemTransformer(folio_client, self.instance_id_map, self.loan_type_map,
-                                                 self.material_type_map, self.locations_map)
+            # Call number type mapping
+            with open(call_number_type_map_path) as call_number_type_map_file:
+                call_number_type_map = list(
+                    csv.DictReader(call_number_type_map_file, dialect="tsv")
+                )
+                print(f"Found {len(call_number_type_map)} rows in callnumber type map")
+                print(
+                    f'{",".join(call_number_type_map[0].keys())} '
+                    "will be used for determining callnumber type"
+                )
+
+            # Instance id mapping
+            with open(instance_id_dict_path, "r") as json_file:
+                replaces = 0
+                for index, json_string in enumerate(json_file):
+                    # Format: {"legacy_id": "", "folio_id": "", "instanceLevelCallNumber": ""}
+                    map_object = json.loads(json_string)
+                    mapped_id = map_object["legacy_id"]
+                    if mapped_id.startswith('.b'):
+                        mapped_id = mapped_id[2:-1]
+                        replaces += 1
+                    elif mapped_id.startswith('b'):
+                        mapped_id = mapped_id[1:]
+                        replaces += 1
+                    self.instance_id_map[mapped_id] = map_object
+                    if index % 100000 == 0:
+                        print(f"{index} instance ids loaded to map, {replaces} .b:s removed", end='\r')
+                print(f"loaded {index} migrated instance IDs")
+
+            # Location mapping
+            with open(location_map_path) as location_map_f:
+                location_map = list(csv.DictReader(location_map_f, dialect="tsv"))
+                print(
+                    f'{",".join(loan_type_map[0].keys())} will be used for determining location'
+                )
+                print(f"Found {len(location_map)} rows in location map")
+
+            self.transformer = SierraItemTransformer(folio_client, self.instance_id_map,
+                                                     loan_type_map,
+                                                     material_type_map,
+                                                     location_map,
+                                                     call_number_type_map)
+
+        except TransformationProcessError as process_error:
+            print("\n=======ERROR===========")
+            print(f"{process_error}")
+            print("\n=======Stack Trace===========")
+            traceback.print_exc()
 
     def wrap_up(self):
         print("Writing Holdings file to disk")
@@ -144,13 +174,15 @@ class SierraItemMigrator(ServiceTaskBase):
                         print(json.dumps(sierra_item, indent=4))
                     if sierra_item["deleted"] is not True and len(sierra_item["bibIds"]) > 0:
                         self.transformer.transform(sierra_item, items_file)
+                except TransformationCriticalDataError as tcde:
+                    print(tcde)
                 except ValueError as value_error:
                     self.value_errors += 1
                     print(value_error)
                     if self.value_errors > 500:
                         raise Exception(f"More than 20 000 errors raised. Quitting.")
                 if i % 10000 == 0:
-                    print(f"{i} rows processed. {self.value_errors} valueerrors")
+                    print(f"{i} rows processed. {self.value_errors} value errors")
             print(f"Done. {i} rows processed")
             print(" Wrapping up...")
             self.wrap_up()
@@ -160,16 +192,13 @@ class SierraItemMigrator(ServiceTaskBase):
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_argument(parser, "item_file", "File of Sierra Items", "FileChooser")
-        ServiceTaskBase.add_argument(parser, "instance_id_dict_path", "", "FileChooser")
-        ServiceTaskBase.add_argument(parser, "results_folder", "Results folder", "DirChooser")
-
-        ServiceTaskBase.add_argument(parser, "mappings_files_folder", "Mapping files folder", "DirChooser")
+        ServiceTaskBase.add_argument(parser, "result_path", "Results folder", "DirChooser")
+        ServiceTaskBase.add_argument(parser, "map_path", "Mapping files folder", "DirChooser")
 
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_cli_argument(parser, "item_file", "File of Sierra Items")
-        ServiceTaskBase.add_cli_argument(parser, "instance_id_dict_path", "")
-        ServiceTaskBase.add_cli_argument(parser, "results_folder", "Results folder")
-        ServiceTaskBase.add_cli_argument(parser, "mappings_files_folder", "Mapping files folder")
+        ServiceTaskBase.add_cli_argument(parser, "result_path", "Results folder")
+        ServiceTaskBase.add_cli_argument(parser, "map_path", "Mapping files folder")

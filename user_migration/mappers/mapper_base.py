@@ -12,6 +12,7 @@ class MapperBase():
         self.migration_report = {}
         self.folio_client = folio_client
         self.mapped_folio_fields = {}
+        self.ref_data_dicts = {}
         self.mapped_legacy_fields = {}
         self.user_schema = self.get_user_schema()
 
@@ -114,6 +115,27 @@ class MapperBase():
             self.migration_report[header][measure_to_add] = 1
         else:
             self.migration_report[header][measure_to_add] += 1
+
+    def get_ref_data_tuple_by_code(self, ref_data, ref_name, code):
+        return self.get_ref_data_tuple(ref_data, ref_name, code, "code")
+
+    def get_ref_data_tuple_by_name(self, ref_data, ref_name, name):
+        return self.get_ref_data_tuple(ref_data, ref_name, name, "name")
+
+    def get_ref_data_tuple(self, ref_data, ref_name, key_value, key_type):
+        dict_key = f"{ref_name}{key_type}"
+        ref_object = self.ref_data_dicts.get(dict_key, {}).get(
+            key_value.lower().strip(), ()
+        )
+        # print(f"{key_value} - {ref_object} - {dict_key}")
+        if ref_object:
+            return ref_object
+        else:
+            d = {}
+            for r in ref_data:
+                d[r[key_type].lower()] = (r["id"], r["name"])
+            self.ref_data_dicts[dict_key] = d
+        return self.ref_data_dicts.get(dict_key, {}).get(key_value.lower().strip(), ())
 
     @abstractmethod
     def do_map(self):
