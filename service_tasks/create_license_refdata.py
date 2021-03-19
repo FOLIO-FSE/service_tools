@@ -95,7 +95,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d85094f0027",
         "name": "AllRightsReserved",
-        "primary": "true",
+        "primary": "false",
         "category": f"{YesNo}", 
         "defaultInternal": "true",
         "label": "All Rights Reserved",
@@ -117,7 +117,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d8cc248002f",
         "name": "ArchivingAllowed",
-        "primary": "true",
+        "primary": "false",
         "category": f"{YesNo}",
         "defaultInternal": "true",
         "label": "Archiving Allowed",
@@ -128,7 +128,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d8d88550059",
         "name": "AuthorizedUsers",
-        "primary": "true",
+        "primary": "false",
         "defaultInternal": "true",
         "label": "Authorized User Definition",
         "description": "Defines what constitutes an authorized user for the licensed resource.",
@@ -138,7 +138,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d7fff640021",
         "name": "ConcurrentUsers",
-        "primary": "true",
+        "primary": "false",
         "defaultInternal": "true",
         "label": "Concurrent Users",
         "description": "Specifies the number of allowed concurrent users",
@@ -148,7 +148,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d81e8180049",
         "name": "AgreementConfidentiality",
-        "primary": "true",
+        "primary": "false",
         "category": f"{YesNo}",
         "defaultInternal": "true",
         "label": "Confidentiality of Agreement Required",
@@ -159,7 +159,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d82e8c2004b",
         "name": "UserConfidentiality",
-        "primary": "true",
+        "primary": "false",
         "category": f"{YesNo}",
         "defaultInternal": "true",
         "label": "Confidentiality of User Information Protected",
@@ -170,7 +170,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d8bf829002e",
         "name": "CopyDigital",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "Copy - Digital",
@@ -181,7 +181,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d81922e0023",
         "name": "CopyPrint",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "Copy - Print",
@@ -192,7 +192,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d8b3534002c",
         "name": "CoursePackElectronic",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "Course Pack - Electronic",
@@ -203,7 +203,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d8ba1d3002d",
         "name": "CoursePackPrint",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "Course Pack - Print",
@@ -214,7 +214,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d8ad72c0057",
         "name": "DistanceEducation",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "Distance Education",
@@ -225,7 +225,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d8a84450056",
         "name": "FairUseClause",
-        "primary": "true",
+        "primary": "false",
         "category": f"{YesNo}",
         "defaultInternal": "true",
         "label": "Fair Use Clause",
@@ -236,7 +236,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d84517b0026",
         "name": "GovJurisdiction",
-        "primary": "true",
+        "primary": "false",
         "defaultInternal": "true",
         "label": "Governing Jurisdiction",
         "description": "Details the governing jurisdiction of the license agreement",
@@ -246,7 +246,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d8402a90025",
         "name": "GovLaw",
-        "primary": "true",
+        "primary": "false",
         "defaultInternal": "true",
         "label": "Governing Law",
         "description": "Details the governing law of the license agreement",
@@ -256,7 +256,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d8a251b0055",
         "name": "ILLElectronic",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "ILL - Electronic",
@@ -267,7 +267,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d896591002b",
         "name": "ILLElectronicSecure",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "ILL - Electronic (Secure)",
@@ -278,7 +278,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d89d1640054",
         "name": "ILLPrint",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "ILL - Print",
@@ -289,7 +289,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d83b3e9004c",
         "name": "IndemLicensee",
-        "primary": "true",
+        "primary": "false",
         "defaultInternal": "true",
         "label": "Indemnification by Licensee",
         "description": "Indemnification by Licensee",
@@ -299,7 +299,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d834a780024",
         "name": "IndemLicensor",
-        "primary": "true",
+        "primary": "false",
         "defaultInternal": "true",
         "label": "Indemnification by Licensor",
         "description": "Indemnification by Licensor",
@@ -309,7 +309,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d868c77004e",
         "name": "LMS",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "Learning Management System",
@@ -320,7 +320,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d8906e10053",
         "name": "LinkElectronic",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "Link Electronic",
@@ -331,7 +331,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d8282c8004a",
         "name": "OtherRestrictions",
-        "primary": "true",
+        "primary": "false",
         "defaultInternal": "true",
         "label": "Other Restrictions",
         "description": "A blanket term to capture restrictions on a licensed resource not covered by established terms",
@@ -341,7 +341,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d8c5a100058",
         "name": "PerpetualAccess",
-        "primary": "true",
+        "primary": "false",
         "category": f"{YesNo}",
         "defaultInternal": "true",
         "label": "Perpetual Access",
@@ -352,7 +352,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d874d52004f",
         "name": "PersonsPerceptualDisabilities",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "Persons with Perceptual Disabilities",
@@ -363,7 +363,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d8072020047",
         "name": "SERU",
-        "primary": "true",
+        "primary": "false",
         "category": f"{YesNo}",
         "defaultInternal": "true",
         "label": "Publisher Accepts SERU",
@@ -374,7 +374,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d88a8390052",
         "name": "ReservesElectronic",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "Reserves - Electronic",
@@ -385,7 +385,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d8807a80051",
         "name": "ReservesPrint",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "Reserves - Print",
@@ -396,7 +396,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d85c8030029",
         "name": "DepositRights",
-        "primary": "true",
+        "primary": "false",
         "category": f"{YesNo}",
         "defaultInternal": "true",
         "label": "Right to Deposit",
@@ -407,7 +407,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d8138210022",
         "name": "ScholarlySharing",
-        "primary": "true",
+        "primary": "false",
         "category": f"{PermPro}",
         "defaultInternal": "true",
         "label": "Scholarly Sharing",
@@ -418,7 +418,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c91808b7445501601764d8563350028",
         "name": "TextDataMining",
-        "primary": "true",
+        "primary": "false",
         "category": f"{YesNo}",
         "defaultInternal": "true",
         "label": "Text / Data Mining",
@@ -429,7 +429,7 @@ class CreateLicensePolicies(ServiceTaskBase):
         lt.append({
         "id": "2c9180857445294501764d87ab1e0050",
         "name": "Walkins",
-        "primary": "true",
+        "primary": "false",
         "category": f"{YesNo}",
         "defaultInternal": "true",
         "label": "Walk-ins",
