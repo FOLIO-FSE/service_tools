@@ -74,7 +74,7 @@ class VisualizeCsvData(ServiceTaskBase):
 
                     value_names = [str(name).replace("$","|") for name in value_names_raw]
                     # Creating plot 
-                    plt.figure(figsize =(14, 7))
+                    plt.figure(figsize =(12, 8))
                     plt.title(column)
                     plt.tight_layout()
                     plt.pie(value_counts, labels = value_names, colors = plt.cm.tab20.colors)
@@ -86,9 +86,10 @@ class VisualizeCsvData(ServiceTaskBase):
                     plt.savefig(filepath)
                     plt.close()
 
-                    self.mdFile.new_line(self.mdFile.new_inline_image(text= "Chart", path=filename))
                     tab_value_counts = value_counts.to_markdown()
                     self.mdFile.new_paragraph(tab_value_counts)
+
+                    self.mdFile.new_paragraph(self.mdFile.new_inline_image(text= "Chart", path=filename))
                 
                 elif 21 <= unique_values <= len(data.index) / 10:
                     non_unique = value_counts[value_counts > 1]
