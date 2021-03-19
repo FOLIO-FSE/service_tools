@@ -41,8 +41,8 @@ class BatchPoster(ServiceTaskBase):
         print("Starting....")
         batch = []
 
-        with open(self.objects_file) as rows, open(self.failed_recs_path) as failed_recs_file, open(
-                self.log_path) as log_file:
+        with open(self.objects_file) as rows, open(self.failed_recs_path, 'w') as failed_recs_file, open(
+                self.log_path, 'w') as log_file:
             last_row = ""
             for idx, row in enumerate(rows):
                 last_row = row
