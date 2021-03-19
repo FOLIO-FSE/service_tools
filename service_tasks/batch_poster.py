@@ -61,7 +61,7 @@ class BatchPoster(ServiceTaskBase):
                         print(f"{unicode_error} Posting failed. Encoding error reading file")
                         print(f"Failing row, either the one shown here or the next row in {self.objects_file}")
                         print(last_row)
-                        print("=========Stack trace==============")
+                        print("=========Stack trace==============", flush=True)
                         traceback.print_exc()
                         print("=======================", flush=True)
                     except Exception as exception:
@@ -75,7 +75,7 @@ class BatchPoster(ServiceTaskBase):
                         self.failed_records += len(batch)
                         write_failed_batch_to_file(batch, failed_recs_file)
                         batch = []
-                        print("=========Stack trace==============")
+                        print("=========Stack trace==============", flush=True)
                         traceback.print_exc()
                         print("=======================", flush=True)
                         self.num_failures += 0
