@@ -3,7 +3,10 @@ url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-[packages]
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"[packages]
 psutil = "*"
 folioclient = "*"
 gooey = "*"
@@ -14,9 +17,6 @@ xmltodict = "*"
 matplotlib = "*"
 mdutils = "*"
 pandas = "*"
+tabulate = "*"
 
 [dev-packages]
-[[source]]
-url = "https://pypi.python.org/simple"
-verify_ssl = true
-name = "pypi"
