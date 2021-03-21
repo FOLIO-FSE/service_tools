@@ -27,25 +27,36 @@ class MFHDBuilder(ServiceTaskBase):
         marc008 = '=008  9810090p\\\\\\\\8\\\\\\4001aueng0000000\n'
 
         counter = 0
+        multirecords = 0
+        repeatCounter = 0 
+        recordsWritten = 0 
+        repeatRecords = defaultdict(int)
         
         for row in df.index:
+            bibID = df[self.bibField][row] 
             marc001 = '=001    ' + df[self.holdField][row] + "\n"
-            marc004 = '=004    ' + df[self.bibField][row] + "\n"
+            marc004 = '=004    ' + bibID + "\n"
 
             location = df[self.locField][row]
             callno = str(df[self.callField][row])
             callno = callno.replace(" ", "$i", 1)
 
             marc852 = '=852 0\\$b' + location + '$h' + callno + "\n"
+            ## make sure record was not already processed
+            if (repeatRecords[bibID] != 1): 
+                f.write(LDR)
+                f.write(marc001)
+                f.write(marc004)
+                f.write(marc008)
+                f.write(marc852)
+                f.write("\n")
+                repeatRecords[bibID] = 1
+                recordsWritten += 1
+            else:
+                repeatCounter +=1
 
-            f.write(LDR)
-            f.write(marc001)
-            f.write(marc004)
-            f.write(marc008)
-            f.write(marc852)
-            f.write("\n")
             counter += 1
-        print(f"Process complete. {counter} MFHD records were created and written to {self.outfile}")
+        print(f"Process complete. {counter} items were processed. {recordsWritten} MFHD records were created and written to {self.outfile} and {repeatCounter} MHFDs will be associated with more than one item record")
 
             
     @staticmethod
