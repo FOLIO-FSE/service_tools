@@ -21,7 +21,7 @@ class MFHDBuilder(ServiceTaskBase):
         else:
             df = pd.read_csv(self.infile, dtype=str)  
 
-        f = open(self.outfile, "w")
+        f = open(self.outfile, "w", encoding='utf-8')
 
         LDR = '=LDR  00166cx  a22000853  4500\n'
         marc008 = '=008  9810090p\\\\\\\\8\\\\\\4001aueng0000000\n'
@@ -33,11 +33,11 @@ class MFHDBuilder(ServiceTaskBase):
         repeatRecords = defaultdict(int)
         
         for row in df.index:
-            bibID = df[self.bibField][row] 
-            marc001 = '=001    ' + df[self.holdField][row] + "\n"
+            bibID = str(df[self.bibField][row])
+            marc001 = '=001    ' + str(df[self.holdField][row]) + "\n"
             marc004 = '=004    ' + bibID + "\n"
 
-            location = df[self.locField][row]
+            location = str(df[self.locField][row])
             callno = str(df[self.callField][row])
             callno = callno.replace(" ", "$i", 1)
 
