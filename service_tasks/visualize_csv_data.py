@@ -72,26 +72,30 @@ class VisualizeCsvData(ServiceTaskBase):
                     for value in value_counts_dict:
                         string_value_counts.append(f"{value}   {value_counts[value]}\n")
 
-                    value_names = [str(name).replace("$","|") for name in value_names_raw]
-                    # Creating plot 
-                    plt.figure(figsize =(12, 8))
-                    plt.title(column)
-                    plt.tight_layout()
-                    plt.pie(value_counts, labels = value_names, colors = plt.cm.tab20.colors)
-                    plt.legend(string_value_counts, loc="center left", bbox_to_anchor=(1, 0.5))
-
-                    # Save plot as svg image
-                    filename = column.replace(" ","_") + ".svg"
-                    filepath = self.save_to_folder + "/" + filename
-                    plt.savefig(filepath)
-                    plt.close()
-
                     tab_value_counts = value_counts.to_markdown()
                     self.mdFile.new_paragraph(tab_value_counts)
 
-                    self.mdFile.new_paragraph(self.mdFile.new_inline_image(text= "Chart", path=filename))
+                    try:
+                        value_names = [str(name).replace("$","|") for name in value_names_raw]
+                        # Creating plot 
+                        plt.figure(figsize =(12, 8))
+                        plt.title(column)
+                        plt.tight_layout()
+                        plt.pie(value_counts, labels = value_names, colors = plt.cm.tab20.colors)
+                        plt.legend(string_value_counts, loc="center left", bbox_to_anchor=(1, 0.5))
+
+                        # Save plot as svg image
+                        filename = column.replace(" ","_") + ".svg"
+                        filepath = self.save_to_folder + "/" + filename
+                        plt.savefig(filepath)
+                        plt.close()
+
+                        self.mdFile.new_paragraph(self.mdFile.new_inline_image(text= "Chart", path=filename))
+                    except Exception as e:
+                        print(e)
+                        traceback.print_exc() 
                 
-                elif 21 <= unique_values <= len(data.index) / 10:
+                elif 21 <= unique_values <= 100:
                     non_unique = value_counts[value_counts > 1]
                     tab_non_unique = non_unique.to_markdown()
 
