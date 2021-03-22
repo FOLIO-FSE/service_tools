@@ -46,12 +46,12 @@ class CirculationHelper:
             else:
                 req.raise_for_status()
         except HTTPError as exception:
-            logging.Error(f"{req.status_code}\tPOST FAILED {url}\n\t{json.dumps(data)}\n\t{req.text}", exc_info=True)
+            logging.error(f"{req.status_code}\tPOST FAILED {url}\n\t{json.dumps(data)}\n\t{req.text}", exc_info=True)
             return False, None, "5XX", f"Failed checkout http status {req.status_code}"
 
     @staticmethod
     def create_request(
-        folio_client: FolioClient, request_type, patron, item, service_point_id, request_date=datetime.now(),
+            folio_client: FolioClient, request_type, patron, item, service_point_id, request_date=datetime.now(),
     ):
         try:
             df = "%Y-%m-%dT%H:%M:%S.%f+0000"
@@ -68,12 +68,11 @@ class CirculationHelper:
             path = "/circulation/requests"
             url = f"{folio_client.okapi_url}{path}"
             req = requests.post(url, headers=folio_client.okapi_headers, data=json.dumps(data))
-            logging.info(f"POST {req.status_code}\t{url}\t{json.dumps(data)}")
+            logging.debug(f"POST {req.status_code}\t{url}\t{json.dumps(data)}")
             if str(req.status_code) == "422":
                 logging.error(f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(data)}")
                 return False
             else:
-                # print(req.text)
                 req.raise_for_status()
                 logging.info(f"{req.status_code} Successfully created {request_type}")
                 return True
@@ -101,9 +100,11 @@ class CirculationHelper:
                 return False
             else:
                 req.raise_for_status()
+                logging.info(f"{req.status_code} Successfully Extended loan")
             return True
         except Exception as exception:
-            logging.error(f"PUT FAILED Extend loan to {loan_to_put['dueDate']}\t {url}\t{json.dumps(loan_to_put)}", exc_info=True)
+            logging.error(f"PUT FAILED Extend loan to {loan_to_put['dueDate']}\t {url}\t{json.dumps(loan_to_put)}",
+                          exc_info=True)
             return False
 
     @staticmethod
@@ -125,10 +126,11 @@ class CirculationHelper:
             path = "/circulation/requests"
             url = f"{folio_client.okapi_url}{path}"
             req = requests.post(url, headers=folio_client.okapi_headers, data=json.dumps(data))
-            logging.info(f"POST {req.status_code}\t{url}\t{json.dumps(data)}")
+            logging.debug(f"POST {req.status_code}\t{url}\t{json.dumps(data)}")
             if str(req.status_code) == "422":
                 logging.error(f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(data)}")
             else:
                 req.raise_for_status()
+                logging.info(f"POST {req.status_code} Successfully created request {request_type}")
         except Exception as exception:
             logging.error(exception, exc_info=True)

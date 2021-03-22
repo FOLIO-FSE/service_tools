@@ -29,7 +29,7 @@ class ServiceTaskBase():
             log_file = os.path.join(log_file_path, "service_task_log.log")
             file_handler = logging.handlers.TimedRotatingFileHandler(
                 filename=log_file, when='midnight', backupCount=30)
-            file_handler.addFilter(LevelFilter(0, 20))
+            # file_handler.addFilter(LevelFilter(0, 20))
             file_handler.setFormatter(formatter)
             file_handler.setLevel(logging.DEBUG)
             logging.getLogger().addHandler(file_handler)
