@@ -74,8 +74,8 @@ class MFHDBuilder(ServiceTaskBase):
     @abstractmethod
     def add_cli_arguments(parser):
         ServiceTaskBase.add_cli_argument(parser, "infile",
-                                         "Tab or comma delimited input file (csv/tsv extension required)", "")
-        ServiceTaskBase.add_argument(parser, "holdID", "Field containing holdings ID", "")
-        ServiceTaskBase.add_argument(parser, "bibID", "Field containing bib ID", "")
-        ServiceTaskBase.add_argument(parser, "location", "Field containing location code", "")
-        ServiceTaskBase.add_argument(parser, "callno", "Field containing call number", "")
+                                         "Tab or comma delimited input file (csv/tsv extension required)")
+        ServiceTaskBase.add_cli_argument(parser, "holdID", "Field containing holdings ID")
+        ServiceTaskBase.add_cli_argument(parser, "bibID", "Field containing bib ID")
+        ServiceTaskBase.add_cli_argument(parser, "location", "Field containing location code")
+        ServiceTaskBase.add_cli_argument(parser, "callno", "Field containing call number")
