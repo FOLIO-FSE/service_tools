@@ -54,8 +54,8 @@ class VisualizeCsvData(ServiceTaskBase):
 
         print("Making pie charts...")
         # Show number of occurences for each unique value per column (truncated if many)
-        for column in data.columns:
-            try:    
+        try:    
+            for column in data.columns:
                 value_counts = data[column].value_counts()
                 value_names = value_counts.index.tolist()
                 # value_names = [str(name).replace("$","|") for name in value_names_raw]
@@ -108,12 +108,11 @@ class VisualizeCsvData(ServiceTaskBase):
                         self.mdFile.new_paragraph(tab_non_unique)
                         self.mdFile.new_line("</details>\n")
         
-            except Exception as e:
+        except Exception as e:
                 print(f"Failed to analyze the data in column {column}: {e}")
                 traceback.print_exc()
 
-
-            finally:
+        finally:
                 self.mdFile.new_table_of_contents(table_title='Contents', depth=3)
                 self.mdFile.create_md_file()
 
