@@ -19,8 +19,8 @@ class GenerateFakeLoans(ServiceTaskBase):
         self.faker = Faker()
         self.items = set()
         self.loan_policies = {}
-        self.create_requests = args.create_requests
-        self.create_page_requests = args.page_requests
+        self.create_requests = args.create_requests if "create_requests" in args else False
+        self.create_page_requests = args.page_requests if "page_requests" in args else False
         self.patron_groups = folio_client.get_all_ids("/groups")
         print(f"Fetched {len(self.patron_groups)} patron groups")
 
@@ -150,7 +150,7 @@ class GenerateFakeLoans(ServiceTaskBase):
     @abstractmethod
     def add_cli_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        parser.add_cli_argument("-r", "--create_requests", help="Add requests to created loan or page",
-                                action="store_true")
-        parser.add_cli_argument("-p", "--page_requests", help="Create page requests as well as loans",
-                                action="store_true")
+        ServiceTaskBase.add_cli_argument(parser, "--create_requests", "Add requests to created loan or page",
+                                         action="store_true")
+        ServiceTaskBase.add_cli_argument(parser, "--page_requests", "Create page requests as well as loans",
+                                         action="store_true")

@@ -71,5 +71,5 @@ class RemapField(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
-        ServiceTaskBase.add_cli_argument(parser, "infile", "Tab or comma delimited input file (csv/tsv extension required)", "FileChooser")
-        ServiceTaskBase.add_cli_argument(parser, "mapfile", "TSV mapping file (column headers required)", "FileChooser")
+        ServiceTaskBase.add_cli_argument(parser, "infile", "Tab or comma delimited input file (csv/tsv extension required)")
+        ServiceTaskBase.add_cli_argument(parser, "mapfile", "TSV mapping file (column headers required)")

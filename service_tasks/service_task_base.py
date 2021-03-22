@@ -78,7 +78,7 @@ class ServiceTaskBase():
 
     @staticmethod
     def add_cli_argument(parser: ArgumentParser, destination, help, **kwargs):
-        parser.add_argument(dest=destination, help=help)
+        parser.add_argument(dest=destination, help=help, **kwargs)
 
     @abstractmethod
     def do_work(self):
