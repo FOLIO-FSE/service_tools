@@ -150,7 +150,7 @@ class GenerateFakeLoans(ServiceTaskBase):
     @abstractmethod
     def add_cli_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        ServiceTaskBase.add_cli_argument(parser, "--create_requests", "Add requests to created loan or page",
+        ServiceTaskBase.add_cli_argument(parser, "create_requests", "Add requests to created loan or page",
                                          action="store_true")
-        ServiceTaskBase.add_cli_argument(parser, "--page_requests", "Create page requests as well as loans",
+        ServiceTaskBase.add_cli_argument(parser, "page_requests", "Create page requests as well as loans",
                                          action="store_true")
