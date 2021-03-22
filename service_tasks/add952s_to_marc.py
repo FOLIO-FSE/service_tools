@@ -1,19 +1,16 @@
+import asyncio
 import copy
 import json
 import logging
-import multiprocessing
 import sys
 import time
-import traceback
 from abc import abstractmethod
-
 from os import listdir
 from os.path import isfile, join
 
-from pymarc import MARCReader, pymarc, Field, Record, XMLWriter
+from pymarc import pymarc, Field
 
 from service_tasks.service_task_base import ServiceTaskBase
-import asyncio
 
 
 # We are mimicing this behaviour:
@@ -67,7 +64,6 @@ class Add952ToMarc(ServiceTaskBase):
                     "call_number_prefix": "",
                     "call_number_suffix": "",
                     "call_number_type": "",
-                    "volume": "",
                     "material_type": "",
                     "volume": "",
                     "enumeration": "",

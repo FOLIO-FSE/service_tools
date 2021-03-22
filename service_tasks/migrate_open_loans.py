@@ -1,7 +1,6 @@
 import copy
 import csv
 import json
-import re
 import time
 import traceback
 from abc import abstractmethod
@@ -11,6 +10,7 @@ import requests
 from dateutil import parser as du_parser
 from requests import HTTPError
 
+from helpers.circulation_helper import CirculationHelper
 from helpers.custom_dict import InsensitiveDictReader
 from service_tasks.service_task_base import ServiceTaskBase
 
@@ -56,7 +56,10 @@ class MigrateOpenLoans(ServiceTaskBase):
                 continue  # no need to process
             t0_migration = time.time()
             try:
-                res_checkout = self.check_out_by_barcode(legacy_loan, self.service_point_id)
+                res_checkout = CirculationHelper.check_out_by_barcode(legacy_loan["item_barcode"],
+                                                                      legacy_loan["patron_barcode"], self.folio_client,
+                                                                      self.service_point_id)
+                self.add_stats(res_checkout[3])
                 if not res_checkout[0]:
                     res_checkout = self.handle_checkout_failure(legacy_loan, res_checkout)
                     if not res_checkout[0]:
@@ -115,7 +118,11 @@ class MigrateOpenLoans(ServiceTaskBase):
             return False, None, None
         elif folio_checkout[2] == "Declared lost":
             self.set_item_as_available(legacy_loan)
-            res = self.check_out_by_barcode(legacy_loan, self.service_point_id)  # checkout_and_update
+            res = CirculationHelper.check_out_by_barcode(self.folio_client,
+                                                         legacy_loan["item_barcode"],
+                                                         legacy_loan["patron_barcode"],
+                                                         self.service_point_id)  # checkout_and_update
+            self.add_stats(res[3])
             if res[0]:
                 self.declare_lost(res[1])
                 self.add_stats("Handled Declared lost items")
@@ -128,7 +135,11 @@ class MigrateOpenLoans(ServiceTaskBase):
             expiration_date = user.get("expirationDate", dt.isoformat(dt.now()))
             user["expirationDate"] = dt.isoformat(dt.now() + timedelta(days=1))
             self.activate_user(user)
-            res = self.check_out_by_barcode(legacy_loan, self.service_point_id)  # checkout_and_update
+            res = CirculationHelper.check_out_by_barcode(self.folio_client,
+                                                         legacy_loan["item_barcode"],
+                                                         legacy_loan["patron_barcode"],
+                                                         self.service_point_id)  # checkout_and_update
+            self.add_stats(res[3])
             self.deactivate_user(user, expiration_date)
             self.add_stats("Handled expired users")
             return res
@@ -148,42 +159,6 @@ class MigrateOpenLoans(ServiceTaskBase):
                 self.add_stats("Duplicate loans")
                 del self.failed[legacy_loan["item_id"]]
             return False, None, None
-
-    def check_out_by_barcode(self, legacy_loan, service_point_id):
-        # TODO: add logging instead of print out
-        t0_function = time.time()
-        data = {
-            "itemBarcode": legacy_loan["item_barcode"],
-            "userBarcode": legacy_loan["patron_barcode"],
-            "loanDate": dt.now().isoformat(),
-            "servicePointId": service_point_id,
-        }
-        path = "/circulation/check-out-by-barcode"
-        url = f"{self.folio_client.okapi_url}{path}"
-        try:
-            req = requests.post(url, headers=self.folio_client.okapi_headers, data=json.dumps(data))
-            if req.status_code == 422:
-                error_message = json.loads(req.text)['errors'][0]['message']
-                if "has the item status" in error_message:
-                    error_message = re.findall("(?<=has the item status\s).*(?=\sand cannot be checked out)",
-                                               error_message)[0]
-                elif "No item with barcode" in error_message:
-                    error_message = "Missing barcode"
-                self.add_stats(f"Check out error: {error_message}")
-                return False, None, error_message
-            elif req.status_code == 201:
-                self.add_stats(f"Successfully checked out by barcode ({req.status_code})")
-                return True, json.loads(req.text), None
-            elif req.status_code == 204:
-                self.add_stats(f"Successfully checked out by barcode ({req.status_code})")
-                return True, None, None
-            else:
-                self.add_stats(f"Failed checkout http status {req.status_code}")
-                req.raise_for_status()
-        except HTTPError as exception:
-            print(f"{req.status_code}\tPOST FAILED {url}\n\t{json.dumps(data)}\n\t{req.text}", flush=True)
-            print(exception, flush=True)
-            return False, None, "5XX"
 
     @staticmethod
     @abstractmethod

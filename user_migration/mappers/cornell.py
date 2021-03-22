@@ -346,7 +346,6 @@ class Cornell(MapperBase):
                 "9": "Library Card",
                 "10": "Staff",
                 "11": "SPEC(Library Dept Card)",
-                "12": "Interlibrary Loan",
                 "12": "Carrel",
                 "13": "Privilege Card (Statutory)",
                 "14": "Privilege Card (Statutory)",

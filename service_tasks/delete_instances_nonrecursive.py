@@ -51,7 +51,7 @@ class DeleteInstancesAndSrsOnly(ServiceTaskBase):
     def delete_holdings(self, holdings):
         holding_iterator = 0
         
-        if holdings != []:
+        if holdings:
             for holding in holdings:
                 holding = holding["id"]
                 print("Deleting holding: " + holding)
