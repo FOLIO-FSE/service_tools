@@ -1,6 +1,7 @@
 import csv
 import json
 import pandas
+import re
 import matplotlib.pyplot as plt
 from mdutils.mdutils import MdUtils
 from service_tasks.service_task_base import ServiceTaskBase
@@ -32,33 +33,32 @@ class VisualizeCsvData(ServiceTaskBase):
 
         self.mdFile.new_paragraph("Scroll down to learn about your legacy data.")
 
-        try:
-            # Print overview to md file
-            self.mdFile.new_header(level=2, title="Data overview")
-            self.mdFile.new_paragraph(f"Your file contains {len(data.index)} rows (records) and {len(data.columns)} columns (fields). These are the present fields:")
-            self.mdFile.new_paragraph(f"These are the present fields:")
-            self.mdFile.new_line(str(data.columns.values))
+        # Print overview to md file
+        self.mdFile.new_header(level=2, title="Data overview")
+        self.mdFile.new_paragraph(f"Your file contains {len(data.index)} rows (records) and {len(data.columns)} columns (fields). These are the present fields:")
+        self.mdFile.new_paragraph(f"These are the present fields:")
+        self.mdFile.new_line(str(data.columns.values))
 
-            # Create a bar chart showing how many times a field occurs in the data
-            plt.rcParams["font.size"] = 12.0
-            data.count().plot.barh(figsize=(10, 10), color = "royalblue")
-            plt.title("Field occurences")
+        # Create a bar chart showing how many times a field occurs in the data
+        plt.rcParams["font.size"] = 12.0
+        data.count().plot.barh(figsize=(10, 10), color = "royalblue")
+        plt.title("Field occurences")
 
-            filename = "field_occurences.svg"
-            filepath = self.save_to_folder + "/" + filename
-            plt.savefig(filepath)
-            plt.close()
-            self.mdFile.new_line(self.mdFile.new_inline_image(text= "Chart", path=filename))
+        filename = "field_occurences.svg"
+        filepath = self.save_to_folder + "/" + filename
+        plt.savefig(filepath)
+        plt.close()
+        self.mdFile.new_line(self.mdFile.new_inline_image(text= "Chart", path=filename))
 
-            self.mdFile.new_header(level=2, title="A closer look at the different fields")
+        self.mdFile.new_header(level=2, title="A closer look at the different fields")
 
-
-            print("Making pie charts...")
-
-            # Show number of occurences for each unique value per column (truncated if many)
-            for column in data.columns:
+        print("Making pie charts...")
+        # Show number of occurences for each unique value per column (truncated if many)
+        for column in data.columns:
+            try:    
                 value_counts = data[column].value_counts()
-                value_names_raw = value_counts.index.tolist()
+                value_names = value_counts.index.tolist()
+                # value_names = [str(name).replace("$","|") for name in value_names_raw]
                 value_counts_dict = value_counts.to_dict()
 
                 self.mdFile.new_header(level=3, title=column)
@@ -76,7 +76,6 @@ class VisualizeCsvData(ServiceTaskBase):
                     self.mdFile.new_paragraph(tab_value_counts)
 
                     try:
-                        value_names = [str(name).replace("$","|") for name in value_names_raw]
                         # Creating plot 
                         plt.figure(figsize =(12, 8))
                         plt.title(column)
@@ -91,10 +90,11 @@ class VisualizeCsvData(ServiceTaskBase):
                         plt.close()
 
                         self.mdFile.new_paragraph(self.mdFile.new_inline_image(text= "Chart", path=filename))
+                    except ValueError as ve:
+                        print(f"Pie error in {column}! Alas, the following ingredients will cause failure to bake: {ve}")
+                        # traceback.print_exc() 
                     except Exception as e:
                         print(e)
-                        traceback.print_exc() 
-                
                 elif 21 <= unique_values <= 100:
                     non_unique = value_counts[value_counts > 1]
                     tab_non_unique = non_unique.to_markdown()
@@ -107,14 +107,15 @@ class VisualizeCsvData(ServiceTaskBase):
                         self.mdFile.new_paragraph(f"\n<details><summary>Expand to see a list of non-unique values.</summary>\n\n")
                         self.mdFile.new_paragraph(tab_non_unique)
                         self.mdFile.new_line("</details>\n")
+        
+            except Exception as e:
+                print(f"Failed to analyze the data in column {column}: {e}")
+                traceback.print_exc()
 
-        except Exception as e:
-            print(e)
-            traceback.print_exc() 
 
-        finally:
-            self.mdFile.new_table_of_contents(table_title='Contents', depth=3)
-            self.mdFile.create_md_file()
+            finally:
+                self.mdFile.new_table_of_contents(table_title='Contents', depth=3)
+                self.mdFile.create_md_file()
 
 
     @staticmethod
