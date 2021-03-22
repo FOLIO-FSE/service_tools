@@ -107,7 +107,8 @@ class GenerateFakeLoans(ServiceTaskBase):
                         # 1 out of 6 items are paged if argument -p was given
                         else:
                             logging.info("create page request")
-                            self.folio_client.create_request(
+                            CirculationHelper.create_request(
+                                self.folio_client,
                                 "Page",
                                 item_patron[1],
                                 item_patron[0],
