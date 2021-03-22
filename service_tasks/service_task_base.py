@@ -18,7 +18,7 @@ class ServiceTaskBase():
         logger = logging.getLogger()
         formatter = logging.Formatter(
             '%(asctime)s\t%(levelname)s\t%(message)s')
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.INFO)
 
         stream_handler = logging.StreamHandler()
         stream_handler.setLevel(logging.INFO)
