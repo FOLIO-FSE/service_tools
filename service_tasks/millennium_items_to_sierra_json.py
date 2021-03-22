@@ -1,4 +1,5 @@
 import csv
+import pandas
 import json
 import os
 import re
@@ -13,7 +14,7 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
     def __init__(self, args):
         self.millennium_items_path = args.data_path
         self.result_file = os.path.join(args.result_path, "millennium_sierra_items.json")
-        self.result_csv = os.path.join(args.result_path, "clean_items.csv")
+        self.csv_result_file = os.path.join(args.result_path, "csv_results.csv")
         self.sierra_items = {}
 
     def do_work(self):
@@ -21,12 +22,9 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
         written = 0
         unequal = 0
         unequal_rows = []
+        dict_list = []
 
-        with open(self.millennium_items_path, "r") as millennium_items_file, open(self.result_csv, "w") as result_csv, open(self.result_file,
-                                                                                  "w+") as results_file:
-            # If you have opted into printing a csv file
-            csv_writer = csv.writer(result_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
+        with open(self.millennium_items_path, "r") as millennium_items_file, open(self.result_file,'w+') as results_file, open(self.csv_result_file, "w") as csv_result_file:
             # Loop through all the rows
             for row_index, row in enumerate(millennium_items_file):      
                 # The first row contains the hearders from the first row
@@ -72,7 +70,7 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
 
                     # Translate the item dictionary into a Sierra style item object
                     sierra_object = self.dict_to_sierra_structure(item_as_dict)
-                    # print(json.dumps(sierra_obj, Findent=4))
+                    # print(json.dumps(sierra_obj, indent=4))
                     
                     # Remove fields with "" and " " values
                     elements_to_remove = []
@@ -83,13 +81,19 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
                         del sierra_object["fixedFields"][element]
 
                     results_file.write(f"{json.dumps(sierra_object, ensure_ascii=False)}\n")
+                    dict_list.append(item_as_dict)
 
+                
                     written += 1
                      # Report progress
                     if written % 5000 == 0:
                         print(f"{written} records created!", flush=True)
                 
-                csv_writer.writerow(row)
+                # millennium_items_file[row_index] = row
+                # print(millennium_items_file)
+
+            items_df = pandas.DataFrame(dict_list)
+            items_df.to_csv(csv_result_file, quoting=csv.QUOTE_ALL, index=False, line_terminator='\n')
 
             print(f"Done!\nNumber of rows processed: {row_index}\nNumber of Sierra-like records created: {written}\nA total of {unequal} rows had unexpected column counts:\n {unequal_rows}")
 
@@ -278,8 +282,9 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
                                      "data_path", "Path to the delimited file. Note that the script is tailored to handle a specific sequence of trailing characters.", "FileChooser"
                                      )
         ServiceTaskBase.add_argument(parser,
-                                     "result_path", "Folder where the resulting json file will be saved.", "DirChooser"
+                                     "result_path", "Folder where results will be saved", "DirChooser"
                                      )
+
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
