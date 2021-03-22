@@ -1,3 +1,6 @@
+import logging
+import logging.handlers
+import os
 from abc import abstractmethod
 from argparse import ArgumentParser
 
@@ -9,6 +12,28 @@ class ServiceTaskBase():
         self.stats = {}
         self.migration_report = {}
         self.folio_client = folio_client
+
+    @staticmethod
+    def setup_logging(log_file_path=None):
+        logger = logging.getLogger()
+        formatter = logging.Formatter(
+            '%(asctime)s\t%(levelname)s\t%(message)s')
+        logger.setLevel(logging.DEBUG)
+
+        stream_handler = logging.StreamHandler()
+        stream_handler.setLevel(logging.INFO)
+        stream_handler.setFormatter(formatter)
+        logger.addHandler(stream_handler)
+
+        if log_file_path:
+            log_file = os.path.join(log_file_path, "service_task_log.log")
+            file_handler = logging.handlers.TimedRotatingFileHandler(
+                filename=log_file, when='midnight', backupCount=30)
+            file_handler.addFilter(LevelFilter(0, 20))
+            file_handler.setFormatter(formatter)
+            file_handler.setLevel(logging.DEBUG)
+            logging.getLogger().addHandler(file_handler)
+        logger.info("Logging setup")
 
     def write_migration_report(self, report_file):
 
@@ -74,7 +99,7 @@ class ServiceTaskBase():
         # print(parser.__class__.__name__)
         # print(destination)
         parser.add_argument(dest=destination, help=help, widget=widget, metavar=kwargs.get('metavar'),
-                            choices=kwargs.get('choices'), gooey_options=kwargs.get('gooey_options'))
+                            choices=kwargs.get('choices'), gooey_options=kwargs.get('gooey_options'), action=kwargs.get('action'))
 
     @staticmethod
     def add_cli_argument(parser: ArgumentParser, destination, help, **kwargs):
@@ -97,3 +122,15 @@ def as_str(s):
         return str(s), ''
     except ValueError:
         return '', s
+
+
+class LevelFilter(logging.Filter):
+    def __init__(self, low, high):
+        self._low = low
+        self._high = high
+        logging.Filter.__init__(self)
+
+    def filter(self, record):
+        if self._low <= record.levelno <= self._high:
+            return True
+        return False

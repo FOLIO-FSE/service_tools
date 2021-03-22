@@ -1,4 +1,5 @@
 import itertools
+import logging
 import random
 from abc import abstractmethod
 from datetime import datetime, timedelta
@@ -14,29 +15,30 @@ class GenerateFakeLoans(ServiceTaskBase):
 
     def __init__(self, folio_client, args):
         super().__init__(folio_client)
+        self.setup_logging(args.results_path)
         """Init, setup"""
         self.folio_client = folio_client
         self.faker = Faker()
         self.items = set()
         self.loan_policies = {}
-        self.create_requests = args.create_requests if "create_requests" in args else False
-        self.create_page_requests = args.page_requests if "page_requests" in args else False
+        self.create_requests = True
+        self.create_page_requests = True
         self.patron_groups = folio_client.get_all_ids("/groups")
-        print(f"Fetched {len(self.patron_groups)} patron groups")
+        logging.info(f"Fetched {len(self.patron_groups)} patron groups")
 
         self.item_loan_types = folio_client.get_all_ids("/loan-types")
-        print(f"Fetched {len(self.item_loan_types)} item loan types")
+        logging.info(f"Fetched {len(self.item_loan_types)} item loan types")
 
         self.item_material_types = folio_client.get_all_ids("/material-types")
-        print(f"Fetched {len(self.item_material_types)} item material types")
+        logging.info(f"Fetched {len(self.item_material_types)} item material types")
 
         self.service_points = folio_client.get_all_ids(
             "/service-points", "?query=(pickupLocation==true)"
         )
-        print(f"Fetched {len(self.service_points)} Service points")
+        logging.info(f"Fetched {len(self.service_points)} Service points")
 
         self.locations = folio_client.get_all_ids("/locations")
-        print(f"Fetched {len(self.locations)} locations")
+        logging.info(f"Fetched {len(self.locations)} locations")
 
         self.item_seeds = list(
             itertools.product(
@@ -45,13 +47,11 @@ class GenerateFakeLoans(ServiceTaskBase):
         )
         # Shuffle the list of combinations so that you can run multiple instances at the same time
         random.shuffle(self.item_seeds)
-        print(
-            f"Created randomized list of {len(self.item_seeds)} possible combinations"
-        )
-        print("Init done.")
+        logging.info(f"Created randomized list of {len(self.item_seeds)} possible combinations")
+        logging.info("Init done.")
 
     def do_work(self):
-        print("Starting....")
+        logging.info("Starting....")
         # Iterate over every combination
         for seed in self.item_seeds:
             material_type_id = seed[0]
@@ -106,7 +106,7 @@ class GenerateFakeLoans(ServiceTaskBase):
 
                         # 1 out of 6 items are paged if argument -p was given
                         else:
-                            print("create page request", flush=True)
+                            logging.info("create page request")
                             self.folio_client.create_request(
                                 "Page",
                                 item_patron[1],
@@ -135,22 +135,16 @@ class GenerateFakeLoans(ServiceTaskBase):
                                                                                )
                                 if not req_results:
                                     combo_failed = True
-                                    print("Combination failed. No more trying to create requests")
+                                    logging.warn("Combination failed. No more trying to create requests")
 
     @staticmethod
     @abstractmethod
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        parser.add_argument("-r", "--create_requests", help="Add requests to created loan or page",
-                            action="store_true")
-        parser.add_argument("-p", "--page_requests", help="Create page requests as well as loans",
-                            action="store_true")
+        ServiceTaskBase.add_argument(parser, "results_path", "Path to results and logs", "DirChooser")
 
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        ServiceTaskBase.add_cli_argument(parser, "create_requests", "Add requests to created loan or page",
-                                         action="store_true")
-        ServiceTaskBase.add_cli_argument(parser, "page_requests", "Create page requests as well as loans",
-                                         action="store_true")
+        ServiceTaskBase.add_cli_argument(parser, "results_path", "Path to results and logs")

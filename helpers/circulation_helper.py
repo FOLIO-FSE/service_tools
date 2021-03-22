@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 import re
 import time
 import traceback
@@ -32,18 +33,20 @@ class CirculationHelper:
                                                error_message)[0]
                 elif "No item with barcode" in error_message:
                     error_message = "Missing barcode"
+                logging.error(error_message)
                 return False, None, error_message, f"Check out error: {error_message}"
             elif req.status_code == 201:
                 stats = f"Successfully checked out by barcode ({req.status_code})"
+                logging.info(stats)
                 return True, json.loads(req.text), None, stats
             elif req.status_code == 204:
                 stats = f"Successfully checked out by barcode ({req.status_code})"
+                logging.info(stats)
                 return True, None, None, stats
             else:
                 req.raise_for_status()
         except HTTPError as exception:
-            print(f"{req.status_code}\tPOST FAILED {url}\n\t{json.dumps(data)}\n\t{req.text}", flush=True)
-            print(exception, flush=True)
+            logging.Error(f"{req.status_code}\tPOST FAILED {url}\n\t{json.dumps(data)}\n\t{req.text}", exc_info=True)
             return False, None, "5XX", f"Failed checkout http status {req.status_code}"
 
     @staticmethod
@@ -64,23 +67,18 @@ class CirculationHelper:
             }
             path = "/circulation/requests"
             url = f"{folio_client.okapi_url}{path}"
-            print(f"POST {url}\t{json.dumps(data)}", flush=True)
             req = requests.post(url, headers=folio_client.okapi_headers, data=json.dumps(data))
-            print(req.status_code, flush=True)
+            logging.info(f"POST {req.status_code}\t{url}\t{json.dumps(data)}")
             if str(req.status_code) == "422":
-                print(
-                    f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(data)}",
-                    flush=True,
-                )
+                logging.error(f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(data)}")
                 return False
             else:
                 # print(req.text)
                 req.raise_for_status()
-                print(f"{req.status_code} Successfully created {request_type}", flush=True)
+                logging.info(f"{req.status_code} Successfully created {request_type}")
                 return True
         except Exception as exception:
-            print(exception, flush=True)
-            traceback.print_exc()
+            logging.error(exception, exc_info=True)
             return False
 
     @staticmethod
@@ -97,26 +95,15 @@ class CirculationHelper:
             req = requests.put(
                 url, headers=folio_client.okapi_headers, data=json.dumps(loan_to_put)
             )
-            print(
-                f"{req.status_code}\tPUT Extend loan {loan_to_put['id']} to {loan_to_put['dueDate']}\t {url}",
-                flush=True,
-            )
+            logging.info(f"{req.status_code}\tPUT Extend loan {loan_to_put['id']} to {loan_to_put['dueDate']}\t {url}")
             if str(req.status_code) == "422":
-                print(
-                    f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(loan_to_put)}",
-                    flush=True,
-                )
+                logging.error(f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(loan_to_put)}")
                 return False
             else:
                 req.raise_for_status()
             return True
         except Exception as exception:
-            print(
-                f"PUT FAILED Extend loan to {loan_to_put['dueDate']}\t {url}\t{json.dumps(loan_to_put)}",
-                flush=True,
-            )
-            traceback.print_exc()
-            print(exception, flush=True)
+            logging.error(f"PUT FAILED Extend loan to {loan_to_put['dueDate']}\t {url}\t{json.dumps(loan_to_put)}", exc_info=True)
             return False
 
     @staticmethod
@@ -137,18 +124,11 @@ class CirculationHelper:
             }
             path = "/circulation/requests"
             url = f"{folio_client.okapi_url}{path}"
-            print(f"POST {url}\t{json.dumps(data)}", flush=True)
             req = requests.post(url, headers=folio_client.okapi_headers, data=json.dumps(data))
-            print(req.status_code, flush=True)
+            logging.info(f"POST {req.status_code}\t{url}\t{json.dumps(data)}")
             if str(req.status_code) == "422":
-                print(
-                    f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(data)}",
-                    flush=True,
-                )
+                logging.error(f"{json.loads(req.text)['errors'][0]['message']}\t{json.dumps(data)}")
             else:
-                print(req.status_code, flush=True)
-                # print(req.text)
                 req.raise_for_status()
         except Exception as exception:
-            print(exception, flush=True)
-            traceback.print_exc()
+            logging.error(exception, exc_info=True)
