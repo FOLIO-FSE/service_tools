@@ -4,6 +4,7 @@ from collections import defaultdict
 import csv
 import pandas as pd
 
+
 class MFHDBuilder(ServiceTaskBase):
     def __init__(self, args):
         self.infile = args.infile
@@ -11,15 +12,15 @@ class MFHDBuilder(ServiceTaskBase):
         self.holdField = args.holdID
         self.locField = args.location
         self.callField = args.callno
-        self.filetype = Path(args.infile).suffix 
+        self.filetype = Path(args.infile).suffix
         self.outfile = self.infile[:-len(self.filetype)] + ".mrk"
 
     def do_work(self):
 
         if (self.filetype == ".tsv"):
-            df = pd.read_csv(self.infile, dtype=str, sep='\t')  
+            df = pd.read_csv(self.infile, dtype=str, sep='\t')
         else:
-            df = pd.read_csv(self.infile, dtype=str)  
+            df = pd.read_csv(self.infile, dtype=str)
 
         f = open(self.outfile, "w", encoding='utf-8')
 
@@ -28,10 +29,10 @@ class MFHDBuilder(ServiceTaskBase):
 
         counter = 0
         multirecords = 0
-        repeatCounter = 0 
-        recordsWritten = 0 
+        repeatCounter = 0
+        recordsWritten = 0
         repeatRecords = defaultdict(int)
-        
+
         for row in df.index:
             bibID = str(df[self.bibField][row])
             marc001 = '=001    ' + str(df[self.holdField][row]) + "\n"
@@ -43,7 +44,7 @@ class MFHDBuilder(ServiceTaskBase):
 
             marc852 = '=852 0\\$b' + location + '$h' + callno + "\n"
             ## make sure record was not already processed
-            if (repeatRecords[bibID] != 1): 
+            if (repeatRecords[bibID] != 1):
                 f.write(LDR)
                 f.write(marc001)
                 f.write(marc004)
@@ -53,16 +54,17 @@ class MFHDBuilder(ServiceTaskBase):
                 repeatRecords[bibID] = 1
                 recordsWritten += 1
             else:
-                repeatCounter +=1
+                repeatCounter += 1
 
             counter += 1
-        print(f"Process complete. {counter} items were processed. {recordsWritten} MFHD records were created and written to {self.outfile} and {repeatCounter} MHFDs will be associated with more than one item record")
+        print(
+            f"Process complete. {counter} items were processed. {recordsWritten} MFHD records were created and written to {self.outfile} and {repeatCounter} MHFDs will be associated with more than one item record")
 
-            
     @staticmethod
     @abstractmethod
     def add_arguments(parser):
-        ServiceTaskBase.add_argument(parser, "infile", "Tab or comma delimited input file (csv/tsv extension required)", "FileChooser")
+        ServiceTaskBase.add_argument(parser, "infile", "Tab or comma delimited input file (csv/tsv extension required)",
+                                     "FileChooser")
         ServiceTaskBase.add_argument(parser, "holdID", "Field containing holdings ID", "")
         ServiceTaskBase.add_argument(parser, "bibID", "Field containing bib ID", "")
         ServiceTaskBase.add_argument(parser, "location", "Field containing location code", "")
@@ -71,7 +73,8 @@ class MFHDBuilder(ServiceTaskBase):
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
-        ServiceTaskBase.add_cli_argument(parser, "infile", "Tab or comma delimited input file (csv/tsv extension required)", "FileChooser")
+        ServiceTaskBase.add_cli_argument(parser, "infile",
+                                         "Tab or comma delimited input file (csv/tsv extension required)", "")
         ServiceTaskBase.add_argument(parser, "holdID", "Field containing holdings ID", "")
         ServiceTaskBase.add_argument(parser, "bibID", "Field containing bib ID", "")
         ServiceTaskBase.add_argument(parser, "location", "Field containing location code", "")
