@@ -144,6 +144,9 @@ class Default(MapperBase):
                     address_type_id = self.user_map["addressTypes"][i]
                     self.report_folio_mapping(f"{folio_prop_name}", True, False)
                     return address_type_id
+                except KeyError as key_error:
+                    print(f"Key error; {key_error}")
+                    json.dumps(self.user_map, indent=4)
                 except IndexError:
                     return ""
             elif legacy_user_key:
