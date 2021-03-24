@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 import re
 import uuid
 from datetime import datetime
@@ -139,8 +140,12 @@ class Default(MapperBase):
             if folio_prop_name == "personal.addresses.id":
                 return str(uuid.uuid4())
             elif folio_prop_name == "expirationDate":
-                exp_date = parse(legacy_user.get(legacy_user_key, datetime.utcnow().isoformat()), fuzzy=True)
-                return exp_date.isoformat()
+                try:
+                    exp_date = parse(legacy_user.get(legacy_user_key), fuzzy=True)
+                    return exp_date.isoformat()
+                except Exception as ee:
+                    logging.error(f"expiration date {legacy_user.get(legacy_user_key)} could not be parsed")
+                    return datetime.utcnow().isoformat()
             elif folio_prop_name.strip() == "personal.addresses.primaryAddress":
                 return i == self.user_map["primaryAddressIndex"]
             elif folio_prop_name == "personal.addresses.addressTypeId":
@@ -149,7 +154,7 @@ class Default(MapperBase):
                     self.report_folio_mapping(f"{folio_prop_name}", True, False)
                     return address_type_id
                 except KeyError as key_error:
-                    print(f"Key error:git {key_error} i:{i}")
+                    print(f"Key error: {key_error} i:{i}")
                     json.dumps(self.user_map, indent=4)
                     print("Stupid output")
                     return ""
