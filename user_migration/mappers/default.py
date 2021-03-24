@@ -16,6 +16,7 @@ class Default(MapperBase):
     def __init__(self, folio_client: FolioClient, args):
         super().__init__(folio_client)
         self.args = args
+        self.file_format = args.file_format
         self.user_schema = MapperBase.get_user_schema()
         with open(args.mapping_file_path) as mapping_file:
             self.user_map = json.load(mapping_file)
@@ -121,7 +122,10 @@ class Default(MapperBase):
         address_fields = ["countryId", "addressLine1", "addressLine2", "city", "region", "postalCode",
                           "addressTypeId", "primaryAddress"]
         csv.register_dialect("tsv", delimiter="\t")
-        reader = csv.DictReader(source_file)
+        if self.file_format == "tsv":
+            reader = csv.DictReader(source_file, dialect=self.file_format)
+        else:
+            reader = csv.DictReader(source_file)
         current_user = {}
         current_user_id = ""
         for row in reader:
@@ -147,6 +151,8 @@ class Default(MapperBase):
                 except KeyError as key_error:
                     print(f"Key error:git {key_error} i:{i}")
                     json.dumps(self.user_map, indent=4)
+                    print("Stupid output")
+                    return ""
                 except IndexError:
                     return ""
             elif legacy_user_key:

@@ -136,7 +136,7 @@ class MigrateUsers(ServiceTaskBase):
                                      "./users subfolder and add results to it.",
                                      "DirChooser")
         ServiceTaskBase.add_argument(parser, "patron_group_map_path", "Location of the patron group mapping file",
-                                     "FileChooser",required=False)
+                                     "FileChooser", required=False)
         ServiceTaskBase.add_argument(parser, "batch_size",
                                      "The number of users in each batch that is saved to disk and posted to FOLIO", "",
                                      gooey_options={'initial_value': '250'})
@@ -150,6 +150,9 @@ class MigrateUsers(ServiceTaskBase):
         ServiceTaskBase.add_argument(parser, "temp_email",
                                      "Email address to give all users during testing. Leave empty at go-live",
                                      "", required=False)
+        ServiceTaskBase.add_argument(parser, "file_format", "File format", "Dropdown",
+                                     choices=list(list_file_formats()),
+                                     )
 
     @staticmethod
     @abstractmethod
@@ -173,6 +176,16 @@ class MigrateUsers(ServiceTaskBase):
                                                                       "transformer other than Default")
         ServiceTaskBase.add_cli_argument(parser, "temp_email",
                                          "Email address to give all users during testing. Leave empty at go-live")
+        ServiceTaskBase.add_cli_argument(parser, "file_format", "File format",
+                                         choices=list(list_file_formats())
+                                         )
+
+
+def list_file_formats():
+    return {
+        "tsv",
+        "csv"
+    }
 
 
 def chunks(records, number_of_chunks):
