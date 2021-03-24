@@ -145,7 +145,7 @@ class Default(MapperBase):
                     self.report_folio_mapping(f"{folio_prop_name}", True, False)
                     return address_type_id
                 except KeyError as key_error:
-                    print(f"Key error; {key_error}")
+                    print(f"Key error:git {key_error} i:{i}")
                     json.dumps(self.user_map, indent=4)
                 except IndexError:
                     return ""
