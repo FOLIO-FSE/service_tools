@@ -6,7 +6,9 @@ name = "pypi"
 [[source]]
 url = "https://pypi.python.org/simple"
 verify_ssl = true
-name = "pypi"[packages]
+name = "pypi"
+
+[packages]
 psutil = "*"
 folioclient = "*"
 gooey = "*"
@@ -18,5 +20,6 @@ matplotlib = "*"
 mdutils = "*"
 pandas = "*"
 tabulate = "*"
+faker = "*"
 
 [dev-packages]
