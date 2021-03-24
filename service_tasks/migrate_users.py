@@ -61,7 +61,9 @@ class MigrateUsers(ServiceTaskBase):
                             self.write_results(batch, f"user_batch{i}.json")
                             batch = []
                         if i == 1:
-                            print("## First user")
+                            print("## First Legacy  user")
+                            print(json.dumps(legacy_user, indent=4))
+                            print("## First FOLIO  user")
                             print(json.dumps(folio_user, indent=4, sort_keys=True))
                         self.add_stats("Successfull user transformations")
                     except ValueError as ve:
