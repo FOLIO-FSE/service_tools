@@ -147,7 +147,7 @@ class Default(MapperBase):
                     logging.error(f"expiration date {legacy_user.get(legacy_user_key)} could not be parsed")
                     return datetime.utcnow().isoformat()
             elif folio_prop_name.strip() == "personal.addresses.primaryAddress":
-                return i == self.user_map["primaryAddressIndex"]
+                return i == 0  # The first address in the mapping file (the one with [0]) will be primary
             elif folio_prop_name == "personal.addresses.addressTypeId":
                 try:
                     address_type_id = self.user_map["addressTypes"][i]
