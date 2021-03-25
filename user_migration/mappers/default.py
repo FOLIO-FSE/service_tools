@@ -100,7 +100,7 @@ class Default(MapperBase):
         if self.args.temp_email:
             self.add_to_migration_report("General", f"Replaced email with {self.args.temp_email}")
             folio_user["personal"]["email"] = self.args.temp_email
-        folio_user["personal"]["preferredContactTypeId"] = self.user_map["preferredContactTypeId"]
+        folio_user["personal"]["preferredContactTypeId"] = "Email"
         folio_user["active"] = True
         del folio_user["personal"]["preferredFirstName"]
         del folio_user["tags"]
