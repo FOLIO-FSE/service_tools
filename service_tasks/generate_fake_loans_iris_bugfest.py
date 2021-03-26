@@ -10,7 +10,7 @@ from helpers.circulation_helper import CirculationHelper
 from service_tasks.service_task_base import ServiceTaskBase
 
 
-class GenerateFakeLoans(ServiceTaskBase):
+class GenerateFakeLoansIrisBugfest(ServiceTaskBase):
     """Class that is responsible for the actual work"""
 
     def __init__(self, folio_client, args):
