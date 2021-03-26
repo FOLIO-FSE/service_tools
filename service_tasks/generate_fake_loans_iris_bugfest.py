@@ -23,22 +23,20 @@ class GenerateFakeLoans(ServiceTaskBase):
         self.loan_policies = {}
         self.create_requests = True
         self.create_page_requests = True
-        self.patron_groups = [""]
+        self.patron_groups = ["ba484dd9-a2c3-4d80-b067-91cd2066134b", "6ad290aa-5851-4356-bb8d-1015e40c05c2", "d01b7bba-48fb-4264-833b-b88d23505404","d010bfa2-4983-4741-9ef8-1295484297cc"]
         logging.info(f"{len(self.patron_groups)} patron groups")
 
-        self.item_loan_types = [""]
+        self.item_loan_types = ["e8b311a6-3b21-43f2-a269-dd9310cb2d0e", "2e48e713-17f3-4c13-a9f8-23845bb210a4", "2b94c631-fca9-4892-a730-03ee529ffe27"]
         logging.info(f"{len(self.item_loan_types)} item loan types")
 
-        self.item_material_types = [""]
-        logging.info(f"Fetched {len(self.item_material_types)} item material types")
+        self.item_material_types = ["025ba2c5-5e96-4667-a677-8186463aee69", "b3d29557-c74d-403d-a279-a2ef6b3a80f6"]
+        logging.info(f"{len(self.item_material_types)} item material types")
 
-        self.service_points = folio_client.get_all_ids(
-            "/service-points", "?query=(pickupLocation==true)"
-        )
-        logging.info(f"Fetched {len(self.service_points)} Service points")
+        self.service_points = ["3a7de149-f17d-4602-adfe-0b09bf8e884a"]
+        logging.info(f"{len(self.service_points)} Service points")
 
-        self.locations = folio_client.get_all_ids("/locations")
-        logging.info(f"Fetched {len(self.locations)} locations")
+        self.locations = ["23f6dc01-1d53-4dfa-8163-60bf1f5cc4cd", "dcd9815f-f66b-401c-a345-acc3e0d0acf4"]
+        logging.info(f"{len(self.locations)} locations")
 
         self.item_seeds = list(
             itertools.product(
