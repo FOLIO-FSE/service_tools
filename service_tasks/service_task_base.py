@@ -7,17 +7,18 @@ from argparse import ArgumentParser
 from folioclient import FolioClient
 
 
-class ServiceTaskBase():
+class ServiceTaskBase:
     def __init__(self, folio_client: FolioClient = None):
         self.stats = {}
         self.migration_report = {}
         self.folio_client = folio_client
+        self.setup_logging()
 
     @staticmethod
     def setup_logging(log_file_path=None):
         logger = logging.getLogger()
         formatter = logging.Formatter(
-            '%(asctime)s\t%(levelname)s\t%(message)s')
+            '%(levelname)s\t%(message)s\t%(asctime)s')
         logger.setLevel(logging.INFO)
 
         stream_handler = logging.StreamHandler()
@@ -65,10 +66,10 @@ class ServiceTaskBase():
     @staticmethod
     def print_dict_to_md_table(my_dict, h1="", h2=""):
         d_sorted = {k: my_dict[k] for k in sorted(my_dict)}
-        print(f"{h1} | {h2}")
-        print("--- | ---:")
+        logging.info(f"{h1} | {h2}")
+        logging.info("--- | ---:")
         for k, v in d_sorted.items():
-            print(f"{k} | {v}")
+            logging.info(f"{k} | {v}")
 
     def print_stats(self):
         self.print_dict_to_md_table(self.stats, "Measure", "  #  ")
@@ -80,9 +81,9 @@ class ServiceTaskBase():
 
     def print_migration_report(self):
         for a in self.migration_report:
-            print(f"# {a}")
+            logging.info(f"# {a}")
             for b in self.migration_report[a]:
-                print(b)
+                logging.info(b)
 
     @staticmethod
     @abstractmethod
@@ -96,10 +97,11 @@ class ServiceTaskBase():
 
     @staticmethod
     def add_argument(parser, destination, help, widget, **kwargs):
-        # print(parser.__class__.__name__)
-        # print(destination)
+        # logging.info(parser.__class__.__name__)
+        # logging.info(destination)
         parser.add_argument(dest=destination, help=help, widget=widget, metavar=kwargs.get('metavar'),
-                            choices=kwargs.get('choices'), gooey_options=kwargs.get('gooey_options'), action=kwargs.get('action'))
+                            choices=kwargs.get('choices'), gooey_options=kwargs.get('gooey_options'),
+                            action=kwargs.get('action'))
 
     @staticmethod
     def add_cli_argument(parser: ArgumentParser, destination, help, **kwargs):
@@ -110,10 +112,10 @@ class ServiceTaskBase():
         raise NotImplementedError
 
     @staticmethod
-    def add_common_arguments(parser: object) -> object:
+    def add_common_arguments(parser):
         parser.add_argument(
             "okapi_credentials_string", help="Space delimited string containing "
-                                             "OKAPI_URL, TENANT_ID,  USERNAME, PASSWORD in that oreder."
+                                             "OKAPI_URL, TENANT_ID,  USERNAME, PASSWORD in that order."
         )
 
 

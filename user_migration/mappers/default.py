@@ -17,20 +17,15 @@ class Default(MapperBase):
     def __init__(self, folio_client: FolioClient, args):
         super().__init__(folio_client)
         self.args = args
-        self.file_format = args.file_format
         self.user_schema = MapperBase.get_user_schema()
-        with open(args.mapping_file_path) as mapping_file:
-            self.user_map = json.load(mapping_file)
-        print(f"User map loaded from {args.mapping_file_path}")
-        self.legacy_id_map: Dict[str, str] = {}
         self.ids_dict: Dict[str, set] = {}
         self.use_map = True
 
-    def do_map(self, legacy_user):
+    def do_map(self, legacy_user, user_map):
         # raise NotImplementedError("Create ID-Legacy ID Mapping file!")
         # raise NotImplementedError("Check for ID duplicates (barcodes, externalsystemID:s, usernames, emails?, ")
         folio_user = self.instantiate_user()
-        self.add_to_migration_report("Users per patron type", str(self.get_prop(legacy_user, "patronGroup")))
+        self.add_to_migration_report("Users per patron type", str(self.get_prop(legacy_user, user_map, "patronGroup")))
         for prop_name, prop in self.user_schema["properties"].items():
             if prop.get("description", "") == "Deprecated":
                 self.report_folio_mapping(f"{prop_name} (deprecated)", False, True)
@@ -48,17 +43,17 @@ class Default(MapperBase):
                             for sub_prop_name2, sub_prop2 in sub_prop["properties"].items():
                                 sub_prop_key2 = sub_prop_key + "." + sub_prop_name2
                                 if sub_prop2["type"] == "array":
-                                    print(f"Array: {sub_prop_key2} ")
+                                    logging.warning(f"Array: {sub_prop_key2} ")
                         elif sub_prop["type"] == "array":
                             folio_user[prop_name][sub_prop_name] = []
                             for i in range(0, 5):
                                 if sub_prop["items"]["type"] == "object":
                                     temp = {}
                                     for sub_prop_name2, sub_prop2 in sub_prop["items"]["properties"].items():
-                                        temp[sub_prop_name2] = self.get_prop(legacy_user,
+                                        temp[sub_prop_name2] = self.get_prop(legacy_user, user_map,
                                                                              sub_prop_key + "." + sub_prop_name2, i)
                                     if all(value == "" for key, value in temp.items() if
-                                           key not in ["id", "primaryAddress"]):
+                                           key not in ["id", "primaryAddress", "addressTypeId"]):
                                         continue
                                     folio_user[prop_name][sub_prop_name].append(temp)
                                 else:
@@ -68,14 +63,14 @@ class Default(MapperBase):
                                                                                          i)
 
                         else:
-                            folio_user[prop_name][sub_prop_name] = self.get_prop(legacy_user, sub_prop_key)
+                            folio_user[prop_name][sub_prop_name] = self.get_prop(legacy_user, user_map, sub_prop_key)
 
             elif prop["type"] == "array":
                 # handle departments
                 self.report_folio_mapping(f"Unhandled array: {prop_name}", False)
 
             else:
-                self.map_basic_props(legacy_user, prop_name, folio_user)
+                self.map_basic_props(legacy_user, user_map, prop_name, folio_user)
                 """ elif prop == "customFields":
                     custom_fields = [c for c in legacy_user if c.startswith("customField")]
                     if any(custom_fields):
@@ -97,9 +92,6 @@ class Default(MapperBase):
         # self.add_to_migration_report("Users by FOLIO Patron Group", folio_user['patronGroup'])
         # self.handle_addresses(folio_user, legacy_user_dict)
         # self.validate(folio_user)
-        if self.args.temp_email:
-            self.add_to_migration_report("General", f"Replaced email with {self.args.temp_email}")
-            folio_user["personal"]["email"] = self.args.temp_email
         folio_user["personal"]["preferredContactTypeId"] = "Email"
         folio_user["active"] = True
         del folio_user["personal"]["preferredFirstName"]
@@ -107,25 +99,25 @@ class Default(MapperBase):
 
         return folio_user
 
-    def map_basic_props(self, legacy_user, prop, folio_user):
-        if self.has_property(legacy_user, prop):  # is there a match in the csv?
-            if self.get_prop(legacy_user, prop).strip():
-                folio_user[prop] = self.get_prop(legacy_user, prop)
-                self.report_legacy_mapping(self.legacy_property(prop), True, False)
+    def map_basic_props(self, legacy_user, user_map, prop, folio_user):
+        if self.has_property(legacy_user, user_map, prop):  # is there a match in the csv?
+            if self.get_prop(legacy_user, user_map, prop).strip():
+                folio_user[prop] = self.get_prop(legacy_user, user_map, prop)
+                self.report_legacy_mapping(self.legacy_property(user_map, prop), True, False)
                 self.report_folio_mapping(prop, True, False)
             else:  # Match but empty field. Lets report this
-                self.report_legacy_mapping(self.legacy_property(prop), True, True)
+                self.report_legacy_mapping(self.legacy_property(user_map, prop), True, True)
                 self.report_folio_mapping(prop, True, True)
         else:
             self.report_folio_mapping(prop, False)
 
-    def get_users(self, source_file):
+    def get_users(self, source_file, file_format: str):
         address_fields = ["countryId", "addressLine1", "addressLine2", "city", "region", "postalCode",
                           "addressTypeId", "primaryAddress"]
         csv.register_dialect("tsv", delimiter="\t")
-        if self.file_format == "tsv":
-            reader = csv.DictReader(source_file, dialect=self.file_format)
-        else:
+        if file_format == "tsv":
+            reader = csv.DictReader(source_file, dialect='tsv')
+        else:  # Assume csv
             reader = csv.DictReader(source_file)
         current_user = {}
         current_user_id = ""
@@ -133,12 +125,22 @@ class Default(MapperBase):
             # return [row]
             yield row
 
-    def get_prop(self, legacy_user, folio_prop_name, i=0):
+    def get_prop(self, legacy_user, user_map, folio_prop_name, i=0):
         if self.use_map:
-            legacy_user_key = next((k["legacy_field"] for k in self.user_map["data"] if
-                                    k["folio_field"].replace(f"[{i}]", "") == folio_prop_name), "")
+            legacy_user_key = next((k["legacy_field"] for k
+                                    in user_map["data"]
+                                    if k["folio_field"].replace(f"[{i}]", "") == folio_prop_name), "")
+            value = next(
+                (k.get("value", "")
+                 for k in user_map["data"]
+                 if k["folio_field"].replace(f"[{i}]", "") == folio_prop_name), ""
+            )
+            if value:
+                self.add_to_migration_report("Default values added", f"{value} added to {folio_prop_name}")
+                return value
+
             if folio_prop_name == "personal.addresses.id":
-                return str(uuid.uuid4())
+                return "not needed"
             elif folio_prop_name == "expirationDate":
                 try:
                     exp_date = parse(legacy_user.get(legacy_user_key), fuzzy=True)
@@ -150,13 +152,12 @@ class Default(MapperBase):
                 return i == 0  # The first address in the mapping file (the one with [0]) will be primary
             elif folio_prop_name == "personal.addresses.addressTypeId":
                 try:
-                    address_type_id = self.user_map["addressTypes"][i]
+                    address_type_id = user_map["addressTypes"][i]
                     self.report_folio_mapping(f"{folio_prop_name}", True, False)
                     return address_type_id
                 except KeyError as key_error:
-                    print(f"Key error: {key_error} i:{i}")
-                    json.dumps(self.user_map, indent=4)
-                    print("Stupid output")
+                    # logging.error(f"Key error: {key_error} i:{i}")
+                    # json.dumps(user_map, indent=4)
                     return ""
                 except IndexError:
                     return ""
@@ -170,16 +171,21 @@ class Default(MapperBase):
             self.report_folio_mapping(f"{folio_prop_name}", True, False)
             return legacy_user[folio_prop_name]
 
-    def has_property(self, user, folio_prop_name):
+    def has_property(self, user, user_map, folio_prop_name):
         if self.use_map:
-            user_key = next((k["legacy_field"] for k in self.user_map["data"] if k["folio_field"] == folio_prop_name),
+            user_key = next((k["legacy_field"] for k in user_map["data"] if k["folio_field"] == folio_prop_name),
                             "")
             return user_key and user_key not in ["", "Not mapped"] and user.get(user_key, "")
         else:
             return folio_prop_name in user
 
-    def legacy_property(self, folio_prop):
+    def legacy_property(self, user_map, folio_prop_name):
         if self.use_map:
-            return next(k["legacy_field"] for k in self.user_map["data"] if k["folio_field"] == folio_prop)
+            value = next(
+                (k.get("value", "") for k in user_map["data"] if k["folio_field"] == folio_prop_name), "")
+            if value:
+                self.add_to_migration_report("Default values added", f"{value} added to {folio_prop_name}")
+                return value
+            return next(k["legacy_field"] for k in user_map["data"] if k["folio_field"] == folio_prop_name)
         else:
-            return folio_prop
+            return folio_prop_name

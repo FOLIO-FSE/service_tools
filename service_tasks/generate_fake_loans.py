@@ -136,7 +136,7 @@ class GenerateFakeLoans(ServiceTaskBase):
                                                                                )
                                 if not req_results:
                                     combo_failed = True
-                                    logging.warn("Combination failed. No more trying to create requests")
+                                    logging.warning("Combination failed. No more trying to create requests")
 
     @staticmethod
     @abstractmethod

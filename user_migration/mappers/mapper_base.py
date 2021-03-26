@@ -1,6 +1,9 @@
 import json
+import logging
 import uuid
 from abc import abstractmethod
+from typing import Dict
+
 import requests
 from folioclient import FolioClient
 import os
@@ -9,6 +12,8 @@ import os
 class MapperBase():
     def __init__(self, folio_client: FolioClient):
         self.stats = {}
+        self.legacy_id_map: Dict[str, str] = {}
+
         self.migration_report = {}
         self.folio_client = folio_client
         self.mapped_folio_fields = {}
@@ -17,7 +22,7 @@ class MapperBase():
         self.user_schema = self.get_user_schema()
 
     def print_mapping_report(self, total_records):
-        print('\n## Mapped FOLIO fields')
+        logging.info('\n## Mapped FOLIO fields')
         d_sorted = {k: self.mapped_folio_fields[k] for k in sorted(self.mapped_folio_fields)}
         print(f"FOLIO Field | Mapped | Empty | Unmapped")
         print("--- | --- | --- | ---:")
@@ -27,7 +32,7 @@ class MapperBase():
             unmapped_per = "{:.1%}".format(unmapped / total_records)
             mp = mapped / total_records
             mapped_per = "{:.0%}".format(mp if mp > 0 else 0)
-            print(f"{k} | {mapped if mapped > 0 else 0} ({mapped_per}) | {v[1]} | {unmapped}")
+            logging.info(f"{k} | {mapped if mapped > 0 else 0} ({mapped_per}) | {v[1]} | {unmapped}")
         print('\n## Mapped Legacy fields')
         d_sorted = {k: self.mapped_legacy_fields[k] for k in sorted(self.mapped_legacy_fields)}
         print(f"Legacy Field | Mapped | Empty | Unmapped")
@@ -127,7 +132,7 @@ class MapperBase():
         ref_object = self.ref_data_dicts.get(dict_key, {}).get(
             key_value.lower().strip(), ()
         )
-        # print(f"{key_value} - {ref_object} - {dict_key}")
+        # logging.info(f"{key_value} - {ref_object} - {dict_key}")
         if ref_object:
             return ref_object
         else:
@@ -138,11 +143,11 @@ class MapperBase():
         return self.ref_data_dicts.get(dict_key, {}).get(key_value.lower().strip(), ())
 
     @abstractmethod
-    def do_map(self):
+    def do_map(self, legacy_user, object_map):
         raise NotImplementedError
 
     @abstractmethod
-    def get_users(self, source_file):
+    def get_users(self, source_file, file_format: str):
         raise NotImplementedError
 
     @staticmethod
