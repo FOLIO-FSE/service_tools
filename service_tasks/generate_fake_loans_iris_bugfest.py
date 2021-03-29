@@ -51,90 +51,91 @@ class GenerateFakeLoansIrisBugfest(ServiceTaskBase):
     def do_work(self):
         logging.info("Starting....")
         # Iterate over every combination
-        for seed in self.item_seeds:
-            material_type_id = seed[0]
-            loan_type_id = seed[1]
-            location_id = seed[2]
-            i_query = f'?query=(materialTypeId="{material_type_id}" and ' \
-                      f'permanentLoanTypeId="{loan_type_id}" and ' \
-                      f'effectiveLocationId="{location_id}" and ' \
-                      f'status.name=="Available")'
-            # iterate over every patron group
-            for patron_group_id in self.patron_groups:
+        while True:
+            for seed in self.item_seeds:
+                material_type_id = seed[0]
+                loan_type_id = seed[1]
+                location_id = seed[2]
+                i_query = f'?query=(materialTypeId="{material_type_id}" and ' \
+                          f'permanentLoanTypeId="{loan_type_id}" and ' \
+                          f'effectiveLocationId="{location_id}" and ' \
+                          f'status.name=="Available")'
+                # iterate over every patron group
+                for patron_group_id in self.patron_groups:
 
-                # get random Items from FOLIO based on the combination of parameters
-                items = self.folio_client.get_random_objects(
-                    "/item-storage/items", 10, query=i_query
-                )
+                    # get random Items from FOLIO based on the combination of parameters
+                    items = self.folio_client.get_random_objects(
+                        "/item-storage/items", 10, query=i_query
+                    )
 
-                # Get patrons from the current patron group
-                p_query = f'query=(patronGroup=="{patron_group_id}" and active==true)'
-                patrons = self.folio_client.get_random_objects("/users", 10, p_query)
+                    # Get patrons from the current patron group
+                    p_query = f'query=(patronGroup=="{patron_group_id}" and active==true)'
+                    patrons = self.folio_client.get_random_objects("/users", 10, p_query)
 
-                # tie a patron to an item
-                item_patrons = zip(items, patrons)
+                    # tie a patron to an item
+                    item_patrons = zip(items, patrons)
 
-                for item_patron in item_patrons:
+                    for item_patron in item_patrons:
 
-                    # make sure we have barcodes
-                    if "barcode" in item_patron[1] and "barcode" in item_patron[0]:
+                        # make sure we have barcodes
+                        if "barcode" in item_patron[1] and "barcode" in item_patron[0]:
 
-                        # pick a random service point
-                        service_point_id = random.choice(self.service_points)
-                        combo_failed = False
-                        # 5 out of 6 items are checked out if argument -p was given
-                        if random.randint(0, 5) > 0 or not self.create_page_requests:
-                            # check out the item
-                            checkout = CirculationHelper.check_out_by_barcode(self.folio_client,
-                                                                              item_patron[0]["barcode"],
-                                                                              item_patron[1]["barcode"],
-                                                                              service_point_id
-                                                                              )
+                            # pick a random service point
+                            service_point_id = random.choice(self.service_points)
+                            combo_failed = False
+                            # 5 out of 6 items are checked out if argument -p was given
+                            if random.randint(0, 5) > 0 or not self.create_page_requests:
+                                # check out the item
+                                checkout = CirculationHelper.check_out_by_barcode(self.folio_client,
+                                                                                  item_patron[0]["barcode"],
+                                                                                  item_patron[1]["barcode"],
+                                                                                  service_point_id
+                                                                                  )
 
-                            # "extend" the loan date backwards in time in a randomized matter
-                            if checkout[0]:
-                                extension_date: datetime = self.faker.date_time_between(
-                                    start_date="-1y", end_date="now"
-                                )
-                                extension_out_date = extension_date - timedelta(days=90)
-                                CirculationHelper.extend_open_loan(
+                                # "extend" the loan date backwards in time in a randomized matter
+                                if checkout[0]:
+                                    extension_date: datetime = self.faker.date_time_between(
+                                        start_date="-1y", end_date="now"
+                                    )
+                                    extension_out_date = extension_date - timedelta(days=90)
+                                    CirculationHelper.extend_open_loan(
+                                        self.folio_client,
+                                        checkout[1], extension_date, extension_out_date
+                                    )
+
+                            # 1 out of 6 items are paged if argument -p was given
+                            else:
+                                logging.info("create page request")
+                                CirculationHelper.create_request(
                                     self.folio_client,
-                                    checkout[1], extension_date, extension_out_date
+                                    "Page",
+                                    item_patron[1],
+                                    item_patron[0],
+                                    service_point_id,
                                 )
 
-                        # 1 out of 6 items are paged if argument -p was given
-                        else:
-                            logging.info("create page request")
-                            CirculationHelper.create_request(
-                                self.folio_client,
-                                "Page",
-                                item_patron[1],
-                                item_patron[0],
-                                service_point_id,
-                            )
-
-                        # TODO: speed up this thingy. Fetching users is slow
-                        # Create requests for the loan or page. If -r was given
-                        if self.create_requests and not combo_failed:
-                            for b in random.sample(range(30), random.randint(1, 4)):
-                                # pick random patron
-                                new_patron = next(
-                                    iter(
-                                        self.folio_client.get_random_objects(
-                                            "/users", 1, p_query
+                            # TODO: speed up this thingy. Fetching users is slow
+                            # Create requests for the loan or page. If -r was given
+                            if self.create_requests and not combo_failed:
+                                for b in random.sample(range(30), random.randint(1, 4)):
+                                    # pick random patron
+                                    new_patron = next(
+                                        iter(
+                                            self.folio_client.get_random_objects(
+                                                "/users", 1, p_query
+                                            )
                                         )
                                     )
-                                )
-                                # request the item
-                                req_results = CirculationHelper.create_request(self.folio_client,
-                                                                               random.choice(["Hold", "Recall"]),
-                                                                               new_patron,
-                                                                               item_patron[0],
-                                                                               service_point_id,
-                                                                               )
-                                if not req_results:
-                                    combo_failed = True
-                                    logging.warn("Combination failed. No more trying to create requests")
+                                    # request the item
+                                    req_results = CirculationHelper.create_request(self.folio_client,
+                                                                                   random.choice(["Hold", "Recall"]),
+                                                                                   new_patron,
+                                                                                   item_patron[0],
+                                                                                   service_point_id,
+                                                                                   )
+                                    if not req_results:
+                                        combo_failed = True
+                                        logging.warn("Combination failed. No more trying to create requests")
 
     @staticmethod
     @abstractmethod
