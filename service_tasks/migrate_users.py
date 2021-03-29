@@ -33,7 +33,6 @@ class MigrateUsers(ServiceTaskBase):
         self.results_path = None
         self.group_map_path = None
         self.failed_objects = []
-        self.batch_size = 250
         self.client_folder = Path(args.client_folder)
         self.data_files = None
         self.data_map_combos = []
@@ -41,10 +40,6 @@ class MigrateUsers(ServiceTaskBase):
         # Init stuff
         self.setup_folder_structures()
 
-        # self.objects_file = args.objects_file
-        # self.results_path = os.path.join(args.results_folder, "users")
-        # self.post_users = False
-        # self.post_users = args.post_use
         self.transformer = Default(self.folio_client, args)
         """if not args.use_user_map and args.mapping_file_path:
             raise ValueError("You have a specified a user mapping file, but not checked the Use a map checkbox")"""
@@ -109,41 +104,37 @@ class MigrateUsers(ServiceTaskBase):
 
     def do_work(self):
         logging.info("Starting....")
-        batch = []
         i = 0
         try:
-            for combo in self.data_map_combos:
-                i = 0
-                with open(combo["data_file"], encoding="utf8") as object_file, open(combo["mapping_file"],
-                                                                                    encoding="utf8") as mapping_file:
-                    logging.info(f'processing {combo["data_file"]}')
-                    user_map = json.load(mapping_file)
-                    file_format = "tsv" if str(combo["data_file"]).endswith(".tsv") else "csv"
-                    for legacy_user in self.transformer.get_users(object_file, file_format):
-                        i += 1
-                        try:
-                            folio_user = self.transformer.do_map(legacy_user, user_map)
-                            batch.append(folio_user)
-                            if len(batch) == self.batch_size:
-                                self.write_results(batch, f"user_batch_{i}.json")
-                                batch = []
-                            if i == 1:
-                                print("## First Legacy  user")
-                                print(json.dumps(legacy_user, indent=4))
-                                print("## First FOLIO  user")
-                                print(json.dumps(folio_user, indent=4, sort_keys=True))
-                            self.add_stats("Successful user transformations")
-                            if i%1000 == 0:
-                                logging.info(f"{i} users processed")
-                        except ValueError as ve:
-                            logging.error(ve)
-                        except Exception as ee:
-                            logging.error(i)
-                            logging.error(json.dumps(legacy_user))
-                            self.add_stats("Failed user transformations")
-                            raise ee
-                    logging.info("writing last batch...")
-                    self.write_results(batch, f"user_batch_{i}.json")
+            with open(os.path.join(self.results_path, 'folio_users.json'), "w+") as results_file:
+                for combo in self.data_map_combos:
+                    i = 0
+                    with open(combo["data_file"], encoding="utf8") as object_file, \
+                            open(combo["mapping_file"], encoding="utf8") as mapping_file:
+                        logging.info(f'processing {combo["data_file"]}')
+                        user_map = json.load(mapping_file)
+                        file_format = "tsv" if str(combo["data_file"]).endswith(".tsv") else "csv"
+                        for legacy_user in self.transformer.get_users(object_file, file_format):
+                            i += 1
+                            try:
+                                folio_user = self.transformer.do_map(legacy_user, user_map)
+                                clean_user(folio_user)
+                                results_file.write(f"{json.dumps(folio_user)}\n")
+                                if i == 1:
+                                    print("## First Legacy  user")
+                                    print(json.dumps(legacy_user, indent=4))
+                                    print("## First FOLIO  user")
+                                    print(json.dumps(folio_user, indent=4, sort_keys=True))
+                                self.add_stats("Successful user transformations")
+                                if i % 1000 == 0:
+                                    logging.info(f"{i} users processed")
+                            except ValueError as ve:
+                                logging.error(ve)
+                            except Exception as ee:
+                                logging.error(i)
+                                logging.error(json.dumps(legacy_user))
+                                self.add_stats("Failed user transformations")
+                                raise ee
         except Exception as ee:
             logging.error(i, exc_info=True)
         self.print_dict_to_md_table(self.stats)
@@ -155,40 +146,6 @@ class MigrateUsers(ServiceTaskBase):
         logging.info("Saving map of {} old and new IDs to {}".format(len(self.transformer.legacy_id_map), path))
         with open(path, "w+") as id_map_file:
             json.dump(self.transformer.legacy_id_map, id_map_file, indent=4)
-
-    def post_batch(self, batch):
-        response = self.do_post(get_import_struct(batch))
-        if response.status_code == 200:
-            logging.info(
-                f"Posting successful! {response.elapsed.total_seconds()}s {len(batch)}",
-                flush=True,
-            )
-        elif response.status_code == 422:
-            logging.error(f"{response.status_code}\t{response.text}")
-            resp = json.loads(response.text)
-
-            for error in resp["errors"]:
-                logging.error(json.dumps(error))
-
-        elif response.status_code in [500, 413]:
-            logging.error(f"{response.status_code}\t{response.text}")
-            self.failed_objects.extend(batch)
-        else:
-            raise Exception(f"UNHANDLED ERROR! HTTP {response.status_code}\t{response.text}")
-
-    def write_results(self, batch, file_name):
-        if not os.path.exists(self.results_path / 'users'):
-            os.makedirs(self.results_path / 'users')
-        path = os.path.join(self.results_path / 'users', file_name)
-        with open(path, "w+") as results_file:
-            results_file.write(json.dumps(get_import_struct(batch), indent=4))
-
-    def do_post(self, payload):
-        path = "/user-import"
-        url = self.folio_client.okapi_url + path
-        return requests.post(
-            url, data=json.dumps(payload), headers=self.folio_client.okapi_headers
-        )
 
     @staticmethod
     @abstractmethod
@@ -207,7 +164,7 @@ class MigrateUsers(ServiceTaskBase):
                                          "Client folder for current migration. Assumes a certain folder structure.")
 
 
-def chunks(records, number_of_chunks):
-    """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(records), number_of_chunks):
-        yield records[i: i + number_of_chunks]
+def clean_user(folio_user):
+    del folio_user["id"]
+    for address in folio_user.get("personal", {}).get("addresses", []):
+        del address["id"]

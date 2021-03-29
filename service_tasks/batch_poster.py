@@ -52,6 +52,8 @@ class BatchPoster(ServiceTaskBase):
                     try:
                         self.processed_rows += 1
                         json_rec = json.loads(row.split("\t")[-1])
+                        if idx == 1:
+                            print(json.dumps(json_rec, indent=True))
                         batch.append(json_rec)
                         if len(batch) == int(self.batch_size):
                             self.post_batch(batch)
@@ -88,7 +90,7 @@ class BatchPoster(ServiceTaskBase):
 
     def post_batch(self, batch):
         response = self.do_post(batch)
-        if response.status_code == 201:
+        if response.status_code == 201 or response.status_code == 200:
             print(
                 f"Posting successful! Total rows: {self.processed_rows}  {response.elapsed.total_seconds()}s "
                 f"Batch Size: {len(batch)} Request size: {get_req_size(response)} "
@@ -113,7 +115,9 @@ class BatchPoster(ServiceTaskBase):
         kind = list_objects()[self.object_name]
         path = kind["api_endpoint"]
         url = self.folio_client.okapi_url + path
-        if kind["total_records"]:
+        if kind["object_name"] == "users":
+            payload = {kind["object_name"]: list(batch), "totalRecords": len(batch)}
+        elif kind["total_records"]:
             payload = {"records": list(batch), "totalRecords": len(batch)}
         else:
             payload = {kind["object_name"]: batch}
@@ -155,8 +159,7 @@ def list_objects():
                       "total_records": False},
         "Source Records - Batch": {"object_name": "records", "api_endpoint": "/source-storage/batch/records",
                                    "total_records": True},
-        "InventoryInstances": {"object_name": "instances", "api_endpoint": "/inventory/instances/batch",
-                               "total_records": False},
+        "Users": {"object_name": "users", "api_endpoint": "/user-import", "total_records": True},
     }
 
 
