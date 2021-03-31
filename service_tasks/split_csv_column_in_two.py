@@ -27,10 +27,11 @@ class SplitCsvColumnInTwo(ServiceTaskBase):
         
         split_data = data[self.split_column].str.split(self.separator, n = 1, expand = True) 
         
+        data.drop(columns =[self.split_column], inplace = True)
+
         data[self.left_column]= split_data[0]
         data[self.right_column]= split_data[1]
  
-        data.drop(columns =[self.split_column], inplace = True)
 
         data.to_csv(self.save_to_file, index=False, quoting=csv.QUOTE_ALL)
 
