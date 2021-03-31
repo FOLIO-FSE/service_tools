@@ -24,7 +24,7 @@ class Add952ToMarc(ServiceTaskBase):
         self.locations = list(self.folio_client.folio_get_all("/locations", "locations", ))
         print(f"Fetched {len(self.locations)} locations")
         self.ref_data_dicts = {}
-        self.file_paths = args.marc_files
+        self.file_paths = args.results_folder
         self.processed_records = 0
         files = [
             join(self.file_paths, f)
@@ -224,13 +224,13 @@ class Add952ToMarc(ServiceTaskBase):
     @abstractmethod
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        ServiceTaskBase.add_argument(parser, "marc_files", "Path to the file", "DirChooser")
+        ServiceTaskBase.add_argument(parser, "results_folder", "Path to the results folder", "DirChooser")
 
     @staticmethod
     @abstractmethod
     def add_cli_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
-        ServiceTaskBase.add_cli_argument(parser, "marc_files", "Path to the file")
+        ServiceTaskBase.add_cli_argument(parser, "results_folder", "Path to the results folder")
 
 
 def background(f):
