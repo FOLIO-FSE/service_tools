@@ -23,11 +23,12 @@ class VisualizeCsvData(ServiceTaskBase):
             print("Analyzing data...")
             if self.format == "csv":
                 data = pandas.read_csv(file, sep=",", dtype=object)
-            if self.format == "tsv":
+            elif self.format == "tsv":
                 data = pandas.read_csv(file, sep="\t", dtype=object)
-            elif self.format == "json":
-                json_data = json.load(file)
-                data = pandas.json_normalize(json_data, max_level=2)
+            # TODO Maybe implement json
+            #elif self.format == "json":
+            #    json_data = json.load(file)
+            #    data = pandas.json_normalize(json_data, max_level=2)
 
         self.mdFile.new_header(level=1, title='ILS data field analysis')
 
@@ -121,7 +122,7 @@ class VisualizeCsvData(ServiceTaskBase):
     def add_arguments(sub_parser):
         ServiceTaskBase.add_argument(sub_parser,
                                      "data_file",
-                                     "The csv or json file to be analyzed. If csv, all rows must have the same number of columns.",
+                                     "The csv or tsv file to be analyzed. If csv, all rows must have the same number of columns.",
                                      "FileChooser")
         ServiceTaskBase.add_argument(sub_parser,
                                      "save_to_folder",
@@ -131,13 +132,13 @@ class VisualizeCsvData(ServiceTaskBase):
                                      "format",
                                      "Format of the data to analyse.",
                                      widget='Dropdown',
-                                     choices=["csv","tsv","json"])
+                                     choices=["csv","tsv"])
 
     @staticmethod
     def add_cli_arguments(sub_parser):
         ServiceTaskBase.add_cli_argument(sub_parser,
                                          "data_file",
-                                         "he csv or json file to be analyzed. If csv, all rows must have the same number of columns")
+                                         "the csv or tsv file to be analyzed. If csv, all rows must have the same number of columns")
         ServiceTaskBase.add_cli_argument(sub_parser,
                                      "save_to_folder",
                                      "Folder where you want the output to be saved.")

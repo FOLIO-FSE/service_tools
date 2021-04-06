@@ -141,10 +141,10 @@ class Default(MapperBase):
 
             if folio_prop_name == "personal.addresses.id":
                 return "not needed"
-            elif folio_prop_name == "expirationDate":
+            elif folio_prop_name == "expirationDate" or folio_prop_name == "enrollmentDate":
                 try:
-                    exp_date = parse(legacy_user.get(legacy_user_key), fuzzy=True)
-                    return exp_date.isoformat()
+                    format_date = parse(legacy_user.get(legacy_user_key), fuzzy=True)
+                    return format_date.isoformat()
                 except Exception as ee:
                     logging.error(f"expiration date {legacy_user.get(legacy_user_key)} could not be parsed")
                     return datetime.utcnow().isoformat()
