@@ -151,7 +151,7 @@ class Add952ToMarc(ServiceTaskBase):
                     idx += 1
                     srs_rec = json.loads(row.split("\t")[-1])
                     marc_record = from_json(srs_rec["parsedRecord"]["content"])
-                    marc_record.leader[9] = "a"
+                    marc_record.leader.coding_scheme = "a"
                     for item_data in self.item_map.get(marc_record['999']["i"], []):
                         found_locations += 1
                         my_field = Field(
