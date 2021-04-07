@@ -187,7 +187,7 @@ class Add952ToMarc(ServiceTaskBase):
                         )
                 except Exception as ee:
                     print(f"row: {row}")
-                    raise (ee)
+                    # raise (ee)
             print(f"Done parsing {idx} recs in {(time.time() - self.start)} seconds. Matched locs: {found_locations:,}")
 
     def process_record(self, marc_record):
