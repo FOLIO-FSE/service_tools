@@ -175,7 +175,8 @@ class Add952ToMarc(ServiceTaskBase):
                             if sf_value:
                                 my_field.add_subfield(sf_key, sf_value)
                         marc_record.add_ordered_field(my_field)
-                        out.write(marc_record.as_marc())
+                    marc_record.force_utf8 = True
+                    out.write(marc_record.as_marc())
                     if idx % 1000 == 0:
                         print(marc_record["952"])
                         elapsed = idx / (time.time() - self.start)
@@ -187,7 +188,7 @@ class Add952ToMarc(ServiceTaskBase):
                         )
                 except Exception as ee:
                     print(f"row: {row}")
-                    # raise (ee)
+                    raise (ee)
             print(f"Done parsing {idx} recs in {(time.time() - self.start)} seconds. Matched locs: {found_locations:,}")
 
     def process_record(self, marc_record):
