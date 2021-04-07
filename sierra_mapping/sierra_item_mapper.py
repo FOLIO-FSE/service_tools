@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 import traceback
 import uuid
@@ -373,7 +374,7 @@ class SierraItemTransformer(MapperBase, ABC):
                     )
                     if t:
                         self.default_loan_type_id = t[0]
-                        print(
+                        logging.info(
                             f'Set {loan_type_mapping["folio_name"]} as default Loantype mapping'
                         )
                     else:
@@ -401,7 +402,7 @@ class SierraItemTransformer(MapperBase, ABC):
                 "No Default Loan type set up in map."
                 "Add a row to mapping file with *:s and a valid loan type"
             )
-        print(
+        logging.info(
             f"loaded {idx} mappings for {len(self.folio_loan_types)} loan types in FOLIO"
         )
 
@@ -425,7 +426,7 @@ class SierraItemTransformer(MapperBase, ABC):
                     )
                     if t:
                         self.default_material_type_id = t[0]
-                        print(
+                        logging.info(
                             f'Set {mat_mapping["folio_name"]} as default material type mapping'
                         )
                     else:
@@ -454,7 +455,7 @@ class SierraItemTransformer(MapperBase, ABC):
                 "No Default Material type set up in map."
                 "Add a row to mapping file with *:s and a valid Material type"
             )
-        print(
+        logging.info(
             f"loaded {idx} mappings for {len(self.folio_material_types)} material types in FOLIO"
         )
 
@@ -475,7 +476,7 @@ class SierraItemTransformer(MapperBase, ABC):
                 )
                 if t:
                     self.default_location_id = t[0]
-                    print(f'Set {loc_map["folio_code"]} as default location')
+                    logging.info(f'Set {loc_map["folio_code"]} as default location')
                 else:
                     raise TransformationProcessError(
                         f"Default location {loc_map['folio_code']} not found in folio. "
@@ -497,7 +498,7 @@ class SierraItemTransformer(MapperBase, ABC):
                 "No Default Location set up in map. "
                 "Add a row to mapping file with *:s and a valid Location code"
             )
-        print(
+        logging.info(
             f"loaded {idx} mappings for {len(self.folio_client.locations)} locations in FOLIO"
         )
 

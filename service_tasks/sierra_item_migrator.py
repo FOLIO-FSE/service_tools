@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 import os
 import time
 import traceback
@@ -37,9 +38,11 @@ class SierraItemMigrator(ServiceTaskBase):
         self.material_type_map = {}
         self.locations_map = {}
         self.t0 = time.time()
-
-        print(f"Item file to process:{self.item_file}")
-        print(f"Saving results to {self.results_path}")
+        self.setup_logging(os.path.join(
+            self.results_path, "iii_item_transformation.log"
+        ))
+        logging.info(f"Item file to process:{self.item_file}")
+        logging.info(f"Saving results to {self.results_path}")
         self.migration_report_path = os.path.join(
             self.results_path, "iii_item_transformation_report.md"
         )
@@ -62,16 +65,16 @@ class SierraItemMigrator(ServiceTaskBase):
             # Material type mapping
             with open(material_type_map_path) as material_type_file:
                 material_type_map = list(csv.DictReader(material_type_file, dialect="tsv"))
-                print(f"Found {len(material_type_map)} rows in material type map")
-                print(
+                logging.info(f"Found {len(material_type_map)} rows in material type map")
+                logging.info(
                     f'{",".join(material_type_map[0].keys())} will be used for determining Material type'
                 )
 
             # Loan type mapping
             with open(loans_type_map_path) as loans_type_file:
                 loan_type_map = list(csv.DictReader(loans_type_file, dialect="tsv"))
-                print(f"Found {len(loan_type_map)} rows in loan type map")
-                print(
+                logging.info(f"Found {len(loan_type_map)} rows in loan type map")
+                logging.info(
                     f'{",".join(loan_type_map[0].keys())} will be used for determining loan type'
                 )
 
@@ -80,8 +83,8 @@ class SierraItemMigrator(ServiceTaskBase):
                 call_number_type_map = list(
                     csv.DictReader(call_number_type_map_file, dialect="tsv")
                 )
-                print(f"Found {len(call_number_type_map)} rows in callnumber type map")
-                print(
+                logging.info(f"Found {len(call_number_type_map)} rows in callnumber type map")
+                logging.info(
                     f'{",".join(call_number_type_map[0].keys())} '
                     "will be used for determining callnumber type"
                 )
@@ -102,15 +105,15 @@ class SierraItemMigrator(ServiceTaskBase):
                     self.instance_id_map[mapped_id] = map_object
                     if index % 100000 == 0:
                         print(f"{index} instance ids loaded to map, {replaces} .b:s removed", end='\r')
-                print(f"loaded {index} migrated instance IDs")
+                logging.info(f"loaded {index} migrated instance IDs")
 
             # Location mapping
             with open(location_map_path) as location_map_f:
                 location_map = list(csv.DictReader(location_map_f, dialect="tsv"))
-                print(
+                logging.info(
                     f'{",".join(loan_type_map[0].keys())} will be used for determining location'
                 )
-                print(f"Found {len(location_map)} rows in location map")
+                logging.info(f"Found {len(location_map)} rows in location map")
 
             self.transformer = SierraItemTransformer(folio_client, self.instance_id_map,
                                                      loan_type_map,
@@ -125,12 +128,12 @@ class SierraItemMigrator(ServiceTaskBase):
             traceback.print_exc()
 
     def wrap_up(self):
-        print("Writing Holdings file to disk")
+        logging.info("Writing Holdings file to disk")
         self.print_holdings_file()
-        print("Done")
-        print("Writing Item Id map to disk")
+        logging.info("Done")
+        logging.info("Writing Item Id map to disk")
         self.print_item_id_map()
-        print("Done")
+        logging.info("Done")
         with open(self.migration_report_path, "w+") as report_file:
             self.migration_report = {**self.migration_report, **self.transformer.migration_report}
             self.stats = {**self.stats, **self.transformer.stats}
@@ -141,9 +144,9 @@ class SierraItemMigrator(ServiceTaskBase):
             self.write_migration_report(report_file)
 
     def print_holdings_file(self):
-        print("Writing holdings file.")
+        logging.info("Writing holdings file.")
         if any(self.transformer.holdings):
-            print(f"Saving holdings created to {self.holdings_file_path}")
+            logging.info(f"Saving holdings created to {self.holdings_file_path}")
             with open(self.holdings_file_path, "w+") as holdings_file:
                 for key, holding in self.transformer.holdings.items():
                     self.transformer.write_object(holding, holdings_file)
@@ -175,16 +178,16 @@ class SierraItemMigrator(ServiceTaskBase):
                     if sierra_item["deleted"] is not True and len(sierra_item["bibIds"]) > 0:
                         self.transformer.transform(sierra_item, items_file)
                 except TransformationCriticalDataError as tcde:
-                    print(tcde)
+                    logging.exception(tcde)
                 except ValueError as value_error:
                     self.value_errors += 1
-                    print(value_error)
+                    logging.exception(value_error)
                     if self.value_errors > 500:
                         raise Exception(f"More than 20 000 errors raised. Quitting.")
                 if i % 10000 == 0:
-                    print(f"{i} rows processed. {self.value_errors} value errors")
-            print(f"Done. {i} rows processed")
-            print(" Wrapping up...")
+                    logging.info(f"{i} rows processed. {self.value_errors} value errors")
+            logging.info(f"Done. {i} rows processed")
+            logging.info(" Wrapping up...")
             self.wrap_up()
 
     @staticmethod
