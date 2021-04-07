@@ -113,7 +113,7 @@ class SierraItemTransformer(MapperBase, ABC):
         if ',' in sierra_bib_id:
             sierra_bib_id = sierra_bib_id.split(',')[0]
         # sierra_bib_id = re.sub(r"^\.b|b", "", sierra_bib_id)
-        print(sierra_bib_id)
+        # print(sierra_bib_id)
         new_instance_id = self.instance_id_map.get(sierra_bib_id, {}).get("folio_id", "")
         sierra_bib_id = sierra_bib_id
 
