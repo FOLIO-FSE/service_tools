@@ -36,7 +36,6 @@ class TransformUsers(ServiceTaskBase):
         self.client_folder = Path(args.client_folder)
         self.data_files = None
         self.data_map_combos = []
-
         # Init stuff
         self.setup_folder_structures()
 
@@ -125,6 +124,7 @@ class TransformUsers(ServiceTaskBase):
                                     print(json.dumps(legacy_user, indent=4))
                                     print("## First FOLIO  user")
                                     print(json.dumps(folio_user, indent=4, sort_keys=True))
+                                    print_email_warning()
                                 self.add_stats("Successful user transformations")
                                 if i % 1000 == 0:
                                     logging.info(f"{i} users processed")
@@ -168,3 +168,17 @@ def clean_user(folio_user):
     del folio_user["id"]
     for address in folio_user.get("personal", {}).get("addresses", []):
         del address["id"]
+
+
+def print_email_warning():
+    s = """
+  ______   __  __              _____   _         _____     ___  
+ |  ____| |  \/  |     /\     |_   _| | |       / ____|   |__ \ 
+ | |__    | \  / |    /  \      | |   | |      | (___        ) |
+ |  __|   | |\/| |   / /\ \     | |   | |       \___ \      / / 
+ | |____  | |  | |  / ____ \   _| |_  | |____   ____) |    |_|  
+ |______| |_|  |_| /_/    \_\ |_____| |______| |_____/     (_)  
+                                                                
+                                                       
+"""
+    print(s)
