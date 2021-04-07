@@ -151,6 +151,7 @@ class Add952ToMarc(ServiceTaskBase):
                     idx += 1
                     srs_rec = json.loads(row.split("\t")[-1])
                     marc_record = from_json(srs_rec["parsedRecord"]["content"])
+                    marc_record.leader[9] = "a"
                     for item_data in self.item_map.get(marc_record['999']["i"], []):
                         found_locations += 1
                         my_field = Field(
@@ -175,7 +176,6 @@ class Add952ToMarc(ServiceTaskBase):
                             if sf_value:
                                 my_field.add_subfield(sf_key, sf_value)
                         marc_record.add_ordered_field(my_field)
-                    marc_record.force_utf8 = True
                     out.write(marc_record.as_marc())
                     if idx % 1000 == 0:
                         print(marc_record["952"])
