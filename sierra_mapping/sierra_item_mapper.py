@@ -263,7 +263,7 @@ class SierraItemTransformer(MapperBase, ABC):
                     "date": "2019-06-29T13:37:01.071+0000",
                 }
         note_97 = sierra_item["fixedFields"].get("97", {}).get("value")
-        if note_97:
+        if note_97 and len(note_97) > 5:
             self.add_to_migration_report("Circulation notes", "From fixed field 97")
             self.add_stats(self.stats, f"Items with Circ notes - Fixed 97")
             yield {
