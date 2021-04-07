@@ -244,7 +244,7 @@ class SierraItemTransformer(MapperBase, ABC):
             "personal": {"lastName": "Sierra", "firstName": "Migrated"},
         }
         for note_m in get_varfields_no_subfield(sierra_item, "m"):
-            if note_m:
+            if note_m and len(note_m) > 5:
                 self.add_to_migration_report("Circulation notes", "From Varfield m")
                 yield {
                     "id": str(uuid.uuid4()),
