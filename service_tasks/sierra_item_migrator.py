@@ -94,7 +94,7 @@ class SierraItemMigrator(ServiceTaskBase):
                     map_object = json.loads(json_string)
                     mapped_id = map_object["legacy_id"]
                     if mapped_id.startswith('.b'):
-                        mapped_id = mapped_id[2:]
+                        mapped_id = mapped_id[2:-1]
                         replaces += 1
                     elif mapped_id.startswith('b'):
                         mapped_id = mapped_id[1:]
