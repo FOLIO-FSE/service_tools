@@ -175,7 +175,7 @@ class SierraItemMigrator(ServiceTaskBase):
                     if sierra_item["deleted"] is not True and len(sierra_item["bibIds"]) > 0:
                         self.transformer.transform(sierra_item, items_file)
                 except TransformationCriticalDataError as tcde:
-                    logging.exception(tcde)
+                    logging.error(tcde)
                 except ValueError as value_error:
                     self.value_errors += 1
                     logging.exception(value_error)
