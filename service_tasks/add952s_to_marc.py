@@ -114,7 +114,7 @@ class Add952ToMarc(ServiceTaskBase):
             self.start = time.time()
             with open(self.items_file) as items_file:
                 idx = 0
-                for row in items_file:
+                for idx, row in enumerate(items_file):
                     item = json.loads(row.split('\t')[-1])
                     idx += 1
                     hold = self.holdings_map[item["holdingsRecordId"]]
@@ -138,6 +138,14 @@ class Add952ToMarc(ServiceTaskBase):
                         self.item_map[hold["instanceId"]].append(item_field_dict)
                     else:
                         self.item_map[hold["instanceId"]] = [item_field_dict]
+                    if idx % 200000 == 0:
+                        elapsed = idx / (time.time() - self.start)
+                        elapsed_formatted = f"{elapsed:,}"
+                        print(
+                            (f"{elapsed_formatted} recs/sec Number of records: {idx:,}."
+                             f"Size of items map: {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}"),
+                            flush=True,
+                        )
             print(f"Done parsing {idx} Items in {(time.time() - self.start)} seconds. {len(item_field_dict)}")
 
         self.start = time.time()
@@ -151,7 +159,7 @@ class Add952ToMarc(ServiceTaskBase):
                     idx += 1
                     srs_rec = json.loads(row.split("\t")[-1])
                     marc_record = from_json(srs_rec["parsedRecord"]["content"])
-                    marc_record.leader.coding_scheme = "a"
+                    marc_record.coding_scheme = "a"
                     for item_data in self.item_map.get(marc_record['999']["i"], []):
                         found_locations += 1
                         my_field = Field(
