@@ -38,7 +38,6 @@ class SierraItemMigrator(ServiceTaskBase):
         self.material_type_map = {}
         self.locations_map = {}
         self.t0 = time.time()
-        self.setup_logging(self.results_path)
         logging.info(f"Item file to process:{self.item_file}")
         logging.info(f"Saving results to {self.results_path}")
         self.migration_report_path = os.path.join(
