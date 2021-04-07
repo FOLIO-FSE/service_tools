@@ -141,7 +141,7 @@ class Add952ToMarc(ServiceTaskBase):
             print(f"Done parsing {idx} Items in {(time.time() - self.start)} seconds. {len(item_field_dict)}")
 
         self.start = time.time()
-        with open(self.srs_file) as srs_file, open(join(self.file_paths, 'discovery_file.mrc'), 'wb') as out:
+        with open(self.srs_file, "r", encoding="utf-8") as srs_file, open(join(self.file_paths, 'discovery_file.mrc'), 'wb') as out:
             idx = 0
             found_locations = 0
             for row in srs_file:
