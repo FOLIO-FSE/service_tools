@@ -8,7 +8,7 @@ from abc import abstractmethod
 from os import listdir
 from os.path import isfile, join
 
-from pymarc import pymarc, Field
+from pymarc import pymarc, Field, Leader
 
 from service_tasks.service_task_base import ServiceTaskBase
 
@@ -159,7 +159,9 @@ class Add952ToMarc(ServiceTaskBase):
                     idx += 1
                     srs_rec = json.loads(row.split("\t")[-1])
                     marc_record = from_json(srs_rec["parsedRecord"]["content"])
-                    marc_record.coding_scheme = "a"
+                    temp_leader = Leader(marc_record.leader)
+                    temp_leader[9] = 'a'
+                    marc_record.leader = temp_leader
                     for item_data in self.item_map.get(marc_record['999']["i"], []):
                         found_locations += 1
                         my_field = Field(
