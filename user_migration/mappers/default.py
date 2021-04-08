@@ -25,6 +25,7 @@ class Default(MapperBase):
 
         folio_group_names = [g['group'] for g in list(self.folio_client.get_all("/groups", "usergroups"))]
         logging.info(f"Fetched {len(folio_group_names)} groups from FOLIO")
+        print(json.dumps(groups_map, indent=4))
         for m in groups_map:
             if m["folio_name"] in folio_group_names:
                 self.groups_map[m["legacy_code"]] = m["folio_name"]
