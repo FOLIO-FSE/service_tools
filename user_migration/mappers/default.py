@@ -14,12 +14,22 @@ from user_migration.mappers.mapper_base import MapperBase
 
 
 class Default(MapperBase):
-    def __init__(self, folio_client: FolioClient, args):
+    def __init__(self, folio_client: FolioClient, use_group_map, args, groups_map=[]):
         super().__init__(folio_client)
         self.args = args
+        self.use_group_map = use_group_map
+        self.groups_map = {}
         self.user_schema = MapperBase.get_user_schema()
         self.ids_dict: Dict[str, set] = {}
         self.use_map = True
+
+        folio_group_names = [g['group'] for g in list(self.folio_client.get_all("/groups", "usergroups"))]
+        logging.info(f"Fetched {len(folio_group_names)} groups from FOLIO")
+        for m in groups_map:
+            if m["folio_name"] in folio_group_names:
+                self.groups_map[m["legacy_code"]] = m["folio_name"]
+            else:
+                raise Exception(f'FOLIO name {m["folio_name"]} from map is not in FOLIO ')
 
     def do_map(self, legacy_user, user_map):
         # raise NotImplementedError("Create ID-Legacy ID Mapping file!")
@@ -68,7 +78,6 @@ class Default(MapperBase):
             elif prop["type"] == "array":
                 # handle departments
                 self.report_folio_mapping(f"Unhandled array: {prop_name}", False)
-
             else:
                 self.map_basic_props(legacy_user, user_map, prop_name, folio_user)
                 """ elif prop == "customFields":
@@ -135,20 +144,41 @@ class Default(MapperBase):
                  for k in user_map["data"]
                  if k["folio_field"].replace(f"[{i}]", "") == folio_prop_name), ""
             )
-            if value:
+            if value:  # The value is set on the mapping. Return this instead of the default field
                 self.add_to_migration_report("Default values added", f"{value} added to {folio_prop_name}")
+                self.report_folio_mapping(f"{folio_prop_name}", True, False)
+                self.report_legacy_mapping(legacy_user_key, True, False)
                 return value
 
             if folio_prop_name == "personal.addresses.id":
+                self.report_folio_mapping(f"{folio_prop_name} (Not needed)", True, False)
+                self.report_legacy_mapping(legacy_user_key, True, False)
                 return "not needed"
+            elif folio_prop_name == "patronGroup":
+                legacy_group = legacy_user.get(legacy_user_key, "")
+                if self.use_group_map:
+                    self.add_to_migration_report("User group mapping",
+                                                 f"{legacy_group} -> {self.groups_map[legacy_group]}")
+                    self.report_folio_mapping(f"{folio_prop_name}", True, False)
+                    self.report_legacy_mapping(legacy_user_key, True, False)
+                    return self.groups_map[legacy_group]
+                else:
+                    self.add_to_migration_report("User group mapping", f"{legacy_group} -> {legacy_group} (one to one)")
+                    self.report_folio_mapping(f"{folio_prop_name}", True, False)
+                    self.report_legacy_mapping(legacy_user_key, True, False)
+                    return legacy_group
             elif folio_prop_name == "expirationDate" or folio_prop_name == "enrollmentDate":
                 try:
                     format_date = parse(legacy_user.get(legacy_user_key), fuzzy=True)
+                    self.report_folio_mapping(f"{folio_prop_name}", True, False)
+                    self.report_legacy_mapping(legacy_user_key, True, False)
                     return format_date.isoformat()
                 except Exception as ee:
                     logging.error(f"expiration date {legacy_user.get(legacy_user_key)} could not be parsed")
                     return datetime.utcnow().isoformat()
             elif folio_prop_name.strip() == "personal.addresses.primaryAddress":
+                self.report_folio_mapping(f"{folio_prop_name}", True, False)
+                self.report_legacy_mapping(legacy_user_key, True, False)
                 return i == 0  # The first address in the mapping file (the one with [0]) will be primary
             elif folio_prop_name == "personal.addresses.addressTypeId":
                 try:
@@ -163,6 +193,7 @@ class Default(MapperBase):
                     return ""
             elif legacy_user_key:
                 self.report_folio_mapping(f"{folio_prop_name}", True, False)
+                self.report_legacy_mapping(legacy_user_key, True, False)
                 return legacy_user.get(legacy_user_key, "")
             else:
                 self.report_folio_mapping(f"{folio_prop_name}", False, False)

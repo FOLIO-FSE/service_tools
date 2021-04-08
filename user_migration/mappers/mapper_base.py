@@ -22,7 +22,7 @@ class MapperBase():
         self.user_schema = self.get_user_schema()
 
     def print_mapping_report(self, total_records):
-        logging.info('\n## Mapped FOLIO fields')
+        print('\n## Mapped FOLIO fields')
         d_sorted = {k: self.mapped_folio_fields[k] for k in sorted(self.mapped_folio_fields)}
         print(f"FOLIO Field | Mapped | Empty | Unmapped")
         print("--- | --- | --- | ---:")
@@ -32,7 +32,7 @@ class MapperBase():
             unmapped_per = "{:.1%}".format(unmapped / total_records)
             mp = mapped / total_records
             mapped_per = "{:.0%}".format(mp if mp > 0 else 0)
-            logging.info(f"{k} | {mapped if mapped > 0 else 0} ({mapped_per}) | {v[1]} | {unmapped}")
+            print(f"{k} | {mapped if mapped > 0 else 0} ({mapped_per}) | {v[1]} | {unmapped}")
         print('\n## Mapped Legacy fields')
         d_sorted = {k: self.mapped_legacy_fields[k] for k in sorted(self.mapped_legacy_fields)}
         print(f"Legacy Field | Mapped | Empty | Unmapped")

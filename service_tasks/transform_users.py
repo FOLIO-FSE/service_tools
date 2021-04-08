@@ -1,3 +1,4 @@
+import csv
 import json
 import logging
 import os
@@ -38,8 +39,14 @@ class TransformUsers(ServiceTaskBase):
         self.data_map_combos = []
         # Init stuff
         self.setup_folder_structures()
+        csv.register_dialect("tsv", delimiter="\t")
 
-        self.transformer = Default(self.folio_client, args)
+        if self.use_group_map:
+            with open(self.group_map_path, "r") as group_map_path:
+                self.transformer = Default(self.folio_client, self.use_group_map, args,
+                                           list(csv.DictReader(group_map_path, dialect="tsv")))
+        else:
+            self.transformer = Default(self.folio_client, self.use_group_map, args)
         """if not args.use_user_map and args.mapping_file_path:
             raise ValueError("You have a specified a user mapping file, but not checked the Use a map checkbox")"""
 
@@ -64,8 +71,8 @@ class TransformUsers(ServiceTaskBase):
             raise Exception(
                 f"Could not find Git repository path next to the client folder in {parent}"
                 "The folder should be named migration_")
-        git_repo_path = (parent / p)
-        mapping_path = (parent / p) / "mapping_files"
+        git_repo_path = parent / p
+        mapping_path = parent / p / "mapping_files"
         if not mapping_path.is_dir():
             raise Exception(
                 f"Could not find mapping_files folder path at {mapping_path} ")
