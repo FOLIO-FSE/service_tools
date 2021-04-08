@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import traceback
 from abc import abstractmethod
@@ -38,7 +39,7 @@ class BatchPoster(ServiceTaskBase):
         self.start = 0  # TODO: add this as an argument
 
     def do_work(self):
-        print("Starting....")
+        logging.info("Starting....")
         batch = []
 
         with open(self.objects_file) as rows, open(self.failed_recs_path, 'w') as failed_recs_file, open(
@@ -67,31 +68,24 @@ class BatchPoster(ServiceTaskBase):
                         traceback.print_exc()
                         print("=======================", flush=True)
                     except Exception as exception:
-                        print("=========ERROR==============")
-                        print(f"Posting failed with the following error")
-                        print(f"{exception} Posting failed")
-                        print(f"Failing row, either the one shown here or the next row in {self.objects_file}")
-                        print(last_row)
-                        print("writing failed batch to file")
+                        logging.exception(f"{exception}")
+                        logging.error(f"Failed row: {last_row}")
                         self.failed_batches += 1
                         self.failed_records += len(batch)
                         write_failed_batch_to_file(batch, failed_recs_file)
                         batch = []
-                        print("=========Stack trace==============", flush=True)
-                        traceback.print_exc()
-                        print("=======================", flush=True)
                         self.num_failures += 0
                         if self.num_failures > 50:
-                            print(f"Exceeded number of failures at row {idx}")
+                            logging.error(f"Exceeded number of failures at row {idx}")
                             raise exception
             # Last batch
         self.post_batch(batch)
-        print(f"{self.failed_records} failed records in {self.failed_batches} saved to {self.failed_recs_path}")
+        logging.info(f"{self.failed_records} failed records in {self.failed_batches} saved to {self.failed_recs_path}")
 
     def post_batch(self, batch):
         response = self.do_post(batch)
         if response.status_code == 201 or response.status_code == 200:
-            print(
+            logging.info(
                 f"Posting successful! Total rows: {self.processed_rows}  {response.elapsed.total_seconds()}s "
                 f"Batch Size: {len(batch)} Request size: {get_req_size(response)} "
                 f"{datetime.utcnow().isoformat()} UTC",
