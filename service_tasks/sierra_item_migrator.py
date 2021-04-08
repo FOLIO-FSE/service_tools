@@ -147,7 +147,7 @@ class SierraItemMigrator(ServiceTaskBase):
             with open(self.holdings_file_path, "w+") as holdings_file:
                 for key, holding in self.transformer.holdings.items():
                     self.transformer.write_object(holding, holdings_file)
-                    self.add_stats("Holdings Records Written to disk")
+                    self.add_to_migration_report("General statistics", "Holdings Records Written to disk")
 
     def print_item_id_map(self):
         with open(self.item_id_dict_path, "w+") as json_file:

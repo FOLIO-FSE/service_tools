@@ -1,6 +1,5 @@
 import json
 import logging
-import re
 import traceback
 import uuid
 from abc import ABC
@@ -69,10 +68,10 @@ class SierraItemTransformer(MapperBase, ABC):
         holding_key = self.to_key(holding)
         existing_holding = self.holdings.get(holding_key, None)
         if not existing_holding:
-            self.add_stats(self.stats, "Unique Holdings created from Items")
+            self.add_to_migration_report("General statistics", "Unique Holdings created from Items")
             self.holdings[self.to_key(holding)] = holding
         else:
-            self.add_stats(self.stats, "Holdings Already Created from Item")
+            self.add_to_migration_report("General statistics", "Holdings Already Created from Item")
             self.merge_holding(holding)
 
         item = self.convert_to_item(sierra_item, holding)
@@ -87,7 +86,7 @@ class SierraItemTransformer(MapperBase, ABC):
             "volume": next(get_varfields_no_subfield(sierra_item, "v"), ""),
             "formerIds": [get_varfield(sierra_item, "i", "a")],
             "notes": list(self.get_notes(sierra_item)),
-            "circulationNotes": list(self.get_circ_notes(sierra_item)),
+            "circulationNotes": list(self.get_circulation_notes(sierra_item)),
             "status": self.get_status(sierra_item),
             "materialTypeId": self.get_material_type_id(sierra_item, sierra_item["id"]),
             "permanentLoanTypeId": self.get_loan_type_id(sierra_item, sierra_item["id"]),
@@ -108,7 +107,7 @@ class SierraItemTransformer(MapperBase, ABC):
 
     def convert_to_holding(self, sierra_item):
         if len(sierra_item["bibIds"]) > 1:
-            self.add_stats(self.stats, "Item connected to more than one Bib/Instance")
+            self.add_to_migration_report("General statistics", "Item connected to more than one Bib/Instance")
         sierra_bib_id = next(f for f in sierra_item["bibIds"])
         if ',' in sierra_bib_id:
             sierra_bib_id = sierra_bib_id.split(',')[0]
@@ -118,17 +117,19 @@ class SierraItemTransformer(MapperBase, ABC):
         sierra_bib_id = sierra_bib_id
 
         if not new_instance_id:
-            self.add_stats(self.stats, f"Bib Id not in list of migrated records")
+            self.add_to_migration_report("General statistics", f"Bib Id not in list of migrated records")
             self.add_to_migration_report(
                 "Sierra Items without migrated Instances. Must be corrected",
-                f"Sierra Bib Id {sierra_bib_id} missing in migrated bibs for Sierra Item {sierra_item['id']} {sierra_bib_id}",
+                f"Sierra Bib Id {sierra_bib_id} missing in migrated bibs for Sierra Item "
+                f"{sierra_item['id']} {sierra_bib_id}",
             )
             print(f"{sierra_bib_id} {next(iter(self.instance_id_map.items()))}")
             raise TransformationCriticalDataError(
-                f'Missing Instances in map - Sierra Item {sierra_item["id"]} with bibIds:{sierra_item["bibIds"]} {sierra_bib_id}'
+                f'Missing Instances in map - Sierra Item {sierra_item["id"]} with bibIds: '
+                f'{sierra_item["bibIds"]} {sierra_bib_id}'
             )
         else:
-            self.add_stats(self.stats, f"Mapped instance ids")
+            self.add_to_migration_report("General statistics", f"Mapped instance ids")
 
         new_holding = {
             "id": str(uuid.uuid4()),
@@ -159,14 +160,14 @@ class SierraItemTransformer(MapperBase, ABC):
             ids = [
                 f"{i} ({self.get_folio_instance_id(i)})" for i in sierra_item["bibIds"]
             ]
-            self.add_stats(self.stats, "Notes added to items")
+            self.add_to_migration_report("General statistics", "Notes added to items")
             yield {
                 "itemNoteTypeId": "8d0a5eca-25de-4391-81a9-236eeefdd20b",
                 "note": f"Bound-with Instance(s): {json.dumps(ids)}",
                 "staffOnly": True,
             }
         if check_outs + renewals > 0:
-            self.add_stats(self.stats, "Notes added to items")
+            self.add_to_migration_report("General statistics", "Notes added to items")
             yield {
                 "itemNoteTypeId": "8d0a5eca-25de-4391-81a9-236eeefdd20b",
                 "note": (
@@ -177,7 +178,7 @@ class SierraItemTransformer(MapperBase, ABC):
             }
         for note_x in get_varfields_no_subfield(sierra_item, "x"):
             if note_x:
-                self.add_stats(self.stats, "Notes added to items")
+                self.add_to_migration_report("General statistics", "Notes added to items")
                 yield {
                     "itemNoteTypeId": "8d0a5eca-25de-4391-81a9-236eeefdd20b",
                     "note": note_x,
@@ -185,7 +186,7 @@ class SierraItemTransformer(MapperBase, ABC):
                 }
         for note_a in get_varfields_no_subfield(sierra_item, "a"):
             if note_a:
-                self.add_stats(self.stats, "Notes added to items")
+                self.add_to_migration_report("General statistics", "Notes added to items")
                 yield {
                     "itemNoteTypeId": "8d0a5eca-25de-4391-81a9-236eeefdd20b",
                     "note": note_a,
@@ -193,7 +194,7 @@ class SierraItemTransformer(MapperBase, ABC):
                 }
         for note_n in get_varfields_no_subfield(sierra_item, "n"):
             if note_n:
-                self.add_stats(self.stats, "Notes added to items")
+                self.add_to_migration_report("General statistics", "Notes added to items")
                 yield {
                     "itemNoteTypeId": "8d0a5eca-25de-4391-81a9-236eeefdd20b",
                     "note": note_n,
@@ -232,14 +233,7 @@ class SierraItemTransformer(MapperBase, ABC):
             print(holding)
             raise ee
 
-    @staticmethod
-    def add_stats(stats, measure_to_add):
-        if measure_to_add not in stats:
-            stats[measure_to_add] = 1
-        else:
-            stats[measure_to_add] += 1
-
-    def get_circ_notes(self, sierra_item):
+    def get_circulation_notes(self, sierra_item):
         source = {
             "id": self.folio_client.current_user,
             "personal": {"lastName": "Sierra", "firstName": "Migrated"},
@@ -266,7 +260,7 @@ class SierraItemTransformer(MapperBase, ABC):
         note_97 = sierra_item["fixedFields"].get("97", {}).get("value")
         if note_97 and len(note_97) > 5:
             self.add_to_migration_report("Circulation notes", "From fixed field 97")
-            self.add_stats(self.stats, f"Items with Circ notes - Fixed 97")
+            self.add_to_migration_report("General statistics", f"Items with Circ notes - Fixed 97")
             yield {
                 "id": str(uuid.uuid4()),
                 "noteType": "Check in",
@@ -288,11 +282,11 @@ class SierraItemTransformer(MapperBase, ABC):
         # TODO: Move to interface or parent class
         key = self.to_key(holdings_record)
         self.holdings[key]["notes"].extend(holdings_record["notes"])
-        self.holdings[key]["notes"] = dedupe(self.holdings[key]["notes"])
+        self.holdings[key]["notes"] = deduplicate(self.holdings[key]["notes"])
         self.holdings[key]["holdingsStatements"].extend(
             holdings_record["holdingsStatements"]
         )
-        self.holdings[key]["holdingsStatements"] = dedupe(
+        self.holdings[key]["holdingsStatements"] = deduplicate(
             self.holdings[key]["holdingsStatements"]
         )
         self.holdings[key]["formerIds"].extend(holdings_record["formerIds"])
@@ -597,7 +591,7 @@ class SierraItemTransformer(MapperBase, ABC):
             raise TransformationCriticalDataError(sierra_item["id"], "Property not found in item", code)
 
 
-def dedupe(list_of_dicts):
+def deduplicate(list_of_dicts):
     # TODO: Move to interface or parent class
     return [dict(t) for t in {tuple(d.items()) for d in list_of_dicts}]
 
