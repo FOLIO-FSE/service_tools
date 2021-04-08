@@ -64,7 +64,7 @@ class BatchPoster(ServiceTaskBase):
                         print(f"{unicode_error} Posting failed. Encoding error reading file")
                         print(f"Failing row, either the one shown here or the next row in {self.objects_file}")
                         print(last_row)
-                        print("=========Stack trace==============", flush=True)
+                        print("=========Stack trace==============")
                         traceback.print_exc()
                         print("=======================", flush=True)
                     except Exception as exception:
@@ -88,9 +88,7 @@ class BatchPoster(ServiceTaskBase):
             logging.info(
                 f"Posting successful! Total rows: {self.processed_rows}  {response.elapsed.total_seconds()}s "
                 f"Batch Size: {len(batch)} Request size: {get_req_size(response)} "
-                f"{datetime.utcnow().isoformat()} UTC",
-                flush=True,
-            )
+                f"{datetime.utcnow().isoformat()} UTC")
         elif response.status_code == 422:
             resp = json.loads(response.text)
             raise Exception(
