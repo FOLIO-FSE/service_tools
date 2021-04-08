@@ -188,12 +188,12 @@ class Add952ToMarc(ServiceTaskBase):
                         marc_record.add_ordered_field(my_field)
                     out.write(marc_record.as_marc())
                     if idx % 1000 == 0:
-                        logging.info(f'Example 952 field: {marc_record["952"]}')
                         elapsed = idx / (time.time() - self.start)
                         elapsed_formatted = "{0:.2f}".format(elapsed)
                         logging.info(
                             (f"{elapsed_formatted} recs/sec Number of records: {idx:,}. "
-                             f"Number of matched items: {found_locations:,}"),
+                             f"Number of matched items: {found_locations:,} "
+                             f'Example 952 field: {marc_record["952"]}'),
                             flush=True,
                         )
                 except Exception as ee:
