@@ -20,9 +20,9 @@ from service_tasks.service_task_base import ServiceTaskBase
 class Add952ToMarc(ServiceTaskBase):
     def __init__(self, folio_client, args):
         super().__init__(folio_client)
-        print("Fetching locations")
+        logging.info("Fetching locations")
         self.locations = list(self.folio_client.folio_get_all("/locations", "locations", ))
-        print(f"Fetched {len(self.locations)} locations")
+        logging.info(f"Fetched {len(self.locations)} locations")
         self.ref_data_dicts = {}
         self.file_paths = args.results_folder
         self.processed_records = 0
@@ -33,21 +33,21 @@ class Add952ToMarc(ServiceTaskBase):
         self.items_file = ""
         for file_name in files:
             if file_name.endswith("folio_holdings.json"):
-                print("Holdings file found")
+                logging.info("Holdings file found")
                 self.holdings_file = file_name
             elif file_name.endswith("folio_items.json"):
-                print("Items file found")
+                logging.info("Items file found")
                 self.items_file = file_name
             elif file_name.endswith("srs.json"):
-                print("Bibs file found")
+                logging.info("Bibs file found")
                 self.srs_file = file_name
         self.start = time.time()
         self.holdings_map = {}
         self.item_map = {}
-        print("Init done")
+        logging.info("Init done")
 
     def do_work(self):
-        print("Fetching Holdings records")
+        logging.info("Fetching Holdings records")
         self.start = time.time()
         with open(self.holdings_file) as holdings_file:
             idx = 0
@@ -76,7 +76,7 @@ class Add952ToMarc(ServiceTaskBase):
                 if loc:
                     field_dict["location"] = loc[1]
                 else:
-                    print(f"location id {hold['permanentLocationId']} not found")
+                    logging.info(f"location id {hold['permanentLocationId']} not found")
 
                 if hold.get('callNumber', ""):
                     field_dict["call_number"] = hold['callNumber']
@@ -101,16 +101,16 @@ class Add952ToMarc(ServiceTaskBase):
                 if idx % 200000 == 0:
                     elapsed = idx / (time.time() - self.start)
                     elapsed_formatted = f"{elapsed:,}"
-                    print(
+                    logging.info(
                         (f"{elapsed_formatted} recs/sec Number of records: {idx:,}."
                          f"Size of holdings map: {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}"),
                         flush=True,
                     )
 
         elapsed = idx / (time.time() - self.start)
-        print(f"Done parsing Holds in {(time.time() - self.start)} seconds")
+        logging.info(f"Done parsing Holds in {(time.time() - self.start)} seconds")
         if self.items_file:
-            print("Fetching Items records")
+            logging.info("Fetching Items records")
             self.start = time.time()
             with open(self.items_file) as items_file:
                 idx = 0
@@ -141,12 +141,12 @@ class Add952ToMarc(ServiceTaskBase):
                     if idx % 200000 == 0:
                         elapsed = idx / (time.time() - self.start)
                         elapsed_formatted = f"{elapsed:,}"
-                        print(
+                        logging.info(
                             (f"{elapsed_formatted} recs/sec Number of records: {idx:,}."
                              f"Size of items map: {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}"),
                             flush=True,
                         )
-            print(f"Done parsing {idx} Items in {(time.time() - self.start)} seconds. {len(item_field_dict)}")
+            logging.info(f"Done parsing {idx} Items in {(time.time() - self.start)} seconds. {len(item_field_dict)}")
 
         self.start = time.time()
         with open(self.srs_file, "r", encoding="utf-8") as srs_file, open(join(self.file_paths, 'discovery_file.mrc'), 'wb') as out:
@@ -188,18 +188,18 @@ class Add952ToMarc(ServiceTaskBase):
                         marc_record.add_ordered_field(my_field)
                     out.write(marc_record.as_marc())
                     if idx % 1000 == 0:
-                        print(marc_record["952"])
+                        logging.info(f'Example 952 field: {marc_record["952"]}')
                         elapsed = idx / (time.time() - self.start)
                         elapsed_formatted = "{0:.2f}".format(elapsed)
-                        print(
+                        logging.info(
                             (f"{elapsed_formatted} recs/sec Number of records: {idx:,}. "
                              f"Number of matched items: {found_locations:,}"),
                             flush=True,
                         )
                 except Exception as ee:
-                    print(f"row: {row}")
+                    logging.exception(f"row: {row}")
                     raise (ee)
-            print(f"Done parsing {idx} recs in {(time.time() - self.start)} seconds. Matched locs: {found_locations:,}")
+            logging.info(f"Done parsing {idx} recs in {(time.time() - self.start)} seconds. Matched locs: {found_locations:,}")
 
     def process_record(self, marc_record):
         try:
@@ -207,12 +207,12 @@ class Add952ToMarc(ServiceTaskBase):
             if self.processed_records % 1000 == 0:
                 elapsed = self.processed_records / (time.time() - self.start)
                 elapsed_formatted = "{0:.2f}".format(elapsed)
-                print(
+                logging.info(
                     f"{elapsed_formatted} recs/sec Number of records: {self.processed_records:,}",
                     flush=True,
                 )
         except Exception as ee:
-            print(ee)
+            logging.exception(ee)
 
     def get_ref_data_name(self, ref_data, ref_name, key_value, key_type):
         dict_key = f"{ref_name}{key_value}"
