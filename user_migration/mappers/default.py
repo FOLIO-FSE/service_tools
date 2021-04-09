@@ -22,7 +22,7 @@ class Default(MapperBase):
         self.user_schema = MapperBase.get_user_schema()
         self.ids_dict: Dict[str, set] = {}
         self.use_map = True
-
+        self.custom_props = {}
         folio_group_names = [g['group'] for g in list(self.folio_client.get_all("/groups", "usergroups"))]
         logging.info(f"Fetched {len(folio_group_names)} groups from FOLIO")
         print(json.dumps(groups_map, indent=4))
@@ -33,6 +33,12 @@ class Default(MapperBase):
                 raise Exception(f'FOLIO name {m["folio_name"]} from map is not in FOLIO ')
 
     def do_map(self, legacy_user, user_map):
+        if not self.custom_props:
+            for m in user_map["data"]:
+                if "customFields" in m["folio_field"]:
+                    sub_property = m["folio_field"].split('.')[-1]
+                    self.custom_props[sub_property] = m["legacy_field"]
+
         # raise NotImplementedError("Create ID-Legacy ID Mapping file!")
         # raise NotImplementedError("Check for ID duplicates (barcodes, externalsystemID:s, usernames, emails?, ")
         folio_user = self.instantiate_user()
@@ -45,6 +51,15 @@ class Default(MapperBase):
                 self.report_folio_mapping(f"{prop_name}", True, False)
                 continue
             if prop["type"] == "object":
+                if "customFields" in prop_name:
+                    for k, v in self.custom_props.items():
+                        legacy_value = legacy_user.get(v, "")
+                        if legacy_value:
+                            folio_user[f"customFields"][k] = legacy_value
+                            self.report_folio_mapping(f"customFields.{k}", True, False)
+                        else:
+                            self.report_folio_mapping(f"customFields.{k}", False, True)
+                    continue
                 folio_user[prop_name] = {}
                 prop_key = prop_name
                 if "properties" in prop:
@@ -79,6 +94,8 @@ class Default(MapperBase):
             elif prop["type"] == "array":
                 # handle departments
                 self.report_folio_mapping(f"Unhandled array: {prop_name}", False)
+            elif prop == "customFields":
+                logging.info(prop)
             else:
                 self.map_basic_props(legacy_user, user_map, prop_name, folio_user)
                 """ elif prop == "customFields":

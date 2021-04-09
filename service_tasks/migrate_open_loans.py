@@ -16,7 +16,8 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 
 class MigrateOpenLoans(ServiceTaskBase):
-    """Migrates Open Loans using the various Business logic apis for Circulation"""
+    """Migrates Open Loans using the various Business logic apis for Circulation
+    """
 
     def __init__(self, folio_client, args):
         super().__init__(folio_client)
