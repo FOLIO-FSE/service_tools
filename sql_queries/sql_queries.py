@@ -1,14 +1,14 @@
 sql_queries = [
     {"name": "Count Items divided by Permanent Location",
      "description": "",
-     "query": "SELECT L.JSONB->>'code' location_code,L.JSONB->>'name' location_name,C.C FROM "
-              "{tenant_id}_MOD_INVENTORY_STORAGE.LOCATION AS L,(SELECT COUNT(EFFECTIVELOCATIONID) C, "
-              "EFFECTIVELOCATIONID ID FROM {tenant_id}_MOD_INVENTORY_STORAGE.ITEM I GROUP BY EFFECTIVELOCATIONID) AS C "
-              "WHERE C.ID = L.ID"},
+     "query": "select l.jsonb->>'code' location_code,l.jsonb->>'name' location_name,c.c from "
+              "{tenant_id}_mod_inventory_storage.location as l,(select count(effectivelocationid) c, "
+              "effectivelocationid id from {tenant_id}_mod_inventory_storage.item i group by effectivelocationid) as c "
+              "where c.id = l.id"},
     {"name": "Maximum # holdings per bib",
      "description": "",
-     "query": "SELECT INSTANCEID, COUNT(INSTANCEID) FROM {tenant_id}_MOD_INVENTORY_STORAGE.HOLDINGS_RECORD GROUP BY "
-              "INSTANCEID ORDER BY COUNT(INSTANCEID) DESC LIMIT 1"}
+     "query": "select instanceid, count(instanceid) from {tenant_id}_mod_inventory_storage.holdings_record group by "
+              "instanceid order by count(instanceid) desc limit 1"}
 ]
 # Template
 # {"name":"", "description":"", "query": ""}
