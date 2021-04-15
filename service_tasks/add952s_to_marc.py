@@ -103,9 +103,7 @@ class Add952ToMarc(ServiceTaskBase):
                     elapsed_formatted = f"{elapsed:,}"
                     logging.info(
                         (f"{elapsed_formatted} recs/sec Number of records: {idx:,}."
-                         f"Size of holdings map: {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}"),
-                        flush=True,
-                    )
+                         f"Size of holdings map: {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}"))
 
         elapsed = idx / (time.time() - self.start)
         logging.info(f"Done parsing Holds in {(time.time() - self.start)} seconds")
@@ -143,13 +141,13 @@ class Add952ToMarc(ServiceTaskBase):
                         elapsed_formatted = f"{elapsed:,}"
                         logging.info(
                             (f"{elapsed_formatted} recs/sec Number of records: {idx:,}."
-                             f"Size of items map: {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}"),
-                            flush=True,
+                             f"Size of items map: {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}")
                         )
             logging.info(f"Done parsing {idx} Items in {(time.time() - self.start)} seconds. {len(item_field_dict)}")
 
         self.start = time.time()
-        with open(self.srs_file, "r", encoding="utf-8") as srs_file, open(join(self.file_paths, 'discovery_file.mrc'), 'wb') as out:
+        with open(self.srs_file, "r", encoding="utf-8") as srs_file, open(join(self.file_paths, 'discovery_file.mrc'),
+                                                                          'wb') as out:
             idx = 0
             found_locations = 0
             for row in srs_file:
@@ -165,10 +163,10 @@ class Add952ToMarc(ServiceTaskBase):
                     for item_data in self.item_map.get(marc_record['999']["i"], []):
                         found_locations += 1
                         my_field = Field(
-                                tag="952",
-                                indicators=["f", "f"],
-                                subfields=[],
-                            )
+                            tag="952",
+                            indicators=["f", "f"],
+                            subfields=[],
+                        )
                         subfields = {
                             "d": item_data["location"],
                             "e": item_data["call_number"],
@@ -194,12 +192,12 @@ class Add952ToMarc(ServiceTaskBase):
                             (f"{elapsed_formatted} recs/sec Number of records: {idx:,}. "
                              f"Number of matched items: {found_locations:,} "
                              f'Example 952 field: {marc_record["952"]}'),
-                            flush=True,
                         )
                 except Exception as ee:
                     logging.exception(f"row: {row}")
                     raise (ee)
-            logging.info(f"Done parsing {idx} recs in {(time.time() - self.start)} seconds. Matched locs: {found_locations:,}")
+            logging.info(
+                f"Done parsing {idx} recs in {(time.time() - self.start)} seconds. Matched locs: {found_locations:,}")
 
     def process_record(self, marc_record):
         try:
@@ -208,8 +206,7 @@ class Add952ToMarc(ServiceTaskBase):
                 elapsed = self.processed_records / (time.time() - self.start)
                 elapsed_formatted = "{0:.2f}".format(elapsed)
                 logging.info(
-                    f"{elapsed_formatted} recs/sec Number of records: {self.processed_records:,}",
-                    flush=True,
+                    f"{elapsed_formatted} recs/sec Number of records: {self.processed_records:,}"
                 )
         except Exception as ee:
             logging.exception(ee)

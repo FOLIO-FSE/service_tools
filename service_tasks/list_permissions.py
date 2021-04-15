@@ -14,9 +14,10 @@ class ListPermissions(ServiceTaskBase):
     def do_work(self):
         query = f'?query=(userId=="{self.user_id}")'
         resp = self.folio_client.get_all('/perms/users', "permissionUsers", query)
-        print(resp[0]["id"])
+        # print(resp[0]["id"])
         print("")
         print(f"# Permissions for {self.user_id} ")
+        print(list(resp))
         print("\n".join(resp[0]["permissions"]))
 
     @staticmethod
