@@ -16,10 +16,13 @@ from service_tasks.service_task_base import ServiceTaskBase
 # We are mimicing this behaviour:
 # https://issues.folio.org/browse/MODOAIPMH-102
 
-
 class Add952ToMarc(ServiceTaskBase):
     def __init__(self, folio_client, args):
         super().__init__(folio_client)
+        self.mat_type_map = {}
+        for t in self.folio_client.folio_get_all("/material-types", "mtypes"):
+            self.mat_type_map[t["id"]] = t["name"]
+        logging.info(f"Loaded {len(self.mat_type_map)} material types")
         logging.info("Fetching locations")
         self.locations = list(self.folio_client.folio_get_all("/locations", "locations", ))
         logging.info(f"Fetched {len(self.locations)} locations")
@@ -173,7 +176,7 @@ class Add952ToMarc(ServiceTaskBase):
                             # "f", item_data[""],
                             # "g", item_data[""],
                             # "h", item_data[""],
-                            # "i": item_data["material_type"],
+                            "i": self.get_material_type_name(item_data["material_type"]),
                             # "j": item_data["volume"],
                             # "k": item_data["enumeration"],
                             # "l": item_data["chronology"],
@@ -239,6 +242,9 @@ class Add952ToMarc(ServiceTaskBase):
     def add_cli_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_cli_argument(parser, "results_folder", "Path to the results folder")
+
+    def get_material_type_name(self, material_type_uuid):
+        return self.mat_type_map[material_type_uuid]
 
 
 def background(f):
