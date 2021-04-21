@@ -1,7 +1,7 @@
 import json
 import time
-from datetime import datetime
 from abc import abstractmethod
+from datetime import datetime
 
 import requests
 from folioclient import FolioClient
@@ -76,5 +76,4 @@ class PostAnyJsonRecords(ServiceTaskBase):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_cli_argument(
             parser, "objects_file_path", "path data file")
-        ServiceTaskBase.add_argument(
-            parser, "endpoint", "Endpoint to post the records to")
+        ServiceTaskBase.add_cli_argument(parser, "endpoint", "Endpoint to post the records to")
