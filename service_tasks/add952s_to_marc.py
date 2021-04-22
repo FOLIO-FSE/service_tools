@@ -248,6 +248,7 @@ class Add952ToMarc(ServiceTaskBase):
             return self.mat_type_map.get[material_type_uuid]
         except KeyError:
             logging.error(f"Material type '{material_type_uuid}' not found")
+            return ""
 
 
 def background(f):
