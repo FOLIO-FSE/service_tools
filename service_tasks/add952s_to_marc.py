@@ -244,7 +244,10 @@ class Add952ToMarc(ServiceTaskBase):
         ServiceTaskBase.add_cli_argument(parser, "results_folder", "Path to the results folder")
 
     def get_material_type_name(self, material_type_uuid):
-        return self.mat_type_map[material_type_uuid]
+        try:
+            return self.mat_type_map.get[material_type_uuid]
+        except KeyError:
+            logging.error(f"Material type '{material_type_uuid}' not found")
 
 
 def background(f):
