@@ -63,3 +63,4 @@ class DeleteInstances(ServiceTaskBase):
                                          "instance_ids",
                                          "Comma separated list of instance ids to delete"
                                          )
+                                         
