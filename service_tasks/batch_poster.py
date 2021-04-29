@@ -80,13 +80,17 @@ class BatchPoster(ServiceTaskBase):
                             raise exception
             # Last batch
         self.post_batch(batch)
-        logging.info(f"{self.failed_records} failed records in {self.failed_batches} saved to {self.failed_recs_path}")
+        logging.info(f"Done posting {idx} records. ")
+        logging.info(
+            f"Failed records: {self.failed_records} failed records in {self.failed_batches} "
+            f"failed batches. Failed records saved to {self.failed_recs_path}")
 
     def post_batch(self, batch):
         response = self.do_post(batch)
         if response.status_code == 201 or response.status_code == 200:
             logging.info(
-                f"Posting successful! Total rows: {self.processed_rows}  {response.elapsed.total_seconds()}s "
+                f"Posting successful! Total rows: {self.processed_rows} Total failed: {self.failed_records} "
+                f"failed in {response.elapsed.total_seconds()}s "
                 f"Batch Size: {len(batch)} Request size: {get_req_size(response)} "
                 f"{datetime.utcnow().isoformat()} UTC")
         elif response.status_code == 422:
