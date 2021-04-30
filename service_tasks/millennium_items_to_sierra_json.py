@@ -26,11 +26,12 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
 
         with open(self.millennium_items_path, "r") as millennium_items_file, open(self.result_file,'w+') as results_file, open(self.csv_result_file, "w") as csv_result_file:
             # Loop through all the rows
-            for row_index, row in enumerate(millennium_items_file):      
+            for row_index, row in enumerate(millennium_items_file):
+                # Remove trailing and leading quotes
+                row = row[1:-2]
+
                 # The first row contains the hearders from the first row
                 if row_index == 0:
-                    # Remove trailing and leading quotes
-                    row = row[1:-1] + '"'
                     headers = row.split('","')
                     # Delete duplicate columns based on header name
                     duplicate_columns = list_duplicates(headers)
@@ -40,7 +41,6 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
                 # The remaining rows each represent an item
                 else:
                     # Remove trailing and leading quotes
-                    row = row[1:-2]
                     item = row.split('","')
 
                     # Find the index of the first occuring item ID
@@ -51,10 +51,10 @@ class MillenniumItemsToSierraJson(ServiceTaskBase):
                     del item[:item_id_index]
                     item.insert(0, bib_ids)
 
-                    # Put the bib class numbers that occur before the item_id_index into another list 
-                    bib_call_nos = item[2:2 + len(bib_ids)]
-                    del item[2:2 + len(bib_ids)]
-                    item.insert(2, bib_call_nos)
+                    # Put the bib class numbers that occur after the item_id_index into another list 
+                    bib_call_nos = item[3:3 + len(bib_ids)]
+                    del item[3:3 + len(bib_ids)]
+                    item.insert(3, bib_call_nos)
                     
                     # Delete duplicate columns based on header name
                     for column in sorted(duplicate_columns, reverse=True):

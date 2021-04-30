@@ -18,15 +18,18 @@ class DeleteInstances(ServiceTaskBase):
         for instance_id in [id.strip() for id in instance_ids if id]:
             if not uuid.UUID(instance_id) and not uuid.UUID(instance_id).version >= 4:
                 raise Exception(f"id {instance_id} of Object to delete is not a proper UUID")
-            instance_to_delete = self.folio_client.folio_get_single_object(f"/instance-storage/instances/{instance_id}")
-            print(f'Will delete {instance_to_delete["title"]}. Just checking for holdings first')
-            query = f'?query=(instanceId="{instance_id}")'
-            holdings = list(self.folio_client.get_all("/holdings-storage/holdings", "holdingsRecords", query))
-            if len(holdings) > 0:
-                print(f"{len(holdings)} attached found. Halting. Delete holdings and other attached records first")
-            else:
-                print("No holdings found. Deleting Instance")
-                self.delete_request("/instance-storage/instances", instance_id)
+            try:
+                instance_to_delete = self.folio_client.folio_get_single_object(f"/instance-storage/instances/{instance_id}")
+                print(f'Will delete {instance_to_delete["title"]}. Just checking for holdings first')
+                query = f'?query=(instanceId="{instance_id}")'
+                holdings = list(self.folio_client.get_all("/holdings-storage/holdings", "holdingsRecords", query))
+                if len(holdings) > 0:
+                    print(f"{len(holdings)} holding found attached to {instance_id}. Halting. Delete holdings and other attached records first")
+                else:
+                    print("No holdings found. Deleting instance.")
+                    self.delete_request("/instance-storage/instances", instance_id)
+            except requests.HTTPError as http_error:
+                print(http_error)
 
     def delete_request(self, path, object_id):
         parsed_path = path.rstrip("/").lstrip("/")
@@ -60,3 +63,4 @@ class DeleteInstances(ServiceTaskBase):
                                          "instance_ids",
                                          "Comma separated list of instance ids to delete"
                                          )
+                                         
