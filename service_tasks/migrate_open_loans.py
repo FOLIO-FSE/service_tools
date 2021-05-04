@@ -57,8 +57,8 @@ class MigrateOpenLoans(ServiceTaskBase):
                 continue  # no need to process
             t0_migration = time.time()
             try:
-                res_checkout = CirculationHelper.check_out_by_barcode(legacy_loan["item_barcode"],
-                                                                      legacy_loan["patron_barcode"], self.folio_client,
+                res_checkout = CirculationHelper.check_out_by_barcode(self.folio_client, legacy_loan["item_barcode"],
+                                                                      legacy_loan["patron_barcode"],
                                                                       self.service_point_id)
                 self.add_stats(res_checkout[3])
                 if not res_checkout[0]:
