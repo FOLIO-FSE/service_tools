@@ -160,6 +160,7 @@ class Add952ToMarc(ServiceTaskBase):
                     idx += 1
                     srs_rec = json.loads(row.split("\t")[-1])
                     marc_record = from_json(srs_rec["parsedRecord"]["content"])
+                    marc_record.remove_fields('952')
                     temp_leader = Leader(marc_record.leader)
                     temp_leader[9] = 'a'
                     marc_record.leader = temp_leader
