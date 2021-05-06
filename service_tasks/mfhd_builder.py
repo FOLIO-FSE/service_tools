@@ -42,7 +42,7 @@ class MFHDBuilder(ServiceTaskBase):
             callno = str(df[self.callField][row])
             callno = callno.replace(" ", "$i", 1)
 
-            marc852 = '=852 0\\$b' + location + '$h' + callno + "\n"
+            marc852 = '=852 0\\$c' + location + '$h' + callno + "\n"
             ## make sure record was not already processed
             if (repeatRecords[bibID] != 1):
                 f.write(LDR)
