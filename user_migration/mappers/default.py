@@ -1,15 +1,13 @@
 import csv
 import json
 import logging
-import re
-import uuid
 from datetime import datetime
-
-from dateutil.parser import parse
 from typing import Dict
 
+from dateutil.parser import parse
 from folioclient import FolioClient
 
+from helpers.custom_exceptions import TransformationCriticalDataError
 from user_migration.mappers.mapper_base import MapperBase
 
 
@@ -19,7 +17,8 @@ class Default(MapperBase):
         self.args = args
         self.use_group_map = use_group_map
         self.groups_map = {}
-        self.user_schema = MapperBase.get_user_schema()
+        self.user_schema = MapperBase.get_latest_from_github("folio-org", "mod-user-import",
+                                                             "/ramls/schemas/userdataimport.json")
         self.ids_dict: Dict[str, set] = {}
         self.use_map = True
         self.custom_props = {}
@@ -32,17 +31,17 @@ class Default(MapperBase):
             else:
                 raise Exception(f'FOLIO name {m["folio_name"]} from map is not in FOLIO ')
 
-    def do_map(self, legacy_user, user_map):
+    def do_map(self, legacy_user, user_map, idx):
         if not self.custom_props:
             for m in user_map["data"]:
                 if "customFields" in m["folio_field"]:
                     sub_property = m["folio_field"].split('.')[-1]
                     self.custom_props[sub_property] = m["legacy_field"]
+            logging.debug(f"Found {len(self.custom_props)} Custom fields to be mapped.")
 
         # raise NotImplementedError("Create ID-Legacy ID Mapping file!")
         # raise NotImplementedError("Check for ID duplicates (barcodes, externalsystemID:s, usernames, emails?, ")
         folio_user = self.instantiate_user()
-        self.add_to_migration_report("Users per patron type", str(self.get_prop(legacy_user, user_map, "patronGroup")))
         for prop_name, prop in self.user_schema["properties"].items():
             if prop.get("description", "") == "Deprecated":
                 self.report_folio_mapping(f"{prop_name} (deprecated)", False, True)
@@ -92,10 +91,25 @@ class Default(MapperBase):
                             folio_user[prop_name][sub_prop_name] = self.get_prop(legacy_user, user_map, sub_prop_key)
 
             elif prop["type"] == "array":
+                """if prop["items"]["type"] == "object":
+                    self.map_objects_array_props(
+                        legacy_object,
+                        prop_name,
+                        prop["items"]["properties"],
+                        folio_object,
+                        index_or_id,
+                    )
+                elif prop["items"]["type"] == "string":
+                    self.map_string_array_props(
+                        legacy_object, prop_name, folio_object, index_or_id
+                    )
+                else:
+                    self.report_folio_mapping(
+                        f'Unhandled array of {prop["items"]["type"]}: {prop_name}',
+                        False,
+                    )"""
                 # handle departments
                 self.report_folio_mapping(f"Unhandled array: {prop_name}", False)
-            elif prop == "customFields":
-                logging.info(prop)
             else:
                 self.map_basic_props(legacy_user, user_map, prop_name, folio_user)
                 """ elif prop == "customFields":
@@ -121,9 +135,26 @@ class Default(MapperBase):
         # self.validate(folio_user)
         folio_user["personal"]["preferredContactTypeId"] = "Email"
         folio_user["active"] = True
-        del folio_user["personal"]["preferredFirstName"]
-        del folio_user["tags"]
-
+        required = self.user_schema["required"]
+        for required_prop in required:
+            if required_prop not in folio_user:
+                raise TransformationCriticalDataError(
+                    f"Required property {required_prop} missing for \"{folio_user.get('barcode', '')}\" (barcode) {idx} (index in file)"
+                )
+            elif not folio_user[required_prop]:
+                raise TransformationCriticalDataError(
+                    f"Required property {required_prop} empty for \"{folio_user.get('barcode', '')}\" (barcode) {idx} (index in file)"
+                )
+        # Honeysuckle special case
+        if "preferredFirstName" in folio_user["personal"]:
+            del folio_user["personal"]["preferredFirstName"]
+            self.add_to_migration_report("Removed fields due to incompatibility in Honeysuckle", "preferredFirstName")
+        if "tags" in folio_user:
+            del folio_user["tags"]
+            self.add_to_migration_report("Removed fields due to incompatibility in Honeysuckle", "tags")
+        if "requestPreference" in folio_user:
+            del folio_user["requestPreference"]
+            self.add_to_migration_report("Removed fields due to incompatibility in Honeysuckle", "requestPreference")
         return folio_user
 
     def map_basic_props(self, legacy_user, user_map, prop, folio_user):
@@ -175,15 +206,22 @@ class Default(MapperBase):
             elif folio_prop_name == "patronGroup":
                 legacy_group = legacy_user.get(legacy_user_key, "")
                 if self.use_group_map:
+                    mapped_legacy_group = self.groups_map.get(legacy_group, '')
+                    if not mapped_legacy_group:
+                        logging.fatal(f"Patron group {legacy_group} not in groups map!. Halting")
+                        exit()
                     self.add_to_migration_report("User group mapping",
-                                                 f"{legacy_group} -> {self.groups_map[legacy_group]}")
+                                                 f"{legacy_group} -> {mapped_legacy_group}")
                     self.report_folio_mapping(f"{folio_prop_name}", True, False)
                     self.report_legacy_mapping(legacy_user_key, True, False)
+                    self.add_to_migration_report("Users per patron type", self.groups_map[legacy_group])
+
                     return self.groups_map[legacy_group]
                 else:
                     self.add_to_migration_report("User group mapping", f"{legacy_group} -> {legacy_group} (one to one)")
                     self.report_folio_mapping(f"{folio_prop_name}", True, False)
                     self.report_legacy_mapping(legacy_user_key, True, False)
+                    self.add_to_migration_report("Users per patron type", legacy_group)
                     return legacy_group
             elif folio_prop_name == "expirationDate" or folio_prop_name == "enrollmentDate":
                 try:

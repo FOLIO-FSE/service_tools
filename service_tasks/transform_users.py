@@ -10,6 +10,7 @@ from typing import Dict
 import requests
 from folioclient import FolioClient
 
+from helpers.custom_exceptions import TransformationCriticalDataError
 from service_tasks.service_task_base import ServiceTaskBase
 from user_migration.mappers.default import Default
 
@@ -120,21 +121,27 @@ class TransformUsers(ServiceTaskBase):
                         logging.info(f'processing {combo["data_file"]}')
                         user_map = json.load(mapping_file)
                         file_format = "tsv" if str(combo["data_file"]).endswith(".tsv") else "csv"
-                        for legacy_user in self.transformer.get_users(object_file, file_format):
+                        for idx,  legacy_user in enumerate(self.transformer.get_users(object_file, file_format)):
                             i += 1
                             try:
-                                folio_user = self.transformer.do_map(legacy_user, user_map)
+                                folio_user = self.transformer.do_map(legacy_user, user_map, idx)
                                 clean_user(folio_user)
                                 results_file.write(f"{json.dumps(folio_user)}\n")
                                 if i == 1:
                                     print("## First Legacy  user")
+                                    print("```")  # Markdown syntax highlighting
                                     print(json.dumps(legacy_user, indent=4))
+                                    print("```")  # Markdown syntax highlighting
                                     print("## First FOLIO  user")
+                                    print("```")  # Markdown syntax highlighting
                                     print(json.dumps(folio_user, indent=4, sort_keys=True))
+                                    print("```")  # Markdown syntax highlighting
                                     print_email_warning()
                                 self.add_stats("Successful user transformations")
                                 if i % 1000 == 0:
                                     logging.info(f"{i} users processed")
+                            except TransformationCriticalDataError as tre:
+                                logging.error(tre)
                             except ValueError as ve:
                                 logging.error(ve)
                             except Exception as ee:

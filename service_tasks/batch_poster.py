@@ -90,7 +90,7 @@ class BatchPoster(ServiceTaskBase):
         if response.status_code == 201 or response.status_code == 200:
             logging.info(
                 f"Posting successful! Total rows: {self.processed_rows} Total failed: {self.failed_records} "
-                f"failed in {response.elapsed.total_seconds()}s "
+                f"in {response.elapsed.total_seconds()}s "
                 f"Batch Size: {len(batch)} Request size: {get_req_size(response)} "
                 f"{datetime.utcnow().isoformat()} UTC")
         elif response.status_code == 422:
