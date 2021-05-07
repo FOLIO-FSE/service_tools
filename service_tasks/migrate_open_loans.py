@@ -33,7 +33,7 @@ class MigrateOpenLoans(ServiceTaskBase):
         self.processed_items = set()
         self.missing_barcodes = set()
         self.missing_patron_barcodes = set()
-        self.successful_items = set()
+        # self.successful_items = set()
         self.failed = {}
         self.num_legacy_loans_processed = 0
         self.failed_and_not_dupe = {}
@@ -53,8 +53,8 @@ class MigrateOpenLoans(ServiceTaskBase):
                     f"{timings(self.t0, t0_migration, self.num_legacy_loans_processed)} {self.num_legacy_loans_processed}",
                     flush=True)
 
-            if self.is_processed(legacy_loan):
-                continue  # no need to process
+            # if self.is_processed(legacy_loan):
+            #     continue  # no need to process
             t0_migration = time.time()
             try:
                 res_checkout = CirculationHelper.check_out_by_barcode(self.folio_client, legacy_loan["item_barcode"],
@@ -101,12 +101,13 @@ class MigrateOpenLoans(ServiceTaskBase):
         print(f"Total Rows in file  | {self.num_legacy_loans_processed}")
         super().wrap_up()
 
-    def is_processed(self, legacy_loan):
-        if legacy_loan["item_id"] not in self.successful_items:
-            return False
-        else:
-            self.add_stats("Item has already been processed")
-            return True
+    # def is_processed(self, legacy_loan):
+    #     if legacy_loan.get("item_id", None):
+    #         if legacy_loan["item_id"] not in self.successful_items:
+    #             return False
+    #         else:
+    #             self.add_stats("Item has already been processed")
+    #             return True
 
     def handle_checkout_failure(self, legacy_loan, folio_checkout):
         if folio_checkout[2] == "5XX":
