@@ -104,9 +104,10 @@ class Add952ToMarc(ServiceTaskBase):
                 if idx % 200000 == 0:
                     elapsed = idx / (time.time() - self.start)
                     elapsed_formatted = f"{elapsed:,}"
+                    logging.info(field_dict)
                     logging.info(
                         (f"{elapsed_formatted} recs/sec Number of records: {idx:,}."
-                         f"Size of holdings map: {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}"))
+                         f"Size of holdings map: {len(self.holdings_map)} holdings {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}"))
 
         elapsed = idx / (time.time() - self.start)
         logging.info(f"Done parsing Holds in {(time.time() - self.start)} seconds")
@@ -139,9 +140,10 @@ class Add952ToMarc(ServiceTaskBase):
                         self.item_map[hold["instanceId"]].append(item_field_dict)
                     else:
                         self.item_map[hold["instanceId"]] = [item_field_dict]
-                    if idx % 200000 == 0:
+                    if idx % 50000 == 0:
                         elapsed = idx / (time.time() - self.start)
                         elapsed_formatted = f"{elapsed:,}"
+                        logging.info(json.dumps(item_field_dict, indent=4))
                         logging.info(
                             (f"{elapsed_formatted} recs/sec Number of records: {idx:,}."
                              f"Size of items map: {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}")
@@ -153,6 +155,7 @@ class Add952ToMarc(ServiceTaskBase):
                                                                           'wb') as out:
             idx = 0
             found_locations = 0
+            matched_instances = 0
             for row in srs_file:
                 if len(row) < 100:
                     continue
@@ -163,7 +166,11 @@ class Add952ToMarc(ServiceTaskBase):
                     temp_leader = Leader(marc_record.leader)
                     temp_leader[9] = 'a'
                     marc_record.leader = temp_leader
-                    for item_data in self.item_map.get(marc_record['999']["i"], []):
+                    instance_id = ""
+                    for f999 in marc_record.get_fields('999'):
+                        if 'i' in f999: 
+                            instance_id = f999['i']
+                    for item_data in self.item_map.get(instance_id, []):
                         found_locations += 1
                         my_field = Field(
                             tag="952",
@@ -193,8 +200,8 @@ class Add952ToMarc(ServiceTaskBase):
                         elapsed_formatted = "{0:.2f}".format(elapsed)
                         logging.info(
                             (f"{elapsed_formatted} recs/sec Number of records: {idx:,}. "
-                             f"Number of matched items: {found_locations:,} "
-                             f'Example 952 field: {marc_record["952"]}'),
+                             f"Number of matched items: {found_locations} "
+                             f'Example 952 field: {marc_record["952"]} {matched_instances}'),
                         )
                 except Exception as ee:
                     logging.exception(f"row: {row}")
