@@ -171,6 +171,7 @@ class Add952ToMarc(ServiceTaskBase):
                     for f999 in marc_record.get_fields('999'):
                         if 'i' in f999: 
                             instance_id = f999['i']
+                    num_952s = 0
                     for item_data in self.item_map.get(instance_id, []):
                         found_locations += 1
                         my_field = Field(
@@ -193,8 +194,11 @@ class Add952ToMarc(ServiceTaskBase):
                         }
                         for sf_key, sf_value in subfields.items():
                             if sf_value:
+
                                 my_field.add_subfield(sf_key, sf_value)
-                        marc_record.add_ordered_field(my_field)
+                        if num_952s < 50:
+                            marc_record.add_ordered_field(my_field)
+                        num_952s += 1
                     out.write(marc_record.as_marc())
                     if idx % 1000 == 0:
                         elapsed = idx / (time.time() - self.start)
