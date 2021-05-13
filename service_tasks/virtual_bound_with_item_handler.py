@@ -65,12 +65,9 @@ class VirtualBoundWithItemHandler(ServiceTaskBase):
                             index_of_b = bs.index(b)
                             bib_class_numbers[index_of_b] = self.bibs_and_class[b]
                     row2["CLASS NO.(BIBLIO)"] = str(bib_class_numbers)
-                else:
-                    if row["RECORD #(BIBLIO)"] == "['']":
-                        row["RECORD #(BIBLIO)"] = ""
                     if row["CLASS NO.(BIBLIO)"] == "['']":
                         row["CLASS NO.(BIBLIO)"] = ""
-                writer.writerow(row2)
+                    writer.writerow(row2)
             print(f"{located_real_items}! {virtual_real_matches}")
 
 
