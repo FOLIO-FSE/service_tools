@@ -29,6 +29,7 @@ class CreateRecordFromModel(ServiceTaskBase):
             # Open the model and identify the values that should be replaced with data
             model = str(json.load(model_file))
             fields_to_replace = re.findall("\{\{[a-zA-Z0-9_]*\}\}", model)
+            print(f"Field tokens to replace with data: {fields_to_replace}")
 
             # Read the data into a data frame
             # data = pd.read_csv(data_file)
@@ -42,6 +43,7 @@ class CreateRecordFromModel(ServiceTaskBase):
                     # Create a new record based on the model
                     if row[self.dedupe] not in unique_processed:
                         record = model
+                        
 
                         # Loop through the fields, and replace with values from the data
                         for field in fields_to_replace:
@@ -50,12 +52,14 @@ class CreateRecordFromModel(ServiceTaskBase):
                                 this_uuid = str(uuid.uuid4())
                                 record = record.replace(field, this_uuid)
                                 id_map[row[self.dedupe]] = {name : this_uuid}
-                            else:
-                                record = record.replace(field, row[field])
-
-                        # Add record to list and list of processed records
-                        record = eval(record)
-                        records.append(record)
+                            elif row[name]:
+                                record = record.replace(field, str(row[name]))
+                        try:
+                            # Add record to list and list of processed records
+                            record = eval(record)
+                            records.append(record)
+                        except SyntaxError as se:
+                            print("\nError. Double check record:", se, record)
                         unique_processed.append(row[self.dedupe])
                 except KeyError as e:
                     print(f"Make sure that this field is in your headers AND model record: {e}")
