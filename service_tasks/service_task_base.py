@@ -17,22 +17,23 @@ class ServiceTaskBase:
     @staticmethod
     def setup_logging(log_file_path=None):
         logger = logging.getLogger()
-        formatter = logging.Formatter(
-            '%(levelname)s\t%(message)s\t%(asctime)s')
-        logger.setLevel(logging.INFO)
-
+        logger.handlers = []
+        formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
         stream_handler = logging.StreamHandler()
+        logger.setLevel(logging.INFO)
         stream_handler.setLevel(logging.INFO)
         stream_handler.setFormatter(formatter)
         logger.addHandler(stream_handler)
 
         if log_file_path:
             log_file = os.path.join(log_file_path, "service_task_log.log")
-            file_handler = logging.handlers.TimedRotatingFileHandler(
-                filename=log_file, when='midnight', backupCount=30)
+            file_formatter = logging.Formatter("%(message)s")
+            file_handler = logging.FileHandler(
+                filename=log_file,
+            )
             # file_handler.addFilter(LevelFilter(0, 20))
-            file_handler.setFormatter(formatter)
-            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(file_formatter)
+            file_handler.setLevel(logging.ERROR)
             logging.getLogger().addHandler(file_handler)
         logger.info("Logging setup")
 

@@ -3,14 +3,151 @@ import json
 import logging
 import re
 import time
-import traceback
-from datetime import datetime as datetime
+from datetime import datetime
+
 import requests
+from dateutil.parser import parse
 from folioclient import FolioClient
 from requests import HTTPError
 
 
+class TransactionResult(object):
+    def __init__(self, was_successful: bool, successful_message: str, error_message: str,
+                 migration_report_message: str):
+        self.was_successful = was_successful
+        self.successful_message = successful_message
+        self.error_message = error_message
+        self.migration_report_message = migration_report_message
+
+
+class LegacyLoan(object):
+    def __init__(self, legacy_loan_dict, row=0):
+        # validate
+        correct_headers = ["item_barcode", "patron_barcode", "due_date", "out_date", "renewal_count"]
+        for prop in correct_headers:
+            if prop not in legacy_loan_dict:
+                raise ValueError(f'Row {row}. Required property {prop} missing from legacy loan.\n'
+                                 f'Does your file have the required headers {", ".join(correct_headers)}?\n'
+                                 f'Headers in legacy loan: \n{json.dumps(list(legacy_loan_dict.keys()), indent=4)}')
+            if not legacy_loan_dict[prop]:
+                raise ValueError(f"Row {row}. Required property {prop} empty from legacy loan")
+        try:
+            temp_date_due: datetime = parse(legacy_loan_dict["due_date"])
+        except Exception as ee:
+            raise ValueError(f'Row {row}. Could not parse {legacy_loan_dict["due_date"]} into a valid ISO date {ee}')
+        try:
+            temp_date_out: datetime = parse(legacy_loan_dict["out_date"])
+        except Exception as ee:
+            raise ValueError(f'Row {row}. Could not parse {legacy_loan_dict["out_date"]} into a valid ISO date {ee}')
+
+        # good to go, set properties
+        self.item_barcode = legacy_loan_dict["item_barcode"]
+        self.patron_barcode = legacy_loan_dict["patron_barcode"]
+        self.due_date = temp_date_due
+        self.out_date = temp_date_out
+        self.renewal_count = int(legacy_loan_dict["renewal_count"])
+
+
 class CirculationHelper:
+
+    def __init__(self, folio_client: FolioClient, service_point_id):
+        self.folio_client = folio_client
+        self.service_point_id = service_point_id
+
+    def check_out_by_barcode_override_iris(self, legacy_loan: LegacyLoan):
+        t0_function = time.time()
+        data = {
+            "itemBarcode": legacy_loan.item_barcode,
+            "userBarcode": legacy_loan.patron_barcode,
+            "loanDate": legacy_loan.out_date.isoformat(),
+            "servicePointId": self.service_point_id,
+            "overrideBlocks": {"itemNotLoanableBlock": {"dueDate": legacy_loan.due_date.isoformat()},
+                               "patronBlock": {},
+                               "itemLimitBlock":{},
+                               "comment": "Migrated from legacy system"}
+        }
+        path = "/circulation/check-out-by-barcode"
+        url = f"{self.folio_client.okapi_url}{path}"
+        try:
+            req = requests.post(url, headers=self.folio_client.okapi_headers, data=json.dumps(data))
+            if req.status_code == 422:
+                error_message_from_folio = json.loads(req.text)['errors'][0]['message']
+                stat_message = error_message_from_folio
+                error_message = error_message_from_folio
+                if "has the item status" in error_message_from_folio:
+                    stat_message = re.findall(r"(?<=has the item status\s).*(?=\sand cannot be checked out)",
+                                              error_message_from_folio)[0]
+                    error_message = f"{stat_message} for item with barcode {legacy_loan.item_barcode}"
+                elif "No item with barcode" in error_message_from_folio:
+                    error_message = f"No item with barcode {legacy_loan.item_barcode} in FOLIO"
+                    stat_message = "Item barcode not in FOLIO"
+                elif " find user with matching barcode" in error_message_from_folio:
+                    error_message = f"No patron with barcode {legacy_loan.patron_barcode} in FOLIO"
+                    stat_message = "Patron barcode not in FOLIO"
+                logging.error(f"{error_message} {legacy_loan.patron_barcode} {legacy_loan.item_barcode}")
+                return TransactionResult(False, None, error_message, f"Check out error: {stat_message}")
+            elif req.status_code == 201:
+                stats = (f"Successfully checked out by barcode"
+                         # f"HTTP {req.status_code} {json.dumps(json.loads(req.text), indent=4)} "
+                         )
+                logging.info(f"{stats} (item barcode {legacy_loan.item_barcode}) in {(time.time() - t0_function):.2f}s")
+                return TransactionResult(True, json.loads(req.text), None, stats)
+            elif req.status_code == 204:
+                stats = f"Successfully checked out by barcode"
+                logging.info(f"{stats} (item barcode {legacy_loan.item_barcode}) {req.status_code}")
+                return TransactionResult(True, None, None, stats)
+            else:
+                req.raise_for_status()
+        except HTTPError as exception:
+            logging.error(f"{req.status_code}\tPOST FAILED {url}\n\t{json.dumps(data)}\n\t{req.text}", exc_info=True)
+            return TransactionResult(False, None, "5XX", f"Failed checkout http status {req.status_code}")
+
+    def check_out_by_barcode_override_honeysuckle(self, legacy_loan: LegacyLoan):
+        t0_function = time.time()
+        loan_to_post = {
+            "itemBarcode": legacy_loan.item_barcode,
+            "userBarcode": legacy_loan.patron_barcode,
+            "loanDate": legacy_loan.out_date.isoformat(),
+            "comment": "Migrated loan from Voyager",
+            "servicePointId": self.service_point_id,
+            "dueDate": legacy_loan.due_date.isoformat()
+        }
+        checkout_path = "/circulation/override-check-out-by-barcode"
+        checkout_url = f"{self.folio_client.okapi_url}{checkout_path}"
+        try:
+            req = requests.post(checkout_url, headers=self.folio_client.okapi_headers,
+                                data=json.dumps(loan_to_post))
+            if req.status_code == 422:
+                error_message_from_folio = json.loads(req.text)['errors'][0]['message']
+                stat_message = error_message_from_folio
+                error_message = error_message_from_folio
+                if "has the item status" in error_message_from_folio:
+                    stat_message = re.findall(r"(?<=has the item status\s).*(?=\sand cannot be checked out)",
+                                              error_message_from_folio)[0]
+                    error_message = f"{stat_message} for item with barcode {legacy_loan.item_barcode}"
+                elif "No item with barcode" in error_message_from_folio:
+                    error_message = f"No item with barcode {legacy_loan.item_barcode} in FOLIO"
+                    stat_message = "Item barcode not in FOLIO"
+                elif " find user with matching barcode" in error_message_from_folio:
+                    error_message = f"No patron with barcode {legacy_loan.patron_barcode} in FOLIO"
+                    stat_message = "Patron barcode not in FOLIO"
+                logging.error(f"{error_message} {legacy_loan.patron_barcode} {legacy_loan.item_barcode}")
+                return TransactionResult(False, None, error_message, f"Check out error: {stat_message}")
+            elif req.status_code == 201:
+                stats = f"Successfully checked out by barcode ({req.status_code})"
+                logging.info(stats)
+                return TransactionResult(True, json.loads(req.text), None, stats)
+            elif req.status_code == 204:
+                stats = f"Successfully checked out by barcode ({req.status_code})"
+                logging.info(stats)
+                return TransactionResult(True, None, None, stats)
+            else:
+                req.raise_for_status()
+        except HTTPError as exception:
+            logging.error(
+                f"{req.status_code}\tPOST FAILED {checkout_url}\n\t{json.dumps(loan_to_post)}\n\t{req.text}",
+                exc_info=True)
+            return TransactionResult(False, None, "5XX", f"Failed checkout http status {req.status_code}")
 
     @staticmethod
     def check_out_by_barcode(folio_client, item_barcode: str, patron_barcode: str, service_point_id: str):

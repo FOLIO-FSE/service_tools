@@ -73,7 +73,8 @@ class Add952ToMarc(ServiceTaskBase):
                     "chronology": "",
                     "barcode": "",
                     "copy_number": "",
-                    "instanceId": hold["instanceId"]
+                    "instanceId": hold["instanceId"],
+                    "matched_item": False
                 }
                 loc = self.get_ref_data_name(self.locations, "locations", hold["permanentLocationId"], "id")
                 if loc:
@@ -94,8 +95,10 @@ class Add952ToMarc(ServiceTaskBase):
                     field_dict["call_number_type"] = hold['callNumberTypeId']
 
                 if self.items_file:
+                    # If there is an Items file, we add these to the holdings map
                     self.holdings_map[hold["id"]] = field_dict
                 else:
+                    # No items file, add these directly as "Items" that will generate 952:s
                     if hold["instanceId"] in self.item_map:
                         self.item_map[hold["instanceId"]].append(field_dict)
                     else:
@@ -120,6 +123,7 @@ class Add952ToMarc(ServiceTaskBase):
                     item = json.loads(row.split('\t')[-1])
                     idx += 1
                     hold = self.holdings_map[item["holdingsRecordId"]]
+                    hold['matched_item'] = True
                     item_field_dict = copy.deepcopy(hold)
                     if item.get("itemLevelCallNumber", ""):
                         item_field_dict["call_number"] = item["itemLevelCallNumber"]
@@ -146,9 +150,20 @@ class Add952ToMarc(ServiceTaskBase):
                         logging.info(json.dumps(item_field_dict, indent=4))
                         logging.info(
                             (f"{elapsed_formatted} recs/sec Number of records: {idx:,}."
-                             f"Size of items map: {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}")
+                             f"Size of items map: {sys.getsizeof(self.item_map) / (1024 * 1024 * 1024)}")
                         )
-            logging.info(f"Done parsing {idx} Items in {(time.time() - self.start)} seconds. {len(item_field_dict)}")
+                logging.info(f"Done parsing {idx} Items in {(time.time() - self.start)} seconds. {len(item_field_dict)}")
+            for hidx, hold in enumerate((h for h in self.holdings_map if not h['matched_item'])):
+                logging.info("moving item-less holdings to item_map")
+                self.item_map[hold["instanceId"]] = [hold]
+                if hidx % 1000 == 0:
+                    elapsed = hidx / (time.time() - self.start)
+                    elapsed_formatted = f"{elapsed:,}"
+                    logging.info(json.dumps(hold, indent=4))
+                    logging.info(
+                        (f"{elapsed_formatted} recs/sec Number of records: {hidx:,}."
+                         f"Size of items map: {sys.getsizeof(self.item_map) / (1024 * 1024 * 1024)}"))
+            logging.info(f"Done parsing {hidx} Item-less holdings in {(time.time() - self.start)} seconds. {len(item_field_dict)}")
 
         self.start = time.time()
         with open(self.srs_file, "r", encoding="utf-8") as srs_file, open(join(self.file_paths, 'discovery_file.mrc'),
@@ -163,13 +178,13 @@ class Add952ToMarc(ServiceTaskBase):
                     idx += 1
                     srs_rec = json.loads(row.split("\t")[-1])
                     marc_record = from_json(srs_rec["parsedRecord"]["content"])
-                    marc_record.remove_fields('952')
+                    marc_record.remove_fields('952', '945', '907', '998')
                     temp_leader = Leader(marc_record.leader)
                     temp_leader[9] = 'a'
                     marc_record.leader = temp_leader
                     instance_id = ""
                     for f999 in marc_record.get_fields('999'):
-                        if 'i' in f999: 
+                        if 'i' in f999:
                             instance_id = f999['i']
                     num_952s = 0
                     for item_data in self.item_map.get(instance_id, []):
@@ -194,7 +209,6 @@ class Add952ToMarc(ServiceTaskBase):
                         }
                         for sf_key, sf_value in subfields.items():
                             if sf_value:
-
                                 my_field.add_subfield(sf_key, sf_value)
                         if num_952s < 50:
                             marc_record.add_ordered_field(my_field)
