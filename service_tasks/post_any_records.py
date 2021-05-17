@@ -36,7 +36,7 @@ class PostAnyJsonRecords(ServiceTaskBase):
                     if req.status_code == 201:
                         self.num_posted += 1
                         if self.num_posted % 100 == 0:
-                            print("{num_posted} records posted")
+                            print(f"{self.num_posted} records posted")
                     elif req.status_code == 422:
                         self.failed_posts += 1
                         print(
@@ -68,7 +68,7 @@ class PostAnyJsonRecords(ServiceTaskBase):
         ServiceTaskBase.add_argument(
             parser, "objects_file_path", "path data file", "FileChooser")
         ServiceTaskBase.add_argument(
-            parser, "endpoint", "Endpoint to post the records to", "")
+            parser, "endpoint", "Endpoint to post the records to. Eg /organozations/organizations", "")
 
     @staticmethod
     @abstractmethod
