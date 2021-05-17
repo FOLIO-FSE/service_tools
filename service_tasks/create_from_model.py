@@ -53,7 +53,8 @@ class CreateRecordFromModel(ServiceTaskBase):
                                 record = record.replace(field, this_uuid)
                                 id_map[row[self.dedupe]] = {name : this_uuid}
                             elif row[name]:
-                                record = record.replace(field, str(row[name]))
+                                content = row[name].replace("'","\\'")
+                                record = record.replace(field, content)
                         try:
                             # Add record to list and list of processed records
                             record = eval(record)
