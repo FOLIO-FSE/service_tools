@@ -184,54 +184,14 @@ class Add952ToMarc(ServiceTaskBase):
                     for holdings_data in holdings_without_items.get(instance_id, []):
                         found_locations += 1
                         matched_holdings += 1
-                        my_field = Field(
-                            tag="952",
-                            indicators=["f", "f"],
-                            subfields=[],
-                        )
-                        subfields = {
-                            "d": item_data["location"],
-                            "e": item_data["call_number"],
-                            # "f", item_data[""],
-                            # "g", item_data[""],
-                            # "h", item_data[""],
-                            "i": self.get_material_type_name(item_data["material_type"]),
-                            # "j": item_data["volume"],
-                            # "k": item_data["enumeration"],
-                            # "l": item_data["chronology"],
-                            # "m": item_data["barcode"],
-                            # "n": item_data["copy_number"]
-                        }
-                        for sf_key, sf_value in subfields.items():
-                            if sf_value:
-                                my_field.add_subfield(sf_key, sf_value)
+                        my_field = self.create_952_from_item_data(holdings_data)
                         if num_952s < 50:
                             marc_record.add_ordered_field(my_field)
                         num_952s += 1
                     
                     for item_data in self.item_map.get(instance_id, []):
                         found_locations += 1
-                        my_field = Field(
-                            tag="952",
-                            indicators=["f", "f"],
-                            subfields=[],
-                        )
-                        subfields = {
-                            "d": item_data["location"],
-                            "e": item_data["call_number"],
-                            # "f", item_data[""],
-                            # "g", item_data[""],
-                            # "h", item_data[""],
-                            "i": self.get_material_type_name(item_data["material_type"]),
-                            # "j": item_data["volume"],
-                            # "k": item_data["enumeration"],
-                            # "l": item_data["chronology"],
-                            # "m": item_data["barcode"],
-                            # "n": item_data["copy_number"]
-                        }
-                        for sf_key, sf_value in subfields.items():
-                            if sf_value:
-                                my_field.add_subfield(sf_key, sf_value)
+                        my_field = self.create_952_from_item_data(item_data)
                         if num_952s < 50:
                             marc_record.add_ordered_field(my_field)
                         num_952s += 1
@@ -249,6 +209,30 @@ class Add952ToMarc(ServiceTaskBase):
                     raise (ee)
             logging.info(
                 f"Done parsing {idx} recs in {(time.time() - self.start)} seconds. Matched locs: {found_locations:,}")
+
+    def create_952_from_item_data(self, item_data):
+        my_field = Field(
+            tag="952",
+            indicators=["f", "f"],
+            subfields=[],
+        )
+        subfields = {
+            "d": item_data["location"],
+            "e": item_data["call_number"],
+            # "f", item_data[""],
+            # "g", item_data[""],
+            # "h", item_data[""],
+            "i": self.get_material_type_name(item_data["material_type"]),
+            # "j": item_data["volume"],
+            # "k": item_data["enumeration"],
+            # "l": item_data["chronology"],
+            # "m": item_data["barcode"],
+            # "n": item_data["copy_number"]
+        }
+        for sf_key, sf_value in subfields.items():
+            if sf_value:
+                my_field.add_subfield(sf_key, sf_value)
+        return my_field
 
     def process_record(self, marc_record):
         try:
