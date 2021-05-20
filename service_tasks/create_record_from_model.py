@@ -202,7 +202,7 @@ class CreateRecordFromModel(ServiceTaskBase):
                                          "Name of the record type. Will be used in result file name and to qualify the UUID in the output ID map."),
         ServiceTaskBase.add_cli_argument(sub_parser,
                                          "id_map",
-                                         "An existing ID map. If left blank, one will be created.", required=False),
+                                         "An existing ID map. If left blank, one will be created."),
         ServiceTaskBase.add_cli_argument(sub_parser,
                                          "map_key",
                                          "Will be used as a unique key in the (provided or generated) id_map.")
