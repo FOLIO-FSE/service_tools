@@ -97,4 +97,4 @@ class MFHDBuilder(ServiceTaskBase):
         ServiceTaskBase.add_cli_argument(parser, "library", "Type NA if not applicable. Field containing library code")
         ServiceTaskBase.add_cli_argument(parser, "location", "Field containing location code")
         ServiceTaskBase.add_cli_argument(parser, "callno", "Field containing call number")
-        ServiceTaskBase.add_cli_argument(parser, "holdings", "Type NA if not applicable. Field containing holdings statement", "")
+        ServiceTaskBase.add_cli_argument(parser, "holdings", "Type NA if not applicable. Field containing holdings statement")
