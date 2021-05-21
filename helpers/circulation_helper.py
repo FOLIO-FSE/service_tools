@@ -84,7 +84,7 @@ class CirculationHelper:
                 elif " find user with matching barcode" in error_message_from_folio:
                     error_message = f"No patron with barcode {legacy_loan.patron_barcode} in FOLIO"
                     stat_message = "Patron barcode not in FOLIO"
-                logging.error(f"{error_message} {legacy_loan.patron_barcode} {legacy_loan.item_barcode}")
+                logging.error(f"{error_message} Patron barcode: {legacy_loan.patron_barcode} Item Barcode:{legacy_loan.item_barcode}")
                 return TransactionResult(False, None, error_message, f"Check out error: {stat_message}")
             elif req.status_code == 201:
                 stats = (f"Successfully checked out by barcode"
