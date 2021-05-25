@@ -38,6 +38,7 @@ class MFHDBuilder(ServiceTaskBase):
         for row in df.index:
             bibID = str(df[self.bibField][row])
             holdID = str(df[self.holdField][row])
+            library = str(df[self.locField][row])
             location = str(df[self.locField][row])
             callno = str(df[self.callField][row])
             callno = callno.replace(" ", "$i", 1)
@@ -60,7 +61,7 @@ class MFHDBuilder(ServiceTaskBase):
                 f.write(marc008)
                 f.write(marc852)
 
-                if (self.holdings != ''):
+                if (self.holdings != 'NA'):
                     holdID = holdID + library 
                     marc866 = '=866  \\$a' + self.holdings + "\n" 
                     f.write(marc866) 
