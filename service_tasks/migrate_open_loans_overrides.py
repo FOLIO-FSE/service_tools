@@ -51,7 +51,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         for num_loans, legacy_loan in enumerate(self.valid_legacy_loans[self.starting_point:]):
             t0_migration = time.time()
             try:
-                res_checkout = self.circulation_helper.check_out_by_barcode_override_honeysuckle(legacy_loan)
+                res_checkout = self.circulation_helper.check_out_by_barcode_override_iris(legacy_loan)
                 self.add_stats(res_checkout.migration_report_message)
                 self.add_stats("Processed loans")
 
@@ -98,7 +98,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             expiration_date = user.get("expirationDate", dt.isoformat(dt.now()))
             user["expirationDate"] = dt.isoformat(dt.now() + timedelta(days=1))
             self.activate_user(user)
-            res = self.circulation_helper.check_out_by_barcode_override_honeysuckle(legacy_loan)  # checkout_and_update
+            res = self.circulation_helper.check_out_by_barcode_override_iris(legacy_loan)  # checkout_and_update
             self.add_stats(res.migration_report_message)
             self.deactivate_user(user, expiration_date)
             self.add_stats("Handled inactive users")
@@ -111,12 +111,12 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
 
             # Second Failure. For duplicate rows. Needs cleaning...
             else:
-                logging.info(f"Loan already in failed {legacy_loan}")
+                logging.info(f"Loan already in failed {json.dumps(legacy_loan)}")
                 self.failed_and_not_dupe[legacy_loan.item_barcode] = [
                     legacy_loan,
                     self.failed[legacy_loan.item_barcode],
                 ]
-                self.add_stats("Duplicate loans")
+                self.add_stats(f"Duplicate loans (or failed twice) {json.dumps(legacy_loan)}")
                 del self.failed[legacy_loan.item_barcode]
             return TransactionResult(False, None, None, None)
 
@@ -161,10 +161,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         for k, v in self.failed.items():
             self.failed_and_not_dupe[k] = [v]
         # logging.info(json.dumps(self.failed_and_not_dupe, sort_keys=True, indent=4))
-        logging.info(f"## Missing item barcodes ({len(self.missing_barcodes)})")
         logging.info(json.dumps(list(self.missing_barcodes)))
-        logging.info(f"## Missing patron barcodes ({len(self.missing_patron_barcodes)})")
-        logging.info(json.dumps(list(self.missing_patron_barcodes)))
         logging.info("## Loan migration counters")
         logging.info("Title | Number")
         logging.info("--- | ---:")

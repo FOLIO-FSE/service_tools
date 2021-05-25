@@ -26,6 +26,16 @@ class Add952ToMarc(ServiceTaskBase):
         logging.info("Fetching locations")
         self.locations = list(self.folio_client.folio_get_all("/locations", "locations", ))
         logging.info(f"Fetched {len(self.locations)} locations")
+
+        self.institutions = list(self.folio_client.get_all("/location-units/institutions", "locinsts", ))
+        logging.info(f"Fetched {len(self.institutions)} institutions")
+
+        self.campuses = list(self.folio_client.get_all("/location-units/campuses", "loccamps", ))
+        logging.info(f"Fetched {len(self.campuses)} campuses")
+
+        self.libraries = list(self.folio_client.get_all("/location-units/libraries", "loclibs", ))
+        logging.info(f"Fetched {len(self.libraries)} libraries")
+
         self.ref_data_dicts = {}
         self.file_paths = args.results_folder
         self.processed_records = 0
@@ -76,9 +86,13 @@ class Add952ToMarc(ServiceTaskBase):
                     "instanceId": hold["instanceId"],
                     "matched_item": False
                 }
-                loc = self.get_ref_data_name(self.locations, "locations", hold["permanentLocationId"], "id")
-                if loc:
-                    field_dict["location"] = loc[1]
+                loc_structure = self.get_location_structure(self.locations, "locations", hold["permanentLocationId"], "id")
+                # loc = self.get_ref_data_name(self.locations, "locations", hold["permanentLocationId"], "id")
+                if loc_structure:
+                    field_dict["institution"] = loc_structure[1]
+                    field_dict["campus"] = loc_structure[2]
+                    field_dict["library"] = loc_structure[3]
+                    field_dict["location"] = loc_structure[4]
                 else:
                     logging.info(f"location id {hold['permanentLocationId']} not found")
 
@@ -127,6 +141,10 @@ class Add952ToMarc(ServiceTaskBase):
                     item_field_dict = copy.deepcopy(hold)
                     if item.get("itemLevelCallNumber", ""):
                         item_field_dict["call_number"] = item["itemLevelCallNumber"]
+                    if item.get("itemLevelCallNumberPrefix", ""):
+                        item_field_dict["call_number_prefix"] = item["itemLevelCallNumberPrefix"]
+                    if item.get("itemLevelCallNumberSuffix", ""):
+                        item_field_dict["call_number_suffix"] = item["itemLevelCallNumberSuffix"]
                     if item.get("volume", ""):
                         item_field_dict["volume"] = item["volume"]
                     if item.get("materialTypeId", ""):
@@ -153,9 +171,11 @@ class Add952ToMarc(ServiceTaskBase):
                         )
             logging.info(f"Done parsing {idx} Items in {(time.time() - self.start)} seconds. {len(self.item_map)}")
             logging.info("moving item-less holdings to item_map")
-            holdings_without_items = {value['instanceId']: [value] for (key, value) in self.holdings_map.items() if not value['matched_item']}
+            holdings_without_items = {value['instanceId']: [value] for (key, value) in self.holdings_map.items() if
+                                      not value['matched_item']}
             # logging.info(list(holdings_without_items.items())[0])
-            logging.info(f"Done parsing {(len(holdings_without_items))} Item-less holdings in {(time.time() - self.start)} seconds. {len(self.item_map)}")
+            logging.info(
+                f"Done parsing {(len(holdings_without_items))} Item-less holdings in {(time.time() - self.start)} seconds. {len(self.item_map)}")
 
         self.start = time.time()
         with open(self.srs_file, "r", encoding="utf-8") as srs_file, open(join(self.file_paths, 'discovery_file.mrc'),
@@ -169,7 +189,7 @@ class Add952ToMarc(ServiceTaskBase):
                     continue
                 try:
                     idx += 1
-             
+
                     srs_rec = json.loads(row.split("\t")[-1])
                     marc_record = from_json(srs_rec["parsedRecord"]["content"])
                     marc_record.remove_fields('952', '945', '907', '998')
@@ -188,7 +208,7 @@ class Add952ToMarc(ServiceTaskBase):
                         if num_952s < 50:
                             marc_record.add_ordered_field(my_field)
                         num_952s += 1
-                    
+
                     for item_data in self.item_map.get(instance_id, []):
                         found_locations += 1
                         my_field = self.create_952_from_item_data(item_data)
@@ -217,17 +237,20 @@ class Add952ToMarc(ServiceTaskBase):
             subfields=[],
         )
         subfields = {
+            "a": item_data["institution"],
+            "b": item_data["campus"],
+            "c": item_data["library"],
             "d": item_data["location"],
             "e": item_data["call_number"],
-            # "f", item_data[""],
-            # "g", item_data[""],
+            "f": item_data["call_number_prefix"],
+            "g": item_data["call_number_prefix"],
             # "h", item_data[""],
             "i": self.get_material_type_name(item_data["material_type"]),
-            # "j": item_data["volume"],
-            # "k": item_data["enumeration"],
-            # "l": item_data["chronology"],
-            # "m": item_data["barcode"],
-            # "n": item_data["copy_number"]
+            "j": item_data["volume"],
+            "k": item_data["enumeration"],
+            "l": item_data["chronology"],
+            "m": item_data["barcode"],
+            "n": item_data["copy_number"]
         }
         for sf_key, sf_value in subfields.items():
             if sf_value:
@@ -251,7 +274,28 @@ class Add952ToMarc(ServiceTaskBase):
         if dict_key not in self.ref_data_dicts:
             d = {}
             for r in ref_data:
-                d[r[key_type].lower()] = (r["id"], r["discoveryDisplayName"])
+                d[r[key_type].lower()] = (r["id"], r["name"])
+            self.ref_data_dicts[dict_key] = d
+        ref_object = (
+            self.ref_data_dicts[dict_key][key_value.lower()]
+            if key_value.lower() in self.ref_data_dicts[dict_key]
+            else None
+        )
+        if not ref_object:
+            logging.debug(f"No matching element for {key_value} in {list(ref_data)}")
+            return None
+        return ref_object
+
+    # self.get_ref_data_name(self.locations, "locations", hold["permanentLocationId"], "id")
+    def get_location_structure(self, ref_data, ref_name, key_value, key_type):
+        dict_key = f"{ref_name}{key_value}"
+        if dict_key not in self.ref_data_dicts:
+            d = {}
+            for r in ref_data:
+                institution = self.get_ref_data_name(self.institutions, "institutions", r["institutionId"], "id")[1]
+                campus = self.get_ref_data_name(self.campuses, "campuses", r["campusId"], "id")[1]
+                library = self.get_ref_data_name(self.libraries, "libraries", r["libraryId"], "id")[1]
+                d[r[key_type].lower()] = (r["id"], institution, campus, library,  r["name"])
             self.ref_data_dicts[dict_key] = d
         ref_object = (
             self.ref_data_dicts[dict_key][key_value.lower()]
