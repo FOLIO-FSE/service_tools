@@ -27,7 +27,8 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         csv.register_dialect("tsv", delimiter="\t")
         self.valid_legacy_loans = list()
         with open(args.open_loans_file, 'r') as loans_file:
-            self.valid_legacy_loans = list(self.load_and_validate_legacy_loans(InsensitiveDictReader(loans_file, dialect="tsv")))
+            self.valid_legacy_loans = list(
+                self.load_and_validate_legacy_loans(InsensitiveDictReader(loans_file, dialect="tsv")))
             logging.info(f"Loaded and validated {len(self.valid_legacy_loans)} loans in file")
         self.patron_item_combos = set()
         self.t0 = time.time()
@@ -59,13 +60,15 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                     res_checkout = self.handle_checkout_failure(legacy_loan, res_checkout)
                     if not res_checkout.was_successful:
                         continue
-
+                elif legacy_loan.renewal_count > 0:
+                    self.update_open_loan(res_checkout.folio_loan, legacy_loan)
                 if num_loans % 25 == 0:
                     self.print_dict_to_md_table(self.stats)
                     logging.info(
                         f"{timings(self.t0, t0_migration, num_loans)} {num_loans}")
             except Exception as ee:  # Catch other exceptions than HTTP errors
-                logging.info(f"Error in row {self.num_legacy_loans_processed + 1} {legacy_loan} {ee}")
+                logging.info(f"Error in row {num_loans}  Item barcode: {legacy_loan.item_barcode} "
+                             f"Patron barcode: {legacy_loan.patron_barcode} {ee}")
                 traceback.print_exc()
                 raise ee
 
@@ -111,12 +114,14 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
 
             # Second Failure. For duplicate rows. Needs cleaning...
             else:
-                logging.info(f"Loan already in failed {json.dumps(legacy_loan)}")
+                logging.info(f"Loan already in failed. item barcode {legacy_loan.item_barcode}")
                 self.failed_and_not_dupe[legacy_loan.item_barcode] = [
                     legacy_loan,
                     self.failed[legacy_loan.item_barcode],
                 ]
-                self.add_stats(f"Duplicate loans (or failed twice) {json.dumps(legacy_loan)}")
+                self.add_stats(
+                    f"Duplicate loans (or failed twice) item barcode"
+                    f"{legacy_loan.item_barcode} patron barcode: {legacy_loan.patron_barcode}")
                 del self.failed[legacy_loan.item_barcode]
             return TransactionResult(False, None, None, None)
 
@@ -237,6 +242,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             else:
                 self.add_stats(f"Update open loan error http status: {req.status_code}")
                 req.raise_for_status()
+            logging.info(f"Updating open loan was successful")
             return True
         except HTTPError as exception:
             logging.info(

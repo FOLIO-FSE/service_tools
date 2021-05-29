@@ -15,7 +15,7 @@ class TransactionResult(object):
     def __init__(self, was_successful: bool, successful_message: str, error_message: str,
                  migration_report_message: str):
         self.was_successful = was_successful
-        self.successful_message = successful_message
+        self.folio_loan = successful_message
         self.error_message = error_message
         self.migration_report_message = migration_report_message
 
@@ -91,6 +91,7 @@ class CirculationHelper:
                          # f"HTTP {req.status_code} {json.dumps(json.loads(req.text), indent=4)} "
                          )
                 logging.info(f"{stats} (item barcode {legacy_loan.item_barcode}) in {(time.time() - t0_function):.2f}s")
+
                 return TransactionResult(True, json.loads(req.text), None, stats)
             elif req.status_code == 204:
                 stats = f"Successfully checked out by barcode"

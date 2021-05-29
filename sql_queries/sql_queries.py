@@ -8,7 +8,9 @@ sql_queries = [
     {"name": "Maximum # holdings per bib",
      "description": "",
      "query": "select instanceid, count(instanceid) from {tenant_id}_mod_inventory_storage.holdings_record group by "
-              "instanceid order by count(instanceid) desc limit 1"}
+              "instanceid order by count(instanceid) desc limit 1"},
+    {"name": "", "description": "",
+     "query": "SELECT jsonb_set(jsonb, '{status}', '{\"name\":\"Available\",\"date\": \"2021-05-25T21:07:21.459Z\"}'::jsonb) FROM {tenant_id}_mod_inventory_storage.item WHERE jsonb->'status'->>'name' != 'Available'"}
 ]
 # Template
-# {"name":"", "description":"", "query": ""}
+#

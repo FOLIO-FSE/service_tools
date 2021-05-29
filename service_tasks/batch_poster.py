@@ -32,6 +32,8 @@ class BatchPoster(ServiceTaskBase):
         self.failed_batches = 0
         self.failed_records = 0
         self.processed_rows = 0
+        self.users_created = 0
+        self.users_updated = 0
         self.objects_file = args.objects_file
         self.users_per_group = {}
         self.failed_fields = set()
@@ -57,7 +59,7 @@ class BatchPoster(ServiceTaskBase):
                             print(json.dumps(json_rec, indent=True))
                         batch.append(json_rec)
                         if len(batch) == int(self.batch_size):
-                            self.post_batch(batch)
+                            self.post_batch(batch, failed_recs_file)
                             batch = []
                     except UnicodeDecodeError as unicode_error:
                         print("=========ERROR==============")
@@ -79,19 +81,31 @@ class BatchPoster(ServiceTaskBase):
                             logging.error(f"Exceeded number of failures at row {idx}")
                             raise exception
             # Last batch
-        self.post_batch(batch)
+            self.post_batch(batch, failed_recs_file)
         logging.info(f"Done posting {idx} records. ")
         logging.info(
             f"Failed records: {self.failed_records} failed records in {self.failed_batches} "
             f"failed batches. Failed records saved to {self.failed_recs_path}")
 
-    def post_batch(self, batch):
+    def post_batch(self, batch, failed_recs_file):
         response = self.do_post(batch)
-        if response.status_code == 201 or response.status_code == 200:
+        if response.status_code == 201:
             logging.info(
                 f"Posting successful! Total rows: {self.processed_rows} Total failed: {self.failed_records} "
                 f"in {response.elapsed.total_seconds()}s "
                 f"Batch Size: {len(batch)} Request size: {get_req_size(response)} "
+                f"{datetime.utcnow().isoformat()} UTC")
+        elif response.status_code == 200:
+            json_report = json.loads(response.text)
+            self.users_created += json_report.get("createdRecords", 0)
+            self.users_updated += json_report.get("updatedRecords", 0)
+            self.failed_records += json_report.get("failedRecords", 0)
+            if json_report.get("failedRecords", 0) > 0:
+                failed_recs_file.write(response.text)
+            logging.info(
+                f"Posting successful! Total rows: {self.processed_rows} Total failed: {self.failed_records} created: {self.users_created} updated: {self.users_updated}"
+                f"in {response.elapsed.total_seconds()}s "
+                f"Batch Size: {len(batch)} Request size: {get_req_size(response)}"
                 f"{datetime.utcnow().isoformat()} UTC")
         elif response.status_code == 422:
             resp = json.loads(response.text)
