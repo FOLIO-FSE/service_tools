@@ -292,9 +292,9 @@ class Add952ToMarc(ServiceTaskBase):
         if dict_key not in self.ref_data_dicts:
             d = {}
             for r in ref_data:
-                institution = self.get_ref_data_name(self.institutions, "institutions", r["institutionId"], "id")
-                campus = self.get_ref_data_name(self.campuses, "campuses", r["campusId"], "id")
-                library = self.get_ref_data_name(self.libraries, "libraries", r["libraryId"], "id")
+                institution = self.get_ref_data_name(self.institutions, "institutions", r["institutionId"], "id")[1]
+                campus = self.get_ref_data_name(self.campuses, "campuses", r["campusId"], "id")[1]
+                library = self.get_ref_data_name(self.libraries, "libraries", r["libraryId"], "id")[1]
                 d[r[key_type].lower()] = (r["id"], institution, campus, library,  r["name"])
             self.ref_data_dicts[dict_key] = d
         ref_object = (
