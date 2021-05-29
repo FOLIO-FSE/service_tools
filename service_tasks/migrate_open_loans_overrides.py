@@ -114,7 +114,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
 
             # Second Failure. For duplicate rows. Needs cleaning...
             else:
-                logging.info(f"Loan already in failed. item barcode {legacy_loan.item_barcode}")
+                logging.info(f"Loan already in failed. item barcode {legacy_loan.item_barcode} Patron barcode: {legacy_loan.patron_barcode}")
                 self.failed_and_not_dupe[legacy_loan.item_barcode] = [
                     legacy_loan,
                     self.failed[legacy_loan.item_barcode],
@@ -177,7 +177,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
     def handle_previously_failed_loans(self, loan):
         if loan["item_id"] in self.failed:
             logging.info(
-                f"Loan succeeded but failed previously. Removing from failed {loan}"
+                f"Loan succeeded but failed previously. Removing from failed    "
             )
             # this loan har previously failed. It can now be removed from failures:
             del self.failed[loan["item_id"]]

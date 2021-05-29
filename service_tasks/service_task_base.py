@@ -1,6 +1,7 @@
 import logging
 import logging.handlers
 import os
+import time
 from abc import abstractmethod
 from argparse import ArgumentParser
 
@@ -26,15 +27,17 @@ class ServiceTaskBase:
         logger.addHandler(stream_handler)
 
         if log_file_path:
-            log_file = os.path.join(log_file_path, "service_task_log.log")
-            file_formatter = logging.Formatter("%(message)s")
-            file_handler = logging.FileHandler(
-                filename=log_file,
-            )
-            # file_handler.addFilter(LevelFilter(0, 20))
-            file_handler.setFormatter(file_formatter)
-            file_handler.setLevel(logging.ERROR)
-            logging.getLogger().addHandler(file_handler)
+            log_file = os.path.join(log_file_path, f'service_task_log_{time.strftime("%Y%m%d-%H%M%S")}.log')
+        else:
+            log_file = f'service_task_log_{time.strftime("%Y%m%d-%H%M%S")}.log'
+        file_formatter = logging.Formatter("%(message)s")
+        file_handler = logging.FileHandler(
+            filename=log_file,
+        )
+        # file_handler.addFilter(LevelFilter(0, 20))
+        file_handler.setFormatter(file_formatter)
+        file_handler.setLevel(logging.ERROR)
+        logging.getLogger().addHandler(file_handler)
         logger.info("Logging setup")
 
     def write_migration_report(self, report_file):
