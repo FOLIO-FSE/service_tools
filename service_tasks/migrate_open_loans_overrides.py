@@ -35,7 +35,6 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         self.num_duplicate_loans = 0
         self.skipped_since_already_added = 0
         self.processed_items = set()
-        self.missing_barcodes = set()
         self.failed = {}
         self.num_legacy_loans_processed = 0
         self.failed_and_not_dupe = {}
@@ -166,13 +165,13 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         for k, v in self.failed.items():
             self.failed_and_not_dupe[k] = [v]
         # logging.info(json.dumps(self.failed_and_not_dupe, sort_keys=True, indent=4))
-        logging.info(json.dumps(list(self.missing_barcodes)))
         logging.info("## Loan migration counters")
         logging.info("Title | Number")
         logging.info("--- | ---:")
         logging.info(f"Failed items/loans | {len(self.failed_and_not_dupe)}")
         logging.info(f"Total Rows in file  | {self.num_legacy_loans_processed}")
         super().wrap_up()
+        self.circulation_helper.wrap_up()
 
     def handle_previously_failed_loans(self, loan):
         if loan["item_id"] in self.failed:

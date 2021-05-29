@@ -53,6 +53,10 @@ class CirculationHelper:
     def __init__(self, folio_client: FolioClient, service_point_id):
         self.folio_client = folio_client
         self.service_point_id = service_point_id
+        self.missing_patron_barcodes = set()
+
+    def wrap_up(self):
+        logging.error(f"Missing patron barcodes: {json.dumps(list(self.missing_patron_barcodes))}")
 
     def check_out_by_barcode_override_iris(self, legacy_loan: LegacyLoan):
         t0_function = time.time()
@@ -63,12 +67,18 @@ class CirculationHelper:
             "servicePointId": self.service_point_id,
             "overrideBlocks": {"itemNotLoanableBlock": {"dueDate": legacy_loan.due_date.isoformat()},
                                "patronBlock": {},
-                               "itemLimitBlock":{},
+                               "itemLimitBlock": {},
                                "comment": "Migrated from legacy system"}
         }
         path = "/circulation/check-out-by-barcode"
         url = f"{self.folio_client.okapi_url}{path}"
         try:
+            if legacy_loan.patron_barcode in self.missing_patron_barcodes:
+                error_message = "Patron barode already detected as missing"
+                logging.error(
+                    f"{error_message} Patron barcode: {legacy_loan.patron_barcode} "
+                    f"Item Barcode:{legacy_loan.item_barcode}")
+                return TransactionResult(False, None, error_message, error_message)
             req = requests.post(url, headers=self.folio_client.okapi_headers, data=json.dumps(data))
             if req.status_code == 422:
                 error_message_from_folio = json.loads(req.text)['errors'][0]['message']
@@ -82,9 +92,12 @@ class CirculationHelper:
                     error_message = f"No item with barcode {legacy_loan.item_barcode} in FOLIO"
                     stat_message = "Item barcode not in FOLIO"
                 elif " find user with matching barcode" in error_message_from_folio:
+                    self.missing_patron_barcodes.add(legacy_loan.patron_barcode)
                     error_message = f"No patron with barcode {legacy_loan.patron_barcode} in FOLIO"
+
                     stat_message = "Patron barcode not in FOLIO"
-                logging.error(f"{error_message} Patron barcode: {legacy_loan.patron_barcode} Item Barcode:{legacy_loan.item_barcode}")
+                logging.error(
+                    f"{error_message} Patron barcode: {legacy_loan.patron_barcode} Item Barcode:{legacy_loan.item_barcode}")
                 return TransactionResult(False, None, error_message, f"Check out error: {stat_message}")
             elif req.status_code == 201:
                 stats = (f"Successfully checked out by barcode"
