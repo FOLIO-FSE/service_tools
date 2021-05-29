@@ -118,9 +118,11 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                     legacy_loan,
                     self.failed[legacy_loan.item_barcode],
                 ]
-                self.add_stats(
+
+                logging.info(
                     f"Duplicate loans (or failed twice) item barcode"
                     f"{legacy_loan.item_barcode} patron barcode: {legacy_loan.patron_barcode}")
+                self.add_stats(f"Duplicate loans (or failed twice)")
                 del self.failed[legacy_loan.item_barcode]
             return TransactionResult(False, None, None, None)
 
