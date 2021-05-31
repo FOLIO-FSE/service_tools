@@ -74,7 +74,7 @@ class CirculationHelper:
         url = f"{self.folio_client.okapi_url}{path}"
         try:
             if legacy_loan.patron_barcode in self.missing_patron_barcodes:
-                error_message = "Patron barode already detected as missing"
+                error_message = "Patron barcode already detected as missing"
                 logging.error(
                     f"{error_message} Patron barcode: {legacy_loan.patron_barcode} "
                     f"Item Barcode:{legacy_loan.item_barcode}")

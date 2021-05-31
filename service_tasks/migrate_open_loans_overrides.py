@@ -113,7 +113,8 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
 
             # Second Failure. For duplicate rows. Needs cleaning...
             else:
-                logging.info(f"Loan already in failed. item barcode {legacy_loan.item_barcode} Patron barcode: {legacy_loan.patron_barcode}")
+                logging.info(
+                    f"Loan already in failed. item barcode {legacy_loan.item_barcode} Patron barcode: {legacy_loan.patron_barcode}")
                 self.failed_and_not_dupe[legacy_loan.item_barcode] = [
                     legacy_loan,
                     self.failed[legacy_loan.item_barcode],
@@ -149,17 +150,16 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         barcodes = set()
         logging.info("Validating legacy loans in file...")
         for legacy_loan_count, legacy_loan_dict in enumerate(loans_reader):
-            try:
-                legacy_loan = LegacyLoan(legacy_loan_dict, legacy_loan_count)
-                if legacy_loan.item_barcode not in barcodes:
-                    yield legacy_loan
-                else:
-                    raise ValueError(f"Row {legacy_loan_count}. Duplicate Item barcode {legacy_loan.item_barcode} "
-                                     "in legacy loan data")
-            except ValueError as ve:
-                logging.fatal(f"{ve}.")
-                logging.fatal(f"Halting")
-                exit()
+            legacy_loan = LegacyLoan(legacy_loan_dict, legacy_loan_count)
+            if legacy_loan.item_barcode not in barcodes:
+                barcodes.add(legacy_loan.item_barcode)
+                yield legacy_loan
+            else:
+                error_msg = (f"Row {legacy_loan_count}. Duplicate Item barcode {legacy_loan.item_barcode} "
+                             "in legacy loan data")
+                logging.error(error_msg)
+        logging.error(f"The following barcodes where occurring multiple times in the loan data and need to be "
+                      f"handled since they are duplicate loans.:\n{json.dumps(list(barcodes))}")
         logging.info("Done validating legacy loans")
 
     def wrap_up(self):
