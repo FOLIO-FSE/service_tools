@@ -13,7 +13,7 @@ class ServiceTaskBase:
         self.stats = {}
         self.migration_report = {}
         self.folio_client = folio_client
-        self.setup_logging(class_name)
+        self.setup_logging(self.__class__.__name__)
 
     @staticmethod
     def setup_logging(class_name="", log_file_path=None):
@@ -138,4 +138,6 @@ class LevelFilter(logging.Filter):
         logging.Filter.__init__(self)
 
     def filter(self, record):
-        return self._low <= record.levelno <= self._high
+        if self._low <= record.levelno <= self._high:
+            return True
+        return False
