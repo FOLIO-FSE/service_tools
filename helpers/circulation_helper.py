@@ -116,53 +116,6 @@ class CirculationHelper:
             logging.error(f"{req.status_code}\tPOST FAILED {url}\n\t{json.dumps(data)}\n\t{req.text}", exc_info=True)
             return TransactionResult(False, None, "5XX", f"Failed checkout http status {req.status_code}")
 
-    def check_out_by_barcode_override_honeysuckle(self, legacy_loan: LegacyLoan):
-        t0_function = time.time()
-        loan_to_post = {
-            "itemBarcode": legacy_loan.item_barcode,
-            "userBarcode": legacy_loan.patron_barcode,
-            "loanDate": legacy_loan.out_date.isoformat(),
-            "comment": "Migrated loan from Voyager",
-            "servicePointId": self.service_point_id,
-            "dueDate": legacy_loan.due_date.isoformat()
-        }
-        checkout_path = "/circulation/override-check-out-by-barcode"
-        checkout_url = f"{self.folio_client.okapi_url}{checkout_path}"
-        try:
-            req = requests.post(checkout_url, headers=self.folio_client.okapi_headers,
-                                data=json.dumps(loan_to_post))
-            if req.status_code == 422:
-                error_message_from_folio = json.loads(req.text)['errors'][0]['message']
-                stat_message = error_message_from_folio
-                error_message = error_message_from_folio
-                if "has the item status" in error_message_from_folio:
-                    stat_message = re.findall(r"(?<=has the item status\s).*(?=\sand cannot be checked out)",
-                                              error_message_from_folio)[0]
-                    error_message = f"{stat_message} for item with barcode {legacy_loan.item_barcode}"
-                elif "No item with barcode" in error_message_from_folio:
-                    error_message = f"No item with barcode {legacy_loan.item_barcode} in FOLIO"
-                    stat_message = "Item barcode not in FOLIO"
-                elif " find user with matching barcode" in error_message_from_folio:
-                    error_message = f"No patron with barcode {legacy_loan.patron_barcode} in FOLIO"
-                    stat_message = "Patron barcode not in FOLIO"
-                logging.error(f"{error_message} {legacy_loan.patron_barcode} {legacy_loan.item_barcode}")
-                return TransactionResult(False, None, error_message, f"Check out error: {stat_message}")
-            elif req.status_code == 201:
-                stats = f"Successfully checked out by barcode ({req.status_code})"
-                logging.info(stats)
-                return TransactionResult(True, json.loads(req.text), None, stats)
-            elif req.status_code == 204:
-                stats = f"Successfully checked out by barcode ({req.status_code})"
-                logging.info(stats)
-                return TransactionResult(True, None, None, stats)
-            else:
-                req.raise_for_status()
-        except HTTPError as exception:
-            logging.error(
-                f"{req.status_code}\tPOST FAILED {checkout_url}\n\t{json.dumps(loan_to_post)}\n\t{req.text}",
-                exc_info=True)
-            return TransactionResult(False, None, "5XX", f"Failed checkout http status {req.status_code}")
-
     @staticmethod
     def check_out_by_barcode(folio_client, item_barcode: str, patron_barcode: str, service_point_id: str):
         # TODO: add logging instead of print out
