@@ -80,6 +80,8 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             return folio_checkout
         elif folio_checkout.error_message.startswith("No item with barcode"):
             return folio_checkout
+        elif folio_checkout.error_message.startswith("Aged to lost for item"):
+            return folio_checkout
         elif folio_checkout.error_message == "Declared lost":
             raise NotImplementedError("Declared lost. Can this be overridden? Ask Theodor to check")
             """self.set_item_as_available(legacy_loan)
