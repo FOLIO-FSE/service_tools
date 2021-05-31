@@ -148,6 +148,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
     @staticmethod
     def load_and_validate_legacy_loans(loans_reader):
         barcodes = set()
+        duplicate_barcodes = set()
         logging.info("Validating legacy loans in file...")
         for legacy_loan_count, legacy_loan_dict in enumerate(loans_reader):
             legacy_loan = LegacyLoan(legacy_loan_dict, legacy_loan_count)
@@ -155,11 +156,12 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                 barcodes.add(legacy_loan.item_barcode)
                 yield legacy_loan
             else:
+                duplicate_barcodes.add(legacy_loan.item_barcode)
                 error_msg = (f"Row {legacy_loan_count}. Duplicate Item barcode {legacy_loan.item_barcode} "
                              "in legacy loan data")
                 logging.error(error_msg)
         logging.error(f"The following barcodes where occurring multiple times in the loan data and need to be "
-                      f"handled since they are duplicate loans.:\n{json.dumps(list(barcodes))}")
+                      f"handled since they are duplicate loans.:\n{json.dumps(list(duplicate_barcodes))}")
         logging.info("Done validating legacy loans")
 
     def wrap_up(self):
