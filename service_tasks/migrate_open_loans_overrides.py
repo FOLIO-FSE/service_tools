@@ -76,7 +76,8 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
     def handle_checkout_failure(self, legacy_loan, folio_checkout):
         if folio_checkout.error_message == "5XX":
             return folio_checkout
-        if folio_checkout.error_message.startswith("No patron with barcode"):
+        if folio_checkout.error_message.startswith("No patron with barcode") or folio_checkout.error_message.startswith(
+                "Patron barcode already detected"):
             return folio_checkout
         elif folio_checkout.error_message.startswith("No item with barcode"):
             return folio_checkout
