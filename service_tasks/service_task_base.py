@@ -30,7 +30,7 @@ class ServiceTaskBase:
             log_file = os.path.join(log_file_path,
                                     f'service_task_log_{class_name}_{time.strftime("%Y%m%d-%H%M%S")}.log')
         else:
-            log_file = f'service_task_log_{time.strftime("%Y%m%d-%H%M%S")}.log'
+            log_file = f'service_task_log_{class_name}_{time.strftime("%Y%m%d-%H%M%S")}.log'
         file_formatter = logging.Formatter("%(message)s")
         file_handler = logging.FileHandler(
             filename=log_file,
