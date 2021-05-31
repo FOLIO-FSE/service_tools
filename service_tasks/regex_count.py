@@ -3,6 +3,7 @@ import pandas as pd, re
 
 class CountRegExOccurrences(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.input_file = args.input_file
         self.regex_wanted = args.regex_wanted
 

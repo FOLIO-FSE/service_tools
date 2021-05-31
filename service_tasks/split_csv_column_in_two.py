@@ -5,6 +5,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class SplitCsvColumnInTwo(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.delimited_file = args.delimited_file
         self.separator = args.separator
         self.split_column = args.split_column

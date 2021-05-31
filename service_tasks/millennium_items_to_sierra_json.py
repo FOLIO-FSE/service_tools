@@ -12,6 +12,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class MillenniumItemsToSierraJson(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.millennium_items_path = args.data_path
         self.result_file = os.path.join(args.result_path, "millennium_sierra_items.json")
         self.csv_result_file = os.path.join(args.result_path, "csv_results.csv")

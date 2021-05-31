@@ -6,6 +6,7 @@ import pandas as pd
 
 class RemapField(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.infile = args.infile
         self.mapfile = args.mapfile
         self.filetype = Path(args.infile).suffix 

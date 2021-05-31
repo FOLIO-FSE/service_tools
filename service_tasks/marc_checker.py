@@ -14,6 +14,7 @@ import asyncio
 
 class MARCChecker(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.marc_file_paths = args.marc_files.split(',')
         print(self.marc_file_paths)
         print("Init done")

@@ -3,6 +3,7 @@ import json, sys
 
 class ListJSONkeys(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.json_file = args.json_file
 
     def do_work(self):

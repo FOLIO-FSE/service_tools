@@ -12,6 +12,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class ParseIIICsvItemsWithBoundiwths(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.millennium_items_path = args.data_path
         self.result_file = os.path.join(args.result_path, "items_with_boundwiths_handled.csv")
         self.sierra_items = {}

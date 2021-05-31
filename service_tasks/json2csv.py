@@ -4,6 +4,7 @@ import pandas as pd
 
 class JSONtoCSV(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.jsonfile = args.jsonfile
         self.csvfile = self.jsonfile[:-4] + "csv"
 

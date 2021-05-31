@@ -11,6 +11,7 @@ import traceback
 class VisualizeCsvData(ServiceTaskBase):
 # Open file and read into a Pandas Dataframe
     def __init__(self, args):
+        super().__init__()
         print("Let's get started!")
         self.data_file = args.data_file
         self.save_to_folder = args.save_to_folder

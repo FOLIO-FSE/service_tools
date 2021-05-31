@@ -12,8 +12,10 @@ from user_migration.mappers.mapper_base import MapperBase
 
 
 class Default(MapperBase):
-    def __init__(self, folio_client: FolioClient, use_group_map, args, groups_map=[]):
+    def __init__(self, folio_client: FolioClient, use_group_map, args, groups_map=None):
         super().__init__(folio_client)
+        if groups_map is None:
+            groups_map = []
         self.args = args
         self.use_group_map = use_group_map
         self.groups_map = {}

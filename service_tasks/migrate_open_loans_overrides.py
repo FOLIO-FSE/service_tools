@@ -25,7 +25,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         self.service_point_id = args.service_point_id
         self.circulation_helper = CirculationHelper(folio_client, self.service_point_id)
         csv.register_dialect("tsv", delimiter="\t")
-        self.valid_legacy_loans = list()
+        self.valid_legacy_loans = []
         with open(args.open_loans_file, 'r') as loans_file:
             self.valid_legacy_loans = list(
                 self.load_and_validate_legacy_loans(InsensitiveDictReader(loans_file, dialect="tsv")))

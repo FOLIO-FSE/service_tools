@@ -10,6 +10,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class HarvestSierraData(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         print("Init...")
         self.token_path = "/iii/sierra-api/token"
         self.base_uri = args.base_uri

@@ -9,14 +9,14 @@ from folioclient import FolioClient
 
 
 class ServiceTaskBase:
-    def __init__(self, folio_client: FolioClient = None):
+    def __init__(self, folio_client: FolioClient = None, class_name=""):
         self.stats = {}
         self.migration_report = {}
         self.folio_client = folio_client
-        self.setup_logging()
+        self.setup_logging(class_name)
 
     @staticmethod
-    def setup_logging(log_file_path=None):
+    def setup_logging(class_name="", log_file_path=None):
         logger = logging.getLogger()
         logger.handlers = []
         formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
@@ -27,7 +27,8 @@ class ServiceTaskBase:
         logger.addHandler(stream_handler)
 
         if log_file_path:
-            log_file = os.path.join(log_file_path, f'service_task_log_{time.strftime("%Y%m%d-%H%M%S")}.log')
+            log_file = os.path.join(log_file_path,
+                                    f'service_task_log_{class_name}_{time.strftime("%Y%m%d-%H%M%S")}.log')
         else:
             log_file = f'service_task_log_{time.strftime("%Y%m%d-%H%M%S")}.log'
         file_formatter = logging.Formatter("%(message)s")
@@ -80,7 +81,7 @@ class ServiceTaskBase:
 
     def add_to_migration_report(self, header, message_string):
         if header not in self.migration_report:
-            self.migration_report[header] = list()
+            self.migration_report[header] = []
         self.migration_report[header].append(message_string)
 
     def print_migration_report(self):
@@ -137,6 +138,4 @@ class LevelFilter(logging.Filter):
         logging.Filter.__init__(self)
 
     def filter(self, record):
-        if self._low <= record.levelno <= self._high:
-            return True
-        return False
+        return self._low <= record.levelno <= self._high

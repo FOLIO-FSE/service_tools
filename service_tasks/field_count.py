@@ -4,6 +4,7 @@ import pandas as pd
 
 class CountOccurrences(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.csv_file = args.csv_file
         self.field_wanted = args.field_wanted
 

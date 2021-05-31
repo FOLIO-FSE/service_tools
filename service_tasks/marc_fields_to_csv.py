@@ -8,6 +8,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class MARCFieldsToCSV(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         print("Let's get started!")
         self.source_file_path = args.source_path
         self.save_to_file = args.save_to_file

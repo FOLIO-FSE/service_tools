@@ -8,6 +8,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class XML2JSON(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.from_file = args.from_file
         self.to_file = args.to_file
 

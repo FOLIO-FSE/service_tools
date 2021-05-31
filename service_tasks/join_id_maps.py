@@ -8,6 +8,8 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class JoinIdMaps(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
+        super().__init__()
         self.files = args.data_path
         self.result_path = args.result_path
         self.results = {}

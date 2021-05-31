@@ -32,6 +32,7 @@ def init_dict():
 
 class XMLUserFlattener(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.source_path = args.data_path
         self.result_file = os.path.join(args.result_path, "flattenedusersfromVoyager.tsv")
         self.errors = 0

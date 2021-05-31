@@ -9,6 +9,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class VirtualBoundWithItemHandler(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.source_path = args.data_path
         self.result_file = os.path.join(args.result_path, "restructured_virtual_bound_with_items.tsv")
         self.virtual_bound_withs = {}

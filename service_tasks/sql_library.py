@@ -7,6 +7,7 @@ from sql_queries.sql_queries import sql_queries
 
 class SQLLibrary(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.query_name = args.query_name
         self.tenant_id = args.tenant_id
 

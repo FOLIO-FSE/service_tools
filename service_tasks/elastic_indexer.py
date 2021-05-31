@@ -10,6 +10,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class ElasticLoader(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.file_to_index = args.file_to_index
         self.index_name = args.index_name
 

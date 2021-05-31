@@ -7,6 +7,7 @@ import pandas as pd
 
 class CornellReplaceMfhdIdsWithUuids(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.item_file_path = args.item_file_path
         self.holdings_id_file_path = args.holdings_id_file_path
         self.results_file_path = args.results_file_path

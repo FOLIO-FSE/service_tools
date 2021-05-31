@@ -10,7 +10,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 class AddPermissionToUser(ServiceTaskBase):
     def __init__(self, folio_client: FolioClient, args):
         print(args)
-        super().__init__(folio_client)
+        super().__init__(folio_client, self.__class__.__name__)
         self.username = args.username
         self.permission_name = args.permission_name
 

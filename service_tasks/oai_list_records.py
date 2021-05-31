@@ -17,6 +17,7 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class OAIListIdentifiers(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.set_name = "all"
         self.base_uri = args.base_uri
         self.from_date = args.from_date

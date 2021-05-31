@@ -7,6 +7,7 @@ import pandas as pd
 
 class MFHDBuilder(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.infile = args.infile
         self.bibField = args.bibID
         self.holdField = args.holdID
