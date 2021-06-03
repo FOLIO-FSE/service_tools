@@ -48,10 +48,10 @@ class MFHDBuilder(ServiceTaskBase):
                 holdID = holdID + library 
                 marc852 = '=852 0\\$a' + library + '$c' + location + '$h' + callno + "\n" 
             else:
-                marc852 = '=852 0\\$c' + location + '$h' + callno + "\n"
+                marc852 = '=852 0\\$b' + location + '$h' + callno + "\n"
 
-            marc001 = '=001    ' + holdID + "\n"
-            marc004 = '=004    ' + bibID + "\n"
+            marc001 = '=001  ' + holdID + "\n"
+            marc004 = '=004  ' + bibID + "\n"
 
 
             ## make sure record was not already processed
