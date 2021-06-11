@@ -41,6 +41,7 @@ class MFHDBuilder(ServiceTaskBase):
             holdID = str(df[self.holdField][row])
             library = str(df[self.locField][row])
             location = str(df[self.locField][row])
+            holdings = str(df[self.holdings][row])
             callno = str(df[self.callField][row])
             callno = callno.replace(" ", "$i", 1)
 
@@ -64,7 +65,7 @@ class MFHDBuilder(ServiceTaskBase):
 
                 if (self.holdings != 'NA'):
                     holdID = holdID + library 
-                    marc866 = '=866  \\$a' + self.holdings + "\n" 
+                    marc866 = '=866  \\$a' + holdings + "\n" 
                     f.write(marc866) 
 
                 f.write("\n")
