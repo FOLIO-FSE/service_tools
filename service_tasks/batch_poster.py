@@ -80,7 +80,7 @@ class BatchPoster(ServiceTaskBase):
                         if self.num_failures > 50:
                             logging.error(f"Exceeded number of failures at row {idx}")
                             raise exception
-            # Last batch
+                                                                                                                                                                                                                                                                                                                                                        # Last batch
             self.post_batch(batch, failed_recs_file)
         logging.info(f"Done posting {idx} records. ")
         logging.info(
@@ -168,6 +168,8 @@ def list_objects():
         "Instances": {"object_name": "instances", "api_endpoint": "/instance-storage/batch/synchronous",
                       "total_records": False},
         "Source Records - Batch": {"object_name": "records", "api_endpoint": "/source-storage/batch/records",
+                                   "total_records": True},
+        "SRS": {"object_name": "records", "api_endpoint": "/source-storage/batch/records",
                                    "total_records": True},
         "Users": {"object_name": "users", "api_endpoint": "/user-import", "total_records": True},
     }
