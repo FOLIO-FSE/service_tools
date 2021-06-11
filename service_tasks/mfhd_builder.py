@@ -46,9 +46,10 @@ class MFHDBuilder(ServiceTaskBase):
             callno = callno.replace(" ", "$i", 1)
 
             if (self.library != 'NA'):
-                holdID = holdID + library 
+                holdID = holdID + library + location 
                 marc852 = '=852 0\\$a' + library + '$c' + location + '$h' + callno + "\n" 
             else:
+                holdID = holdID + location 
                 marc852 = '=852 0\\$b' + location + '$h' + callno + "\n"
 
             marc001 = '=001  ' + holdID + "\n"
@@ -56,7 +57,7 @@ class MFHDBuilder(ServiceTaskBase):
 
 
             ## make sure record was not already processed
-            if (repeatRecords[bibID] != 1):
+            if (repeatRecords[holdID] != 1):
                 f.write(LDR)
                 f.write(marc001)
                 f.write(marc004)
