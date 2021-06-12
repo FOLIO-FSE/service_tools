@@ -51,28 +51,28 @@ class LegacyLoan(object):
 class LegacyFeeFine(object):
     def __init__(self, legacy_fee_fine_dict, row=0):
         # validate
-        correct_headers = ["item_barcode", "patron_barcode", "created_date", "remaining", "amount", "fine_fee_type"]
+        correct_headers = ["item_barcode", "patron_barcode", "create_date", "remaining", "amount", "fine_fee_type"]
+        self.errors = []
         for prop in correct_headers:
             if prop not in legacy_fee_fine_dict:
-                raise ValueError(f'Row {row}. Required property {prop} missing from legacy FeeFine.\n'
-                                 f'Does your file have the required headers {", ".join(correct_headers)}?\n'
-                                 f'Headers in legacy FeeFine: \n{json.dumps(list(legacy_fee_fine_dict.keys()), indent=4)}')
+                self.errors.append(("Missing properties in legacy data", prop))
             if not legacy_fee_fine_dict[prop]:
-                raise ValueError(f"Row {row}. Required property {prop} empty from legacy FeeFine")
+                self.errors.append(("Empty properties in legacy data", prop))
+                # raise ValueError(f"Row {row}. Required property {prop} empty from legacy FeeFine")
         try:
-            temp_created_date: datetime = parse(legacy_fee_fine_dict["created_date"])
-        except Exception as ee:
-            raise ValueError(
-                f'Row {row}. Could not parse {legacy_fee_fine_dict["created_date"]} into a valid ISO date {ee}')
+            temp_created_date: datetime = parse(legacy_fee_fine_dict["create_date"])
+        except:
+            self.errors.append(("Dates that failed to parse", prop))
+            temp_created_date = datetime.utcnow()
 
         # good to go, set properties
-        self.item_barcode = legacy_fee_fine_dict["item_barcode"]
-        self.patron_barcode = legacy_fee_fine_dict["patron_barcode"]
+        self.item_barcode = legacy_fee_fine_dict.get("item_barcode", "")
+        self.patron_barcode = legacy_fee_fine_dict.get("patron_barcode", "")
         self.created_date = temp_created_date
-        self.remaining = legacy_fee_fine_dict["remaining"]
-        self.amount = legacy_fee_fine_dict["amount"]
+        self.remaining = legacy_fee_fine_dict.get("remaining", "")
+        self.amount = legacy_fee_fine_dict.get("amount", "")
         self.source_dict = legacy_fee_fine_dict
-        self.fee_fine_type = legacy_fee_fine_dict["fine_fee_type"]
+        self.fee_fine_type = legacy_fee_fine_dict.get("fine_fee_type", "")
 
 
 class CirculationHelper:

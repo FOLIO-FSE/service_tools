@@ -30,7 +30,7 @@ class ParseIIICsvItemsWithBoundiwths(ServiceTaskBase):
                 # Remove trailing and leading quotes
                 row = row[1:-2]
 
-                # The first row contains the hearders from the first row
+                # The first row contains the headers from the first row
                 if row_index == 0:
                     headers = row.split('","')
                     # Delete duplicate columns based on header name

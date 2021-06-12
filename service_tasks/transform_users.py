@@ -120,7 +120,7 @@ class TransformUsers(ServiceTaskBase):
                             open(combo["mapping_file"], encoding="utf8") as mapping_file:
                         logging.info(f'processing {combo["data_file"]}')
                         user_map = json.load(mapping_file)
-                        file_format = "tsv" if str(combo["data_file"]).endswith(".tsv") else "csv"
+                        file_format = "tsv" if str(combo["data_file"]).endswith("clea.tsv") else "csv"
                         for idx,  legacy_user in enumerate(self.transformer.get_users(object_file, file_format)):
                             i += 1
                             try:
