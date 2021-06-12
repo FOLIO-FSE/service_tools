@@ -41,21 +41,23 @@ class MFHDBuilder(ServiceTaskBase):
             holdID = str(df[self.holdField][row])
             library = str(df[self.locField][row])
             location = str(df[self.locField][row])
+            holdings = str(df[self.holdings][row])
             callno = str(df[self.callField][row])
             callno = callno.replace(" ", "$i", 1)
 
             if (self.library != 'NA'):
-                holdID = holdID + library 
+                holdID = holdID + library + location 
                 marc852 = '=852 0\\$a' + library + '$c' + location + '$h' + callno + "\n" 
             else:
-                marc852 = '=852 0\\$c' + location + '$h' + callno + "\n"
+                holdID = holdID + location 
+                marc852 = '=852 0\\$b' + location + '$h' + callno + "\n"
 
-            marc001 = '=001    ' + holdID + "\n"
-            marc004 = '=004    ' + bibID + "\n"
+            marc001 = '=001  ' + holdID + "\n"
+            marc004 = '=004  ' + bibID + "\n"
 
 
             ## make sure record was not already processed
-            if (repeatRecords[bibID] != 1):
+            if (repeatRecords[holdID] != 1):
                 f.write(LDR)
                 f.write(marc001)
                 f.write(marc004)
@@ -64,7 +66,7 @@ class MFHDBuilder(ServiceTaskBase):
 
                 if (self.holdings != 'NA'):
                     holdID = holdID + library 
-                    marc866 = '=866  \\$a' + self.holdings + "\n" 
+                    marc866 = '=866  \\$a' + holdings + "\n" 
                     f.write(marc866) 
 
                 f.write("\n")
