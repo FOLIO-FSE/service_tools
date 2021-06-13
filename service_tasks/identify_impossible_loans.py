@@ -72,26 +72,26 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
                 try:
                     loan = LegacyLoan(loan_dict)
                     if users and loan.patron_barcode not in users and loan.item_barcode not in items:
-                        bad_loan_report.append(f"Neither user nor item for loan:\t{loan_dict}")
-                        bad_loans.append(loan_dict)
+                        bad_loan_report.append(f"Neither user nor item for loan:\t{loan.to_dict()}")
+                        bad_loans.append(loan.to_dict())
                         no_user_no_item += 1
                     elif users and loan.patron_barcode not in users:
-                        bad_loan_report.append(f"No user for loan:\t{loan_dict}")
-                        bad_loans.append(loan_dict)
+                        bad_loan_report.append(f"No user for loan:\t{loan.to_dict()}")
+                        bad_loans.append(loan.to_dict())
                         no_user += 1
                     elif loan.item_barcode not in items:
-                        bad_loan_report.append(f"No item for loan:\t{loan_dict}")
-                        bad_loans.append(loan_dict)
+                        bad_loan_report.append(f"No item for loan:\t{loan.to_dict()}")
+                        bad_loans.append(loan.to_dict())
                         no_item += 1
                     elif items[loan.item_barcode] != "Available":
-                        bad_loan_report.append(f"Loan with status\t\"{items[loan.item_barcode]}\" cannot be checked out:\t{loan_dict}")
-                        bad_loans.append(loan_dict)
+                        bad_loan_report.append(f"Loan with status\t\"{items[loan.item_barcode]}\" cannot be checked out:\t{loan.to_dict()}")
+                        bad_loans.append(loan.to_dict())
                         if items[loan.item_barcode] in bad_status:
                             bad_status[items[loan.item_barcode]] += 1
                         else:
                             bad_status[items[loan.item_barcode]] = 1
                     else:
-                        good_loans.append(loan_dict)
+                        good_loans.append(loan.to_dict())
                 except KeyError as e:
                     print(f"Does your data have the right headers? Missing {e}.")
                 except ValueError as ve:
