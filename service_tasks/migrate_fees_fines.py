@@ -52,9 +52,11 @@ class MigrateFeesAndFines(ServiceTaskBase):
                 patron_item = {"user": self.get_user(legacy_fee.patron_barcode),
                                "item": self.get_item(legacy_fee.item_barcode)}
                 if not patron_item["user"]:
+                    self.add_stats("User barcode not found")
                     self.missing_user_barcodes.add(legacy_fee.patron_barcode)
                     raise ValueError(f"User not found with barcode {legacy_fee.patron_barcode}")
                 if not patron_item["item"]:
+                    self.add_stats("Item barcode not found")
                     self.missing_items_barcodes(legacy_fee.item_barcode)
                     self.add_to_migration_report("Item barcodes not found in FOLIO", legacy_fee.item_barcode)
                 # Post this: /accounts
