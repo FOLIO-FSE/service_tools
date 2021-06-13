@@ -32,7 +32,7 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
                     item_status = item["status"]["name"]
                     items[item_barcode] = item_status
                 except KeyError as ke:
-                    bad_loan_report.append(f"{ke} without barcode\t{row}")
+                    bad_loan_report.append(f"item without {ke}\t{row}")
 
             users = []
             for row in user_file:
@@ -40,7 +40,7 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
                     user = json.loads(row)
                     users.append(user["barcode"])
                 except KeyError as ke:
-                    bad_loan_report.append(f"{ke} without barcode\t{row}")
+                    bad_loan_report.append(f"user without {ke}\t{row}")
 
 
             # Read loans file
@@ -62,6 +62,7 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
             no_user = 0
             no_item = 0
             bad_status = {}
+            uninstantiated_loans = 0
 
             for loan_dict in loans:
                 try:
@@ -91,6 +92,7 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
                     print(f"Does your data have the right headers? Missing {e}.")
                 except ValueError as ve:
                     bad_loan_report.append(ve)
+                    uninstantiated_loans += 1
 
             good_loans_df = pd.DataFrame(good_loans)
             bad_loans_df = pd.DataFrame(bad_loans)
@@ -102,7 +104,7 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
 
             print(f"Good loans: {len(good_loans)}")
             print(f"Bad loans total: {len(bad_loans)}")
-
+            print(f"Not instantiated loans: {uninstantiated_loans}")
             print(f"Loans with neither user nor item: {no_user_no_item}")
             print(f"Loans with no user: {no_user}")
             print(f"Loans with no item: {no_item}")
