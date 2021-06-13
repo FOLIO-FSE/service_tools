@@ -91,7 +91,7 @@ class ServiceTaskBase:
             b = self.migration_report[a]
             sortedlist = [(k, b[k]) for k in sorted(b, key=as_str)]
             for b in sortedlist:
-                logging.info(f"{b[0]} \t {b[1]}\n")
+                logging.info(f"{b[0]}\t{b[1]}")
 
     @staticmethod
     @abstractmethod
