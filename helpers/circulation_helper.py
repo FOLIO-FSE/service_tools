@@ -49,7 +49,7 @@ class LegacyLoan(object):
         self.due_date = temp_date_due
         self.out_date = temp_date_out
         self.renewal_count = int(legacy_loan_dict["renewal_count"])
-        self.next_item_status = legacy_loan_dict.get("next_item_status", "")
+        self.next_item_status = legacy_loan_dict.get("next_item_status", "").strip()
         if self.next_item_status not in legal_statuses:
             raise ValueError(f"Not an allowed status: {self.next_item_status} for row {row}")
 

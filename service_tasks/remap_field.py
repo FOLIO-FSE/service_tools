@@ -33,9 +33,9 @@ class RemapField(ServiceTaskBase):
         print(foliohead)
 
         oldvals = mapdf[replacehead].values.tolist()
-        print((json.dumps(oldvals, indent=4)))
+        print(json.dumps(oldvals, indent=4))
         newvals = mapdf[foliohead].values.tolist()
-        print((json.dumps(newvals, indent=4)))
+        print(json.dumps(newvals, indent=4))
 
         sourcecol = df[replacehead].values.tolist()
 
