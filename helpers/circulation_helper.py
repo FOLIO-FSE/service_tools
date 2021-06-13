@@ -46,12 +46,22 @@ class LegacyLoan(object):
         # good to go, set properties
         self.item_barcode = legacy_loan_dict["item_barcode"]
         self.patron_barcode = legacy_loan_dict["patron_barcode"]
-        self.due_date = temp_date_due
-        self.out_date = temp_date_out
+        self.due_date: datetime = temp_date_due
+        self.out_date: datetime = temp_date_out
         self.renewal_count = int(legacy_loan_dict["renewal_count"])
         self.next_item_status = legacy_loan_dict.get("next_item_status", "").strip()
         if self.next_item_status not in legal_statuses:
             raise ValueError(f"Not an allowed status: {self.next_item_status} for row {row}")
+
+    def to_dict(self):
+        return {
+            "item_barcode": self.item_barcode,
+            "patron_barcode": self.patron_barcode,
+            "due_date": self.due_date.isoformat(),
+            "out_date": self.out_date.isoformat(),
+            "renewal_count": self.renewal_count,
+            "next_item_status": self.next_item_status
+        }
 
 
 class LegacyFeeFine(object):
@@ -79,7 +89,6 @@ class LegacyFeeFine(object):
         self.amount = legacy_fee_fine_dict.get("amount", "")
         self.source_dict = legacy_fee_fine_dict
         self.fee_fine_type = legacy_fee_fine_dict.get("fine_fee_type", "")
-
 
 
 class CirculationHelper:
