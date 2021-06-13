@@ -4,7 +4,7 @@ import logging
 import os
 import traceback
 from abc import abstractmethod
-from datetime import time
+import time
 from pathlib import Path
 from typing import Dict
 
