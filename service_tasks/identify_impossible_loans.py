@@ -21,10 +21,22 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
         self.processed = 0
 
     def do_work(self):
-        with open(self.loan_file, encoding='utf-8-sig') as loan_file, open(self.item_file) as item_file, open(self.user_file) as user_file:
-            bad_loan_report = []
-            # Fetch data from items and user file
-            items = {}
+        bad_loan_report = []
+        # Fetch data from items and user file
+        items = {}
+        users = []
+        if len(self.user_file) > 10: # Skip user validation if not supplied argument
+            with open(self.user_file) as user_file:
+                for row in user_file:
+                    try:
+                        user = json.loads(row)
+                        users.append(user["barcode"])
+                    except KeyError as ke:
+                        bad_loan_report.append(f"user without {ke}\t{row}")
+        else:
+            print("No user file supplied. Will not validate user")
+
+        with open(self.item_file) as item_file:
             for row in item_file:
                 try:
                     item = json.loads(row)
@@ -34,15 +46,7 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
                 except KeyError as ke:
                     bad_loan_report.append(f"item without {ke}\t{row}")
 
-            users = []
-            for row in user_file:
-                try:
-                    user = json.loads(row)
-                    users.append(user["barcode"])
-                except KeyError as ke:
-                    bad_loan_report.append(f"user without {ke}\t{row}")
-
-
+        with open(self.loan_file, encoding='utf-8-sig') as loan_file:
             # Read loans file
             try:
                 if self.loan_file.endswith(".csv"):
@@ -67,11 +71,11 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
             for loan_dict in loans:
                 try:
                     loan = LegacyLoan(loan_dict)
-                    if loan.patron_barcode not in users and loan.item_barcode not in items:
+                    if users and loan.patron_barcode not in users and loan.item_barcode not in items:
                         bad_loan_report.append(f"Neither user nor item for loan:\t{loan_dict}")
                         bad_loans.append(loan_dict)
                         no_user_no_item += 1
-                    elif loan.patron_barcode not in users:
+                    elif users and loan.patron_barcode not in users:
                         bad_loan_report.append(f"No user for loan:\t{loan_dict}")
                         bad_loans.append(loan_dict)
                         no_user += 1
