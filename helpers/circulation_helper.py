@@ -23,7 +23,10 @@ class TransactionResult(object):
 class LegacyLoan(object):
     def __init__(self, legacy_loan_dict, row=0):
         # validate
-        correct_headers = ["item_barcode", "patron_barcode", "due_date", "out_date", "renewal_count"]
+        correct_headers = ["item_barcode", "patron_barcode", "due_date", "out_date", "renewal_count",
+                           "next_item_status"]
+        legal_statuses = ["", "Aged to lost", "Checked out", "Claimed returned", "Declared lost", "Lost and paid"]
+
         for prop in correct_headers:
             if prop not in legacy_loan_dict:
                 raise ValueError(f'Row {row}. Required property {prop} missing from legacy loan.\n'
@@ -46,6 +49,9 @@ class LegacyLoan(object):
         self.due_date = temp_date_due
         self.out_date = temp_date_out
         self.renewal_count = int(legacy_loan_dict["renewal_count"])
+        self.next_item_status = legacy_loan_dict.get("next_item_status", "")
+        if self.next_item_status not in legal_statuses:
+            raise ValueError(f"Not an allowed status: {self.next_item_status} for row {row}")
 
 
 class LegacyFeeFine(object):
@@ -73,6 +79,7 @@ class LegacyFeeFine(object):
         self.amount = legacy_fee_fine_dict.get("amount", "")
         self.source_dict = legacy_fee_fine_dict
         self.fee_fine_type = legacy_fee_fine_dict.get("fine_fee_type", "")
+
 
 
 class CirculationHelper:
