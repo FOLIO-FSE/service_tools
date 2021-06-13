@@ -58,13 +58,14 @@ class MapperBase():
             self.mapped_folio_fields[field_name][1] += int(was_empty)
 
     def instantiate_user(self):
+        user_id = str(uuid.uuid4())
         folio_user = {"metadata": self.folio_client.get_metadata_construct(),
-                      "id": str(uuid.uuid4()),
+                      "id": user_id,
                       "type": "object",
                       "personal": {},
                       "customFields": {},
                       "requestPreference": {
-                          "userId": "",
+                          "userId": user_id,
                           "holdShelf": True,
                           "delivery": False,
                           "fulfillment": "Hold Shelf",
