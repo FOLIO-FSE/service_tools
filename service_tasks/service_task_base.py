@@ -16,7 +16,7 @@ class ServiceTaskBase:
         self.setup_logging(self.__class__.__name__)
 
     @staticmethod
-    def setup_logging(class_name="", log_file_path=None):
+    def setup_logging(class_name="", log_file_path=None, time_stamp=time.strftime("%Y%m%d-%H%M%S")):
         logger = logging.getLogger()
         logger.handlers = []
         formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
@@ -28,9 +28,9 @@ class ServiceTaskBase:
 
         if log_file_path:
             log_file = os.path.join(log_file_path,
-                                    f'service_task_log_{class_name}_{time.strftime("%Y%m%d-%H%M%S")}.log')
+                                    f'service_task_log_{class_name}_{time_stamp}.log')
         else:
-            log_file = f'service_task_log_{class_name}_{time.strftime("%Y%m%d-%H%M%S")}.log'
+            log_file = f'service_task_log_{class_name}_{time_stamp}.log'
         file_formatter = logging.Formatter("%(message)s")
         file_handler = logging.FileHandler(
             filename=log_file,
