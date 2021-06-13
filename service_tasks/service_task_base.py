@@ -79,14 +79,19 @@ class ServiceTaskBase:
 
     def add_to_migration_report(self, header, message_string):
         if header not in self.migration_report:
-            self.migration_report[header] = []
-        self.migration_report[header].append(message_string)
+            self.migration_report[header] = {}
+        if message_string not in self.migration_report[header]:
+            self.migration_report[header][message_string] = 1
+        else:
+            self.migration_report[header][message_string] += 1
 
     def print_migration_report(self):
         for a in self.migration_report:
-            logging.info(f"# {a}")
-            for b in self.migration_report[a]:
-                logging.info(b)
+            logging.info(a)
+            b = self.migration_report[a]
+            sortedlist = [(k, b[k]) for k in sorted(b, key=as_str)]
+            for b in sortedlist:
+                logging.info(f"{b[0]} \t {b[1]}\n")
 
     @staticmethod
     @abstractmethod
