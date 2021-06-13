@@ -2,7 +2,6 @@ import csv
 import json
 import logging
 import time
-import traceback
 import uuid
 from abc import abstractmethod
 
@@ -32,6 +31,8 @@ class MigrateFeesAndFines(ServiceTaskBase):
         self.skipped_since_already_added = 0
         self.processed_items = set()
         self.failed = []
+        self.missing_user_barcodes = set()
+        self.missing_items_barcodes = set()
         self.num_legacy_loans_processed = 0
         self.failed_and_not_dupe = {}
         # magic strings
@@ -51,8 +52,10 @@ class MigrateFeesAndFines(ServiceTaskBase):
                 patron_item = {"user": self.get_user(legacy_fee.patron_barcode),
                                "item": self.get_item(legacy_fee.item_barcode)}
                 if not patron_item["user"]:
+                    self.missing_user_barcodes.add(legacy_fee.patron_barcode)
                     raise ValueError(f"User not found with barcode {legacy_fee.patron_barcode}")
                 if not patron_item["item"]:
+                    self.missing_items_barcodes(legacy_fee.item_barcode)
                     self.add_to_migration_report("Item barcodes not found in FOLIO", legacy_fee.item_barcode)
                 # Post this: /accounts
                 account_id = str(uuid.uuid4())
@@ -104,13 +107,13 @@ class MigrateFeesAndFines(ServiceTaskBase):
                 logging.debug(json.dumps(feefine_action_payload))
                 self.post_stuff(fee_fine_action_path, feefine_action_payload, legacy_fee.source_dict)
             except ValueError as ve:
-                self.add_to_migration_report("ValueErrors", ve)
-                self.add_stats("ValueErrors")
+                logging.error(f"ValueError in row {num_fees}  Item id: {legacy_fee.item_barcode}"
+                              f"Patron id: {legacy_fee.patron_barcode} {ve}")
+                self.add_to_migration_report("General", "ValueErrors")
             except Exception as ee:  # Catch other exceptions than HTTP errors
-                logging.info(f"Error in row {num_fees}  Item id: {legacy_fee.item_barcode}"
-                             f"Patron id: {legacy_fee.patron_barcode} {ee}")
-                self.add_to_migration_report("Other errors", ee)
-                self.add_stats("Exceptions")
+                logging.error(f"Error in row {num_fees}  Item id: {legacy_fee.item_barcode}"
+                              f"Patron id: {legacy_fee.patron_barcode} {ee}")
+                self.add_to_migration_report("General", "Exceptions")
             finally:
                 if num_fees % 50 == 0:
                     self.print_dict_to_md_table(self.stats)
@@ -119,17 +122,31 @@ class MigrateFeesAndFines(ServiceTaskBase):
         self.wrap_up()
 
     def get_item(self, item_barcode):
+        if item_barcode in self.missing_items_barcodes:
+            self.add_to_migration_report("Item barcodes reported as misssing", item_barcode)
+            return {}
         item_path = f"/inventory/items?query=barcode=={item_barcode}"
         try:
-            return self.folio_client.folio_get(item_path, "items")[0]
+            items = self.folio_client.folio_get(item_path, "items")
+            if any(items):
+                return items[0]
+            self.add_to_migration_report("General", "No item found by barcode")
+            return {}
         except Exception as ee:
             logging.error(f"{ee} {item_path}")
             return {}
 
     def get_user(self, user_barcode):
+        if user_barcode in self.missing_user_barcodes:
+            self.add_to_migration_report("User barcodes reported as misssing", user_barcode)
+            return {}
         user_path = f"/users?query=barcode=={user_barcode}"
         try:
-            return self.folio_client.folio_get(user_path, "users")[0]
+            users = self.folio_client.folio_get(user_path, "users")
+            if any(users):
+                return users[0]
+            self.add_to_migration_report("General", "No user found by barcode")
+            return {}
         except Exception as ee:
             logging.error(f"{ee} {user_path}")
             return {}
@@ -181,8 +198,6 @@ class MigrateFeesAndFines(ServiceTaskBase):
 
     def wrap_up(self):
         # wrap up
-        for f in self.failed:
-            logging.info(f"{json.dumps(f)}")
         super().wrap_up()
 
 
