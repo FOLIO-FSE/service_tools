@@ -63,14 +63,7 @@ class MapperBase():
                       "id": user_id,
                       "type": "object",
                       "personal": {},
-                      "customFields": {},
-                      "requestPreference": {
-                          "userId": user_id,
-                          "holdShelf": True,
-                          "delivery": False,
-                          "fulfillment": "Hold Shelf",
-                          "metadata": self.folio_client.get_metadata_construct()
-                      }
+                      "customFields": {}
                       }
         self.report_folio_mapping("id", True)
         self.report_folio_mapping("requestPreference", True)

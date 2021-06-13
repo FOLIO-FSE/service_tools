@@ -137,6 +137,13 @@ class Default(MapperBase):
         # self.validate(folio_user)
         folio_user["personal"]["preferredContactTypeId"] = "Email"
         folio_user["active"] = True
+        folio_user["requestPreference"] = {
+            "userId": folio_user["id"],
+            "holdShelf": True,
+            "delivery": False,
+            "fulfillment": "Hold Shelf",
+            "metadata": self.folio_client.get_metadata_construct()
+        }
         required = self.user_schema["required"]
         for required_prop in required:
             if required_prop not in folio_user:
