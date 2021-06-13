@@ -25,10 +25,15 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
             # Fetch data from items and user file
             items = {}
             for row in item_file:
-                item = json.loads(row)
-                item_barcode = item["barcode"]
-                item_status = item["status"]["name"]
-                items[item_barcode] = item_status
+                try:
+                    item = json.loads(row)
+                    item_barcode = item["barcode"]
+                    item_status = item["status"]["name"]
+                    items[item_barcode] = item_status
+                except KeyError as ke:
+                    if ke == "barcode":
+                        print(f"Item without barcode\t{row}")
+
 
             users = []
             for row in user_file:
