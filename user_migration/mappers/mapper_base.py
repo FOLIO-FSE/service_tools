@@ -1,12 +1,10 @@
 import json
-import logging
 import uuid
 from abc import abstractmethod
 from typing import Dict
 
 import requests
 from folioclient import FolioClient
-import os
 
 
 class MapperBase():
@@ -64,7 +62,15 @@ class MapperBase():
                       "id": str(uuid.uuid4()),
                       "type": "object",
                       "personal": {},
-                      "customFields": {}}
+                      "customFields": {},
+                      "requestPreference": {
+                          "userId": "",
+                          "holdShelf": True,
+                          "delivery": False,
+                          "fulfillment": "Hold Shelf",
+                          "metadata": self.folio_client.get_metadata_construct()
+                      }
+                      }
         self.report_folio_mapping("id", True)
         self.report_folio_mapping("metadata", True)
         return folio_user
@@ -211,7 +217,6 @@ class MapperBase():
         req = requests.get(latest_path)
         req.raise_for_status()
         return json.loads(req.text)
-
 
 
 def as_str(s):
