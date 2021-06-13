@@ -63,68 +63,70 @@ class Add952ToMarc(ServiceTaskBase):
         logging.info("Fetching Holdings records")
         self.start = time.time()
         with open(self.holdings_file) as holdings_file:
-            idx = 0
-            for row in holdings_file:
-                hold = json.loads(row.split('\t')[-1])
-                rec_map = {}
-                idx += 1
-                field_dict = {
-                    "location": "",
-                    "institution": "",
-                    "campus": "",
-                    "library": "",
-                    "call_number": "",
-                    "call_number_prefix": "",
-                    "call_number_suffix": "",
-                    "call_number_type": "",
-                    "material_type": "",
-                    "volume": "",
-                    "enumeration": "",
-                    "chronology": "",
-                    "barcode": "",
-                    "copy_number": "",
-                    "instanceId": hold["instanceId"],
-                    "matched_item": False
-                }
-                loc_structure = self.get_location_structure(self.locations, "locations", hold["permanentLocationId"], "id")
-                # loc = self.get_ref_data_name(self.locations, "locations", hold["permanentLocationId"], "id")
-                if loc_structure:
-                    field_dict["institution"] = loc_structure[1]
-                    field_dict["campus"] = loc_structure[2]
-                    field_dict["library"] = loc_structure[3]
-                    field_dict["location"] = loc_structure[4]
-                else:
-                    logging.info(f"location id {hold['permanentLocationId']} not found")
-
-                if hold.get('callNumber', ""):
-                    field_dict["call_number"] = hold['callNumber']
-
-                if hold.get('callNumberPrefix', ""):
-                    field_dict["call_number_prefix"] = hold['callNumberPrefix']
-
-                if hold.get('callNumberSuffix', ""):
-                    field_dict["call_number_suffix"] = hold['callNumberSuffix']
-
-                if hold.get('callNumberTypeId', ""):
-                    field_dict["call_number_type"] = hold['callNumberTypeId']
-
-                if self.items_file:
-                    # If there is an Items file, we add these to the holdings map
-                    self.holdings_map[hold["id"]] = field_dict
-                else:
-                    # No items file, add these directly as "Items" that will generate 952:s
-                    if hold["instanceId"] in self.item_map:
-                        self.item_map[hold["instanceId"]].append(field_dict)
+            for idx, row in enumerate(holdings_file):
+                try:
+                    hold = json.loads(row.split('\t')[-1])
+                    rec_map = {}
+                    idx += 1
+                    field_dict = {
+                        "location": "",
+                        "institution": "",
+                        "campus": "",
+                        "library": "",
+                        "call_number": "",
+                        "call_number_prefix": "",
+                        "call_number_suffix": "",
+                        "call_number_type": "",
+                        "material_type": "",
+                        "volume": "",
+                        "enumeration": "",
+                        "chronology": "",
+                        "barcode": "",
+                        "copy_number": "",
+                        "instanceId": hold["instanceId"],
+                        "matched_item": False
+                    }
+                    loc_structure = self.get_location_structure(self.locations, "locations", hold["permanentLocationId"], "id")
+                    # loc = self.get_ref_data_name(self.locations, "locations", hold["permanentLocationId"], "id")
+                    if loc_structure:
+                        field_dict["institution"] = loc_structure[1]
+                        field_dict["campus"] = loc_structure[2]
+                        field_dict["library"] = loc_structure[3]
+                        field_dict["location"] = loc_structure[4]
                     else:
-                        self.item_map[hold["instanceId"]] = [field_dict]
+                        logging.info(f"location id {hold['permanentLocationId']} not found")
 
-                if idx % 200000 == 0:
-                    elapsed = idx / (time.time() - self.start)
-                    elapsed_formatted = f"{elapsed:,}"
-                    logging.info(field_dict)
-                    logging.info(
-                        (f"{elapsed_formatted} recs/sec Number of records: {idx:,}."
-                         f"Size of holdings map: {len(self.holdings_map)} holdings {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}"))
+                    if hold.get('callNumber', ""):
+                        field_dict["call_number"] = hold['callNumber']
+
+                    if hold.get('callNumberPrefix', ""):
+                        field_dict["call_number_prefix"] = hold['callNumberPrefix']
+
+                    if hold.get('callNumberSuffix', ""):
+                        field_dict["call_number_suffix"] = hold['callNumberSuffix']
+
+                    if hold.get('callNumberTypeId', ""):
+                        field_dict["call_number_type"] = hold['callNumberTypeId']
+
+                    if self.items_file:
+                        # If there is an Items file, we add these to the holdings map
+                        self.holdings_map[hold["id"]] = field_dict
+                    else:
+                        # No items file, add these directly as "Items" that will generate 952:s
+                        if hold["instanceId"] in self.item_map:
+                            self.item_map[hold["instanceId"]].append(field_dict)
+                        else:
+                            self.item_map[hold["instanceId"]] = [field_dict]
+
+                    if idx % 200000 == 0:
+                        elapsed = idx / (time.time() - self.start)
+                        elapsed_formatted = f"{elapsed:,}"
+                        logging.info(field_dict)
+                        logging.info(
+                            (f"{elapsed_formatted} recs/sec Number of records: {idx:,}."
+                             f"Size of holdings map: {len(self.holdings_map)} holdings {sys.getsizeof(self.holdings_map) / (1024 * 1024 * 1024)}"))
+                except Exception as ee:
+                    logging.error(f"{ee} - {row}")
 
         elapsed = idx / (time.time() - self.start)
         logging.info(f"Done parsing Holds in {(time.time() - self.start)} seconds")
