@@ -44,7 +44,7 @@ class TransformUsers(ServiceTaskBase):
         self.setup_folder_structures()
         csv.register_dialect("tsv", delimiter="\t")
         self.time_stamp = time.strftime("%Y%m%d-%H%M%S")
-        self.setup_logging("",str(self.reports_path), self.time_stamp)
+        self.setup_logging("", str(self.reports_path), self.time_stamp)
 
         if self.use_group_map:
             with open(self.group_map_path, "r") as group_map_path:
@@ -121,19 +121,20 @@ class TransformUsers(ServiceTaskBase):
                             open(combo["mapping_file"], encoding="utf8") as mapping_file:
                         logging.info(f'processing {combo["data_file"]}')
                         user_map = json.load(mapping_file)
-                        file_format = "tsv" if str(combo["data_file"]).endswith("clea.tsv") else "csv"
+                        file_format = "tsv" if str(combo["data_file"]).endswith(".tsv") else "csv"
                         for idx,  legacy_user in enumerate(self.transformer.get_users(object_file, file_format)):
                             i += 1
                             try:
+                                if i == 1:
+                                    logging.info("First Legacy  user")
+                                    logging.info(json.dumps(legacy_user, indent=4))
                                 folio_user = self.transformer.do_map(legacy_user, user_map, idx)
                                 clean_user(folio_user)
                                 results_file.write(f"{json.dumps(folio_user)}\n")
                                 if i == 1:
-                                    logging.info("First Legacy  user")
-                                    logging.info(json.dumps(legacy_user, indent=4))
                                     logging.info("## First FOLIO  user")
                                     logging.info(json.dumps(folio_user, indent=4, sort_keys=True))
-                                    print_email_warning()
+
                                 self.add_stats("Successful user transformations")
                                 if i % 1000 == 0:
                                     logging.info(f"{i} users processed")
@@ -146,6 +147,9 @@ class TransformUsers(ServiceTaskBase):
                                 logging.error(json.dumps(legacy_user))
                                 self.add_stats("Failed user transformations")
                                 raise ee
+                            finally:
+                                if i == 1:
+                                    print_email_warning()
         except Exception as ee:
             logging.error(i, exc_info=True)
         self.print_dict_to_md_table(self.stats)
