@@ -37,8 +37,13 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
 
             users = []
             for row in user_file:
-                user = json.loads(row)
-                users.append(user["barcode"])
+                try:
+                    user = json.loads(row)
+                    users.append(user["barcode"])
+                except KeyError as ke:
+                    if ke == "barcode":
+                        print(f"User without barcode\t{row}")
+
 
             # Read loans file
             try:
