@@ -1,8 +1,11 @@
-from service_tasks.service_task_base import ServiceTaskBase, abstractmethod
-from pathlib import Path
+import json
 from collections import defaultdict
-import csv
+from pathlib import Path
+
 import pandas as pd
+
+from service_tasks.service_task_base import ServiceTaskBase, abstractmethod
+
 
 class RemapField(ServiceTaskBase):
     def __init__(self, args):
@@ -24,10 +27,15 @@ class RemapField(ServiceTaskBase):
         mapdf = pd.read_csv(self.mapfile, dtype=str, sep='\t')  
 
         replacehead = mapdf.columns[0]
+        print(replacehead)
+
         foliohead = mapdf.columns[1]
+        print(foliohead)
 
         oldvals = mapdf[replacehead].values.tolist()
+        print((json.dumps(oldvals, indent=4)))
         newvals = mapdf[foliohead].values.tolist()
+        print((json.dumps(newvals, indent=4)))
 
         sourcecol = df[replacehead].values.tolist()
 
