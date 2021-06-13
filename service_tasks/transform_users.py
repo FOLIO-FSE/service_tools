@@ -44,7 +44,7 @@ class TransformUsers(ServiceTaskBase):
         self.setup_folder_structures()
         csv.register_dialect("tsv", delimiter="\t")
         self.time_stamp = time.strftime("%Y%m%d-%H%M%S")
-        self.setup_logging(self.reports_path, self.time_stamp)
+        self.setup_logging(str(self.reports_path), self.time_stamp)
 
         if self.use_group_map:
             with open(self.group_map_path, "r") as group_map_path:

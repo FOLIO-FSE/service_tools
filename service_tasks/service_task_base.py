@@ -16,7 +16,7 @@ class ServiceTaskBase:
         self.setup_logging(self.__class__.__name__)
 
     @staticmethod
-    def setup_logging(class_name="", log_file_path=None, time_stamp=time.strftime("%Y%m%d-%H%M%S")):
+    def setup_logging(class_name="", log_file_path: str = None, time_stamp=time.strftime("%Y%m%d-%H%M%S")):
         logger = logging.getLogger()
         logger.handlers = []
         formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
@@ -37,7 +37,7 @@ class ServiceTaskBase:
         )
         # file_handler.addFilter(LevelFilter(0, 20))
         file_handler.setFormatter(file_formatter)
-        file_handler.setLevel(logging.ERROR)
+        file_handler.setLevel(logging.INFO)
         logging.getLogger().addHandler(file_handler)
         logger.info("Logging setup")
 
