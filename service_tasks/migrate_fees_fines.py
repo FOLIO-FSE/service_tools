@@ -119,6 +119,7 @@ class MigrateFeesAndFines(ServiceTaskBase):
             finally:
                 if num_fees % 50 == 0:
                     self.print_dict_to_md_table(self.stats)
+                    self.print_migration_report()
                     logging.info(
                         f"{timings(self.t0, t0_migration, num_fees)} {num_fees}")
         self.wrap_up()

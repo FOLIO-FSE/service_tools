@@ -71,10 +71,8 @@ class ServiceTaskBase:
     @staticmethod
     def print_dict_to_md_table(my_dict, h1="", h2=""):
         d_sorted = {k: my_dict[k] for k in sorted(my_dict)}
-        print(f"{h1} | {h2}")
-        print("--- | ---:")
         for k, v in d_sorted.items():
-            print(f"{k} | {v}")
+            logging.info(f"{k} | {v}")
 
     def print_stats(self):
         self.print_dict_to_md_table(self.stats, "Measure", "  #  ")
