@@ -2,6 +2,7 @@ import pandas as pd
 import csv
 import json
 
+from helpers.circulation_helper import LegacyLoan
 from service_tasks.service_task_base import ServiceTaskBase
 
 class IdentifyImpossibleLoans(ServiceTaskBase):
@@ -21,7 +22,7 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
 
     def do_work(self):
         with open(self.loan_file, encoding='utf-8-sig') as loan_file, open(self.item_file) as item_file, open(self.user_file) as user_file:
-
+            bad_loan_report = []
             # Fetch data from items and user file
             items = {}
             for row in item_file:
@@ -31,9 +32,7 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
                     item_status = item["status"]["name"]
                     items[item_barcode] = item_status
                 except KeyError as ke:
-                    if ke == "barcode":
-                        print(f"Item without barcode\t{row}")
-
+                    bad_loan_report.append(f"{ke} without barcode\t{row}")
 
             users = []
             for row in user_file:
@@ -41,8 +40,7 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
                     user = json.loads(row)
                     users.append(user["barcode"])
                 except KeyError as ke:
-                    if ke == "barcode":
-                        print(f"User without barcode\t{row}")
+                    bad_loan_report.append(f"{ke} without barcode\t{row}")
 
 
             # Read loans file
@@ -59,39 +57,40 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
 
             good_loans = []
             bad_loans = []
-            bad_loan_report = []
+
             no_user_no_item = 0
             no_user = 0
             no_item = 0
             bad_status = {}
 
-            for loan in loans:
+            for loan_dict in loans:
                 try:
-                    loan_user_barcode = loan["patron_barcode"]
-                    loan_item_barcode = loan["item_barcode"]
-                    if loan_user_barcode not in users and loan_item_barcode not in items:
+                    loan = LegacyLoan(loan_dict)
+                    if loan.patron_barcode not in users and loan.item_barcode not in items:
                         bad_loan_report.append(f"Neither user nor item for loan:\t{loan}")
                         bad_loans.append(loan)
                         no_user_no_item += 1
-                    elif loan_user_barcode not in users:
+                    elif loan.patron_barcode not in users:
                         bad_loan_report.append(f"No user for loan:\t{loan}")
                         bad_loans.append(loan)
                         no_user += 1
-                    elif loan_item_barcode not in items:
+                    elif loan.item_barcode not in items:
                         bad_loan_report.append(f"No item for loan:\t{loan}")
                         bad_loans.append(loan)
                         no_item += 1
-                    elif items[loan_item_barcode] != "Available":
-                        bad_loan_report.append(f"Loan with status\t\"{items[loan_item_barcode]}\" cannot be checked out:\t{loan}")
+                    elif items[loan.item_barcode] != "Available":
+                        bad_loan_report.append(f"Loan with status\t\"{items[loan.item_barcode]}\" cannot be checked out:\t{loan}")
                         bad_loans.append(loan)
-                        if items[loan_item_barcode] in bad_status:
-                            bad_status[items[loan_item_barcode]] += 1
+                        if items[loan.item_barcode] in bad_status:
+                            bad_status[items[loan.item_barcode]] += 1
                         else:
-                            bad_status[items[loan_item_barcode]] = 1
+                            bad_status[items[loan.item_barcode]] = 1
                     else:
                         good_loans.append(loan)
                 except KeyError as e:
                     print(f"Does your data have the right headers? Missing {e}.")
+                except ValueError as ve:
+                    bad_loan_report.append(ve)
 
             good_loans_df = pd.DataFrame(good_loans)
             bad_loans_df = pd.DataFrame(bad_loans)
