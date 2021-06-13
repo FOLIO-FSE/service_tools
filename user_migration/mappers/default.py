@@ -147,7 +147,6 @@ class Default(MapperBase):
                 raise TransformationCriticalDataError(
                     f"Required property {required_prop} empty for \"{folio_user.get('barcode', '')}\" (barcode) {idx} (index in file)"
                 )
-
         return folio_user
 
     def map_basic_props(self, legacy_user, user_map, prop, folio_user):

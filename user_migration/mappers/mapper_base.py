@@ -73,6 +73,7 @@ class MapperBase():
                       }
                       }
         self.report_folio_mapping("id", True)
+        self.report_folio_mapping("requestPreference", True)
         self.report_folio_mapping("metadata", True)
         return folio_user
 
