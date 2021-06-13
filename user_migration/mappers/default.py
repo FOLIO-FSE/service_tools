@@ -147,16 +147,7 @@ class Default(MapperBase):
                 raise TransformationCriticalDataError(
                     f"Required property {required_prop} empty for \"{folio_user.get('barcode', '')}\" (barcode) {idx} (index in file)"
                 )
-        # Honeysuckle special case
-        if "preferredFirstName" in folio_user["personal"]:
-            del folio_user["personal"]["preferredFirstName"]
-            self.add_to_migration_report("Removed fields due to incompatibility in Honeysuckle", "preferredFirstName")
-        if "tags" in folio_user:
-            del folio_user["tags"]
-            self.add_to_migration_report("Removed fields due to incompatibility in Honeysuckle", "tags")
-        if "requestPreference" in folio_user:
-            del folio_user["requestPreference"]
-            self.add_to_migration_report("Removed fields due to incompatibility in Honeysuckle", "requestPreference")
+
         return folio_user
 
     def map_basic_props(self, legacy_user, user_map, prop, folio_user):
