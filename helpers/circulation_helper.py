@@ -26,22 +26,20 @@ class LegacyLoan(object):
         correct_headers = ["item_barcode", "patron_barcode", "due_date", "out_date", "renewal_count",
                            "next_item_status"]
         legal_statuses = ["", "Aged to lost", "Checked out", "Claimed returned", "Declared lost", "Lost and paid"]
-
+        self.errors = []
         for prop in correct_headers:
             if prop not in legacy_loan_dict:
-                raise ValueError(f'Row {row}. Required property {prop} missing from legacy loan.\n'
-                                 f'Does your file have the required headers {", ".join(correct_headers)}?\n'
-                                 f'Headers in legacy loan: \n{json.dumps(list(legacy_loan_dict.keys()), indent=4)}')
+                self.errors.append(("Missing properties in legacy data", prop))
             if not legacy_loan_dict[prop]:
-                raise ValueError(f"Row {row}. Required property {prop} empty from legacy loan")
+                self.errors.append(("Empty properties in legacy data", prop))
         try:
             temp_date_due: datetime = parse(legacy_loan_dict["due_date"])
         except Exception as ee:
-            raise ValueError(f'Row {row}. Could not parse {legacy_loan_dict["due_date"]} into a valid ISO date {ee}')
+            self.errors.append(("Parse date failure", "due_date"))
         try:
             temp_date_out: datetime = parse(legacy_loan_dict["out_date"])
         except Exception as ee:
-            raise ValueError(f'Row {row}. Could not parse {legacy_loan_dict["out_date"]} into a valid ISO date {ee}')
+            self.errors.append(("Parse date failure", "out_date"))
 
         # good to go, set properties
         self.item_barcode = legacy_loan_dict["item_barcode"]
@@ -51,7 +49,7 @@ class LegacyLoan(object):
         self.renewal_count = int(legacy_loan_dict["renewal_count"])
         self.next_item_status = legacy_loan_dict.get("next_item_status", "").strip()
         if self.next_item_status not in legal_statuses:
-            raise ValueError(f"Not an allowed status: {self.next_item_status} for row {row}")
+            self.errors.append(("Not an allowed status", self.next_item_status))
 
     def to_dict(self):
         return {

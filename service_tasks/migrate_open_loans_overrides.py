@@ -148,24 +148,24 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                                          "open_loans_file", help="File to TSV file containing Open Loans")
         ServiceTaskBase.add_cli_argument(parser, "service_point_id", "Id of the service point where checkout occurs")
 
-    @staticmethod
-    def load_and_validate_legacy_loans(loans_reader):
+
+    def load_and_validate_legacy_loans(self, loans_reader):
+        num_bad = 0
         barcodes = set()
         duplicate_barcodes = set()
         logging.info("Validating legacy loans in file...")
         for legacy_loan_count, legacy_loan_dict in enumerate(loans_reader):
-            legacy_loan = LegacyLoan(legacy_loan_dict, legacy_loan_count)
-            if legacy_loan.item_barcode not in barcodes:
-                barcodes.add(legacy_loan.item_barcode)
-                yield legacy_loan
-            else:
-                duplicate_barcodes.add(legacy_loan.item_barcode)
-                error_msg = (f"Row {legacy_loan_count}. Duplicate Item barcode {legacy_loan.item_barcode} "
-                             "in legacy loan data")
-                logging.error(error_msg)
-        logging.error(f"The following barcodes where occurring multiple times in the loan data and need to be "
-                      f"handled since they are duplicate loans.:\n{json.dumps(list(duplicate_barcodes))}")
-        logging.info("Done validating legacy loans")
+            try:
+                legacy_loan = LegacyLoan(legacy_loan_dict, legacy_loan_count)
+                if any(legacy_loan.errors):
+                    num_bad += 1
+                    for error in legacy_loan.errors:
+                        self.add_to_migration_report(error[0], error[1])
+                else:
+                    yield legacy_loan
+            except ValueError as ve:
+                logging.exception(ve)
+        logging.info(f"Done validating {legacy_loan_count} legacy loans with {num_bad} rotten apples")
 
     def wrap_up(self):
         # wrap up

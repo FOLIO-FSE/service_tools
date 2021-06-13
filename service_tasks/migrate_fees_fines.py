@@ -58,7 +58,7 @@ class MigrateFeesAndFines(ServiceTaskBase):
                 if not patron_item["item"]:
                     self.add_stats("Item barcode not found")
                     self.missing_items_barcodes(legacy_fee.item_barcode)
-                    self.add_to_migration_report("Item barcodes not found in FOLIO", legacy_fee.item_barcode)
+                    # self.add_to_migration_report("Item barcodes not found in FOLIO", legacy_fee.item_barcode)
                 # Post this: /accounts
                 account_id = str(uuid.uuid4())
                 post_account_path = f"{self.folio_client.okapi_url}/accounts"
@@ -185,7 +185,7 @@ class MigrateFeesAndFines(ServiceTaskBase):
 
     def load_and_validate_legacy_fees(self, fees_reader):
         num_bad = 0
-        logging.info("Validating legacy loans in file...")
+        logging.info("Validating legacy fees in file...")
         for legacy_fees_count, legacy_fee_dict in enumerate(fees_reader):
             try:
                 fee_fine = LegacyFeeFine(legacy_fee_dict, legacy_fees_count)
