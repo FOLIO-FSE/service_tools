@@ -141,7 +141,6 @@ class Default(MapperBase):
             "userId": folio_user["id"],
             "holdShelf": True,
             "delivery": False,
-            "fulfillment": "Hold Shelf",
             "metadata": self.folio_client.get_metadata_construct()
         }
         required = self.user_schema["required"]
