@@ -22,6 +22,7 @@ def parse_args(task_classes):
 
 @Gooey(
     advanced=True,
+    clear_before_run=True,
     terminal_font_family='consolas',
     progress_regex=r"^progress: (?P<current>\d+)/(?P<total>\d+)$",
     progress_expr="current / total * 100",

@@ -80,7 +80,7 @@ class BatchPoster(ServiceTaskBase):
                         if self.num_failures > 50:
                             logging.error(f"Exceeded number of failures at row {idx}")
                             raise exception
-            # Last batch
+                            # Last batch
             self.post_batch(batch, failed_recs_file)
         logging.info(f"Done posting {idx} records. ")
         logging.info(
@@ -103,9 +103,10 @@ class BatchPoster(ServiceTaskBase):
             if json_report.get("failedRecords", 0) > 0:
                 failed_recs_file.write(response.text)
             logging.info(
-                f"Posting successful! Total rows: {self.processed_rows} Total failed: {self.failed_records} created: {self.users_created} updated: {self.users_updated}"
+                f"Posting successful! Total rows: {self.processed_rows} Total failed: {self.failed_records} "
+                f"created: {self.users_created} updated: {self.users_updated} "
                 f"in {response.elapsed.total_seconds()}s "
-                f"Batch Size: {len(batch)} Request size: {get_req_size(response)}"
+                f"Batch Size: {len(batch)} Request size: {get_req_size(response)} "
                 f"{datetime.utcnow().isoformat()} UTC")
         elif response.status_code == 422:
             resp = json.loads(response.text)
@@ -169,6 +170,8 @@ def list_objects():
                       "total_records": False},
         "Source Records - Batch": {"object_name": "records", "api_endpoint": "/source-storage/batch/records",
                                    "total_records": True},
+        "SRS": {"object_name": "records", "api_endpoint": "/source-storage/batch/records",
+                "total_records": True},
         "Users": {"object_name": "users", "api_endpoint": "/user-import", "total_records": True},
     }
 
