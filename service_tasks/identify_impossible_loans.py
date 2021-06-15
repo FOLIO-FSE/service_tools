@@ -26,14 +26,14 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
             items = {}
             for row in item_file:
                 item = json.loads(row)
-                item_barcode = item["barcode"]
+                item_barcode = item.get("barcode")
                 item_status = item["status"]["name"]
                 items[item_barcode] = item_status
 
             users = []
             for row in user_file:
                 user = json.loads(row)
-                users.append(user["barcode"])
+                users.append(user.get("barcode"))
 
             # Read loans file
             try:
@@ -57,6 +57,7 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
 
             for loan in loans:
                 try:
+                    print(loan)
                     loan_user_barcode = loan["patron_barcode"]
                     loan_item_barcode = loan["item_barcode"]
                     if loan_user_barcode not in users and loan_item_barcode not in items:
