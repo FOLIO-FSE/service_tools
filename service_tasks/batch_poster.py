@@ -25,7 +25,7 @@ class BatchPoster(ServiceTaskBase):
         self.object_name = args.object_name
         self.failed_objects = []
         object_name_formatted = self.object_name.replace(" ", "").lower()
-        self.log_path = os.path.join(args.results_folder, f'{object_name_formatted}_posting.log')
+        self.setup_logging(f'{object_name_formatted}_posting', args.results_folder)
         self.failed_recs_path = os.path.join(args.results_folder, f'{object_name_formatted}_failed_records.json')
         self.batch_size = args.batch_size
         self.processed = 0
@@ -44,8 +44,7 @@ class BatchPoster(ServiceTaskBase):
         logging.info("Starting....")
         batch = []
 
-        with open(self.objects_file) as rows, open(self.failed_recs_path, 'w') as failed_recs_file, open(
-                self.log_path, 'w') as log_file:
+        with open(self.objects_file) as rows, open(self.failed_recs_path, 'w') as failed_recs_file:
             last_row = ""
             for idx, row in enumerate(rows):
                 last_row = row

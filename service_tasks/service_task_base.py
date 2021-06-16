@@ -9,11 +9,11 @@ from folioclient import FolioClient
 
 
 class ServiceTaskBase:
-    def __init__(self, folio_client: FolioClient = None, class_name=""):
+    def __init__(self, folio_client: FolioClient = None, class_name="", log_path=""):
         self.stats = {}
         self.migration_report = {}
         self.folio_client = folio_client
-        self.setup_logging(self.__class__.__name__)
+        self.setup_logging(self.__class__.__name__, class_name, log_path)
 
     @staticmethod
     def setup_logging(class_name="", log_file_path: str = None, time_stamp=time.strftime("%Y%m%d-%H%M%S")):

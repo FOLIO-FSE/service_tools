@@ -17,5 +17,4 @@ sql_queries = [
 
 # UPDATE fs00001067_mod_inventory_storage.item SET jsonb = jsonb_set(jsonb, '{status}', '{"name":"Available","date":"2021-05-25T21:07:21.459Z"}'::jsonb) WHERE jsonb->'status'->>'name' = 'Checked out'
 
-#SELECT jsonb->'status'->>'name', count(jsonb->'status'->>'name') FROM fs00001034_mod_inventory_storage.item
-# group by jsonb->'status'->>'name';
+# SELECT jsonb->'status'->>'name', count(jsonb->'status'->>'name') FROM fs00001034_mod_inventory_storage.item group by jsonb->'status'->>'name';
