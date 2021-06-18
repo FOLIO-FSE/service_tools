@@ -24,7 +24,8 @@ class CornellReplaceMfhdIdsWithUuids(ServiceTaskBase):
             for index, json_item in enumerate(item_file):
                 try:
                     item = json.loads(json_item)
-                    item['holdingsRecordId'] = self.instance_id_map[item['holdingsRecordId']]["id"]
+                    item['holdingsRecordId'] = self.instance_id_map[item['mfhdId']]["id"]
+                    del item["mfhdId"]
                     results_file.write(f"{json.dumps(item)}\n")
                 except Exception as ee:
                     logging.error(f"{ee}\t{json_item}")
