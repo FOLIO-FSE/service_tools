@@ -12,8 +12,9 @@ from service_tasks.service_task_base import ServiceTaskBase
 
 class ParseIIICsvItemsWithBoundiwths(ServiceTaskBase):
     def __init__(self, args):
+        super().__init__()
         self.millennium_items_path = args.data_path
-        self.result_file = os.path.join(args.result_path, "items_with_boundwiths_handled.csv")
+        self.result_file = os.path.join(args.result_path, "items_with_boundwiths_handled.tsv")
         self.sierra_items = {}
 
     def do_work(self):
@@ -27,8 +28,7 @@ class ParseIIICsvItemsWithBoundiwths(ServiceTaskBase):
             millennium_items = csv.reader(millennium_items_file, delimiter="\t")
             # Loop through all the rows
             for row_index, row in enumerate(millennium_items):
-                # Remove trailing and leading quotes
-                # The first row contains the hearders from the first row
+                # The first row contains the headers from the first row
                 if row_index == 0:
                     headers = row
                     # Delete duplicate columns based on header name
@@ -74,7 +74,7 @@ class ParseIIICsvItemsWithBoundiwths(ServiceTaskBase):
                         print(f"{written} records created!", flush=True)
 
             items_df = pandas.DataFrame(dict_list)
-            items_df.to_csv(self.result_file, quoting=csv.QUOTE_ALL, index=False, line_terminator='\n')
+            items_df.to_csv(self.result_file, quoting=csv.QUOTE_ALL, sep="\t", index=False, line_terminator='\n')
 
             print(f"Done!\nNumber of rows processed: {row_index}\nA total of {unequal} rows had unexpected column counts:\n {unequal_rows}")
 
