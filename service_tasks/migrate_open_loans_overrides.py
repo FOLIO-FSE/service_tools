@@ -59,8 +59,17 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                     res_checkout = self.handle_checkout_failure(legacy_loan, res_checkout)
                     if not res_checkout.was_successful:
                         continue
-                elif legacy_loan.renewal_count > 0:
-                    self.update_open_loan(res_checkout.folio_loan, legacy_loan)
+                else:
+                    if legacy_loan.renewal_count > 0:
+                        self.update_open_loan(res_checkout.folio_loan, legacy_loan)
+                    # set new statuses
+                    if legacy_loan.next_item_status == "Declared lost":
+                        self.declare_lost(res_checkout.folio_loan)
+                    elif legacy_loan.next_item_status == "Claimed returned":
+                        self.claim_returned(res_checkout.folio_loan)
+                    elif legacy_loan.next_item_status not in ["Available", ""]:
+                        self.set_item_status(legacy_loan)
+
                 if num_loans % 25 == 0:
                     self.print_dict_to_md_table(self.stats)
                     logging.info(
@@ -84,21 +93,8 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         elif folio_checkout.error_message.startswith("Aged to lost for item"):
             return folio_checkout
         elif folio_checkout.error_message == "Declared lost":
-            raise NotImplementedError("Declared lost. Can this be overridden? Ask Theodor to check")
-            """self.set_item_as_available(legacy_loan)
-            res = CirculationHelper.check_out_by_barcode(self.folio_client,
-                                                         legacy_loan.item_barcode,
-                                                         legacy_loan.patron_barcode,
-                                                         self.service_point_id)  # checkout_and_update
-            self.add_stats(res[3])
-            if res[0]:
-                self.declare_lost(res[1])
-                self.add_stats("Handled Declared lost items")
-            else:
-                self.add_stats(f"Checkout failed when declaring as lost because: {res[2]}")
-                raise Exception(f"Checkout failed when declaring as lost because: {res[2]}")
-            return res"""
-        elif folio_checkout.error_message == "Cannot check out to inactive user":
+            return folio_checkout
+        elif folio_checkout.error_message == "Cannot check out to inactive user. Activating and trying again":
             user = self.get_user_by_barcode(legacy_loan.patron_barcode)
             expiration_date = user.get("expirationDate", dt.isoformat(dt.now()))
             user["expirationDate"] = dt.isoformat(dt.now() + timedelta(days=1))
@@ -113,22 +109,21 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             # First failure. Add to list of failed loans
             if legacy_loan.item_barcode not in self.failed:
                 self.failed[legacy_loan.item_barcode] = legacy_loan
-
             # Second Failure. For duplicate rows. Needs cleaning...
             else:
                 logging.info(
-                    f"Loan already in failed. item barcode {legacy_loan.item_barcode} Patron barcode: {legacy_loan.patron_barcode}")
+                    f"Loan already in failed. item barcode {legacy_loan.item_barcode} "
+                    f"Patron barcode: {legacy_loan.patron_barcode}")
                 self.failed_and_not_dupe[legacy_loan.item_barcode] = [
                     legacy_loan,
                     self.failed[legacy_loan.item_barcode],
                 ]
-
                 logging.info(
                     f"Duplicate loans (or failed twice) item barcode"
                     f"{legacy_loan.item_barcode} patron barcode: {legacy_loan.patron_barcode}")
                 self.add_stats(f"Duplicate loans (or failed twice)")
                 del self.failed[legacy_loan.item_barcode]
-            return TransactionResult(False, None, None, None)
+            return TransactionResult(False, "", "", "")
 
     @staticmethod
     @abstractmethod
@@ -148,7 +143,6 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                                          "open_loans_file", help="File to TSV file containing Open Loans")
         ServiceTaskBase.add_cli_argument(parser, "service_point_id", "Id of the service point where checkout occurs")
 
-
     def load_and_validate_legacy_loans(self, loans_reader):
         num_bad = 0
         barcodes = set()
@@ -165,7 +159,8 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                     yield legacy_loan
             except ValueError as ve:
                 logging.exception(ve)
-        logging.info(f"Done validating {legacy_loan_count} legacy loans with {num_bad} rotten apples")
+        else:
+            logging.info(f"Done validating {legacy_loan_count} legacy loans with {num_bad} rotten apples")
 
     def wrap_up(self):
         # wrap up
@@ -187,37 +182,6 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             )
             # this loan har previously failed. It can now be removed from failures:
             del self.failed[loan["item_id"]]
-
-    def change_due_date(self, folio_loan, legacy_loan):
-        try:
-            t0_function = time.time()
-            api_url = f"{self.folio_client.okapi_url}/circulation/loans/{folio_loan['id']}/change-due-date"
-            body = {"dueDate": du_parser.isoparse(str(legacy_loan.due_date)).isoformat()}
-            req = requests.post(
-                api_url, headers=self.folio_client.okapi_headers, data=json.dumps(body)
-            )
-            if req.status_code == 422:
-                error_message = json.loads(req.text)['errors'][0]['message']
-                self.add_stats(f"Change due date error: {error_message}")
-                logging.info(
-                    f"{error_message}\t",
-                )
-                self.add_stats(error_message)
-                return False
-            elif req.status_code == 201:
-                self.add_stats(f"Successfully changed due date ({req.status_code})")
-                return True, json.loads(req.text), None
-            elif req.status_code == 204:
-                self.add_stats(f"Successfully changed due date ({req.status_code})")
-                return True, None, None
-            else:
-                self.add_stats(f"Update open loan error http status: {req.status_code}")
-                req.raise_for_status()
-        except HTTPError as exception:
-            logging.info(f"{req.status_code} POST FAILED Change Due Date to {api_url}\t{json.dumps(body)})")
-            traceback.print_exc()
-            logging.info(exception)
-            return False, None, None
 
     def update_open_loan(self, folio_loan, legacy_loan: LegacyLoan):
         due_date = du_parser.isoparse(str(legacy_loan.due_date))
@@ -272,21 +236,44 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                 "comment": "Created at migration. Date is due date + 1 day",
                 "servicePointId": str(self.service_point_id)}
         logging.info(f"Declare lost data: {json.dumps(data)}")
-        self.folio_put_post(declare_lost_url, data, "POST", "Declare item as lost")
-        self.stats("Successfully declared loan as lost")
+        if self.folio_put_post(declare_lost_url, data, "POST", "Declare item as lost"):
+            self.stats("Successfully declared loan as lost")
+        else:
+            self.stats("Unsuccessfully declared loan as lost")
         # TODO: Exception handling
 
-    def set_item_as_available(self, legacy_loan):
-        # Get Item by barcode, update status.
-        item_url = f'{self.folio_client.okapi_url}/item-storage/items?query=(barcode=="{legacy_loan.item_barcode}")'
-        resp = requests.get(item_url, headers=self.folio_client.okapi_headers)
-        resp.raise_for_status()
-        data = resp.json()
-        folio_item = data["items"][0]
-        folio_item["status"]["name"] = "Available"
-        self.update_item(folio_item)
-        self.add_stats("Successfully set item to Available")
+    def claim_returned(self, folio_loan):
+        claim_returned_url = f"/circulation/loans/{folio_loan['id']}/claim-item-returned"
+        logging.info(f"Claim returned url:{claim_returned_url}")
+        due_date = du_parser.isoparse(folio_loan['dueDate'])
+        data = {"itemClaimedReturnedDateTime": dt.isoformat(due_date + timedelta(days=1)),
+                "comment": "Created at migration. Date is due date + 1 day"}
+        logging.info(f"Declare lost data:\t{json.dumps(data)}")
+        if self.folio_put_post(claim_returned_url, data, "POST", "Declare item as lost"):
+            self.stats("Successfully declared loan as Claimed returned")
+        else:
+            self.stats("Unsuccessfully declared loan as Claimed returned")
         # TODO: Exception handling
+
+    def set_item_status(self, legacy_loan: LegacyLoan):
+        try:
+            # Get Item by barcode, update status.
+            item_url = f'{self.folio_client.okapi_url}/item-storage/items?query=(barcode=="{legacy_loan.item_barcode}")'
+            resp = requests.get(item_url, headers=self.folio_client.okapi_headers)
+            resp.raise_for_status()
+            data = resp.json()
+            folio_item = data["items"][0]
+            folio_item["status"]["name"] = legacy_loan.next_item_status
+            if self.update_item(folio_item):
+                self.add_stats(f"Successfully set item status to {legacy_loan.next_item_status}")
+                logging.info(f"Successfully set item with barcode "
+                         f"{legacy_loan.item_barcode} to {legacy_loan.next_item_status}")
+            else:
+                self.add_stats(f"Error setting item status to {legacy_loan.next_item_status}")
+        except Exception as ee:
+            logging.error(f"{resp.status_code} when trying to set item with barcode "
+                          f"{legacy_loan.item_barcode} to {legacy_loan.next_item_status} {ee}")
+            raise ee
 
     def activate_user(self, user):
         user["active"] = True
@@ -338,6 +325,37 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             traceback.print_exc()
             logging.info(exception)
             return False
+
+    def change_due_date(self, folio_loan, legacy_loan):
+        try:
+            t0_function = time.time()
+            api_url = f"{self.folio_client.okapi_url}/circulation/loans/{folio_loan['id']}/change-due-date"
+            body = {"dueDate": du_parser.isoparse(str(legacy_loan.due_date)).isoformat()}
+            req = requests.post(
+                api_url, headers=self.folio_client.okapi_headers, data=json.dumps(body)
+            )
+            if req.status_code == 422:
+                error_message = json.loads(req.text)['errors'][0]['message']
+                self.add_stats(f"Change due date error: {error_message}")
+                logging.info(
+                    f"{error_message}\t",
+                )
+                self.add_stats(error_message)
+                return False
+            elif req.status_code == 201:
+                self.add_stats(f"Successfully changed due date ({req.status_code})")
+                return True, json.loads(req.text), None
+            elif req.status_code == 204:
+                self.add_stats(f"Successfully changed due date ({req.status_code})")
+                return True, None, None
+            else:
+                self.add_stats(f"Update open loan error http status: {req.status_code}")
+                req.raise_for_status()
+        except HTTPError as exception:
+            logging.info(f"{req.status_code} POST FAILED Change Due Date to {api_url}\t{json.dumps(body)})")
+            traceback.print_exc()
+            logging.info(exception)
+            return False, None, None
 
 
 def timings(t0, t0func, num_objects):

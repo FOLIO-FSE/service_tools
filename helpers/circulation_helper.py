@@ -30,7 +30,7 @@ class LegacyLoan(object):
         for prop in correct_headers:
             if prop not in legacy_loan_dict:
                 self.errors.append(("Missing properties in legacy data", prop))
-            if not legacy_loan_dict[prop]:
+            if not legacy_loan_dict[prop].strip():
                 self.errors.append(("Empty properties in legacy data", prop))
         try:
             temp_date_due: datetime = parse(legacy_loan_dict["due_date"])
@@ -44,8 +44,8 @@ class LegacyLoan(object):
             self.errors.append(("Parse date failure. Setting UTC NOW", "out_date"))
 
         # good to go, set properties
-        self.item_barcode = legacy_loan_dict["item_barcode"]
-        self.patron_barcode = legacy_loan_dict["patron_barcode"]
+        self.item_barcode = legacy_loan_dict["item_barcode"].strip()
+        self.patron_barcode = legacy_loan_dict["patron_barcode"].strip()
         self.due_date: datetime = temp_date_due
         self.out_date: datetime = temp_date_out
         self.renewal_count = int(legacy_loan_dict["renewal_count"])

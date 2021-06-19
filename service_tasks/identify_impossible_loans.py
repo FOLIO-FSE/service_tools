@@ -1,9 +1,11 @@
-import pandas as pd
 import csv
 import json
 
+import pandas as pd
+
 from helpers.circulation_helper import LegacyLoan
 from service_tasks.service_task_base import ServiceTaskBase
+
 
 class IdentifyImpossibleLoans(ServiceTaskBase):
     # Open file and read into a Pandas Dataframe
@@ -25,7 +27,7 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
         # Fetch data from items and user file
         items = {}
         users = []
-        if len(self.user_file) > 10: # Skip user validation if not supplied argument
+        if len(self.user_file) > 10:  # Skip user validation if not supplied argument
             with open(self.user_file) as user_file:
                 for row in user_file:
                     try:
@@ -84,7 +86,8 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
                         bad_loans.append(loan.to_dict())
                         no_item += 1
                     elif items[loan.item_barcode] != "Available":
-                        bad_loan_report.append(f"Loan with status\t\"{items[loan.item_barcode]}\" cannot be checked out:\t{loan.to_dict()}")
+                        bad_loan_report.append(
+                            f"Loan with status\t\"{items[loan.item_barcode]}\" cannot be checked out:\t{loan.to_dict()}")
                         bad_loans.append(loan.to_dict())
                         if items[loan.item_barcode] in bad_status:
                             bad_status[items[loan.item_barcode]] += 1
@@ -101,7 +104,8 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
             good_loans_df = pd.DataFrame(good_loans)
             bad_loans_df = pd.DataFrame(bad_loans)
 
-            with open(self.good_file, "w") as good_file, open(self.bad_file, "w") as bad_file, open(self.bad_report, "w") as bad_report:
+            with open(self.good_file, "w") as good_file, open(self.bad_file, "w") as bad_file, open(self.bad_report,
+                                                                                                    "w") as bad_report:
                 good_loans_df.to_csv(good_file, sep="\t", index=False, line_terminator='\n')
                 bad_loans_df.to_csv(bad_file, sep="\t", index=False, line_terminator='\n')
                 print(*bad_loan_report, file=bad_report, sep="\n")
@@ -113,9 +117,6 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
             print(f"Loans with no user: {no_user}")
             print(f"Loans with no item: {no_item}")
             print(f"Loans with non-loanable status: {bad_status}")
-
-
-
 
     @staticmethod
     def add_arguments(sub_parser):
@@ -139,14 +140,14 @@ class IdentifyImpossibleLoans(ServiceTaskBase):
     @staticmethod
     def add_cli_arguments(sub_parser):
         ServiceTaskBase.add_cli_argument(sub_parser,
-                                     "loan_file",
-                                     "A .tsv or .csv file"),
+                                         "loan_file",
+                                         "A .tsv or .csv file"),
         ServiceTaskBase.add_cli_argument(sub_parser,
-                                     "item_file",
-                                     "A json file containing one object per row."),
+                                         "item_file",
+                                         "A json file containing one object per row."),
         ServiceTaskBase.add_cli_argument(sub_parser,
-                                     "user_file",
-                                     "A json file containing one object per row."),
+                                         "user_file",
+                                         "A json file containing one object per row."),
         ServiceTaskBase.add_cli_argument(sub_parser,
-                                     "save_to_folder",
-                                     "Folder where you want the output to be saved.")
+                                         "save_to_folder",
+                                         "Folder where you want the output to be saved.")
