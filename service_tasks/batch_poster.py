@@ -92,8 +92,7 @@ class BatchPoster(ServiceTaskBase):
             logging.info(
                 f"Posting successful! Total rows: {self.processed_rows} Total failed: {self.failed_records} "
                 f"in {response.elapsed.total_seconds()}s "
-                f"Batch Size: {len(batch)} Request size: {get_req_size(response)} "
-                f"{datetime.utcnow().isoformat()} UTC")
+                f"Batch Size: {len(batch)} Request size: {get_req_size(response)} ")
         elif response.status_code == 200:
             json_report = json.loads(response.text)
             self.users_created += json_report.get("createdRecords", 0)
