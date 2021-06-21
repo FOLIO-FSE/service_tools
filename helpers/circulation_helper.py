@@ -30,7 +30,7 @@ class LegacyLoan(object):
         for prop in correct_headers:
             if prop not in legacy_loan_dict:
                 self.errors.append(("Missing properties in legacy data", prop))
-            if not legacy_loan_dict[prop].strip():
+            if prop != "next_item_status" and not legacy_loan_dict[prop].strip():
                 self.errors.append(("Empty properties in legacy data", prop))
         try:
             temp_date_due: datetime = parse(legacy_loan_dict["due_date"])

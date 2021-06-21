@@ -26,7 +26,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         self.circulation_helper = CirculationHelper(folio_client, self.service_point_id)
         csv.register_dialect("tsv", delimiter="\t")
         self.valid_legacy_loans = []
-        with open(args.open_loans_file, 'r') as loans_file:
+        with open(args.open_loans_file, 'r', encoding="utf-8") as loans_file:
             self.valid_legacy_loans = list(
                 self.load_and_validate_legacy_loans(InsensitiveDictReader(loans_file, dialect="tsv")))
             logging.info(f"Loaded and validated {len(self.valid_legacy_loans)} loans in file")
@@ -47,7 +47,6 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
 
         if self.starting_point > 0:
             logging.info(f"Skipping {self.starting_point} records")
-
         for num_loans, legacy_loan in enumerate(self.valid_legacy_loans[self.starting_point:]):
             t0_migration = time.time()
             try:
@@ -58,10 +57,13 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                 if not res_checkout.was_successful:
                     res_checkout = self.handle_checkout_failure(legacy_loan, res_checkout)
                     if not res_checkout.was_successful:
+                        if legacy_loan.item_barcode not in self.failed:
+                            self.failed[legacy_loan.item_barcode] = legacy_loan
                         continue
                 else:
                     if legacy_loan.renewal_count > 0:
                         self.update_open_loan(res_checkout.folio_loan, legacy_loan)
+                        self.add_stats("Updated renewal count for loan")
                     # set new statuses
                     if legacy_loan.next_item_status == "Declared lost":
                         self.declare_lost(res_checkout.folio_loan)
@@ -91,17 +93,27 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         elif folio_checkout.error_message.startswith("No item with barcode"):
             return folio_checkout
         elif folio_checkout.error_message.startswith("Aged to lost for item"):
-            return folio_checkout
+            logging.info("Setting Available")
+            legacy_loan.next_item_status = "Available"
+            self.set_item_status(legacy_loan)
+            res_checkout = self.circulation_helper.check_out_by_barcode_override_iris(legacy_loan)
+            legacy_loan.next_item_status = "Aged to lost"
+            self.set_item_status(legacy_loan)
+            logging.info(f"Successfully Checked out Aged to lost item and put the status back")
+            return res_checkout
         elif folio_checkout.error_message == "Declared lost":
             return folio_checkout
-        elif folio_checkout.error_message == "Cannot check out to inactive user. Activating and trying again":
+        elif folio_checkout.error_message.startswith("Cannot check out to inactive user"):
+            logging.info("Cannot check out to inactive user. Activating and trying again")
             user = self.get_user_by_barcode(legacy_loan.patron_barcode)
             expiration_date = user.get("expirationDate", dt.isoformat(dt.now()))
             user["expirationDate"] = dt.isoformat(dt.now() + timedelta(days=1))
             self.activate_user(user)
+            logging.info("Successfully Activated user")
             res = self.circulation_helper.check_out_by_barcode_override_iris(legacy_loan)  # checkout_and_update
             self.add_stats(res.migration_report_message)
             self.deactivate_user(user, expiration_date)
+            logging.info("Successfully Deactivated user again")
             self.add_stats("Handled inactive users")
             return res
         else:
@@ -159,14 +171,13 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                     yield legacy_loan
             except ValueError as ve:
                 logging.exception(ve)
-        else:
-            logging.info(f"Done validating {legacy_loan_count} legacy loans with {num_bad} rotten apples")
+        logging.info(f"Done validating {legacy_loan_count} legacy loans with {num_bad} rotten apples")
 
     def wrap_up(self):
         # wrap up
         for k, v in self.failed.items():
-            self.failed_and_not_dupe[k] = [v]
-        # logging.info(json.dumps(self.failed_and_not_dupe, sort_keys=True, indent=4))
+            self.failed_and_not_dupe[k] = [v.to_dict()]
+        logging.info(json.dumps(self.failed_and_not_dupe, sort_keys=True, indent=4))
         logging.info("## Loan migration counters")
         logging.info("Title | Number")
         logging.info("--- | ---:")
@@ -201,7 +212,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             )
             if req.status_code == 422:
                 error_message = json.loads(req.text)['errors'][0]['message']
-                self.add_stats(f"Update open loan error: {error_message}")
+                self.add_stats(f"Update open loan error: {error_message} {req.status_code}")
                 return False
             elif req.status_code == 201:
                 self.add_stats(f"Successfully updated open loan ({req.status_code})")
@@ -239,6 +250,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         if self.folio_put_post(declare_lost_url, data, "POST", "Declare item as lost"):
             self.stats("Successfully declared loan as lost")
         else:
+            logging.error(f"Unsuccessfully declared loan {folio_loan} as lost")
             self.stats("Unsuccessfully declared loan as lost")
         # TODO: Exception handling
 
@@ -252,7 +264,8 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         if self.folio_put_post(claim_returned_url, data, "POST", "Declare item as lost"):
             self.stats("Successfully declared loan as Claimed returned")
         else:
-            self.stats("Unsuccessfully declared loan as Claimed returned")
+            logging.error(f"Unsuccessfully declared loan {folio_loan} as Claimed returned")
+            self.stats(f"Unsuccessfully declared loan {folio_loan} as Claimed returned")
         # TODO: Exception handling
 
     def set_item_status(self, legacy_loan: LegacyLoan):
@@ -267,8 +280,12 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             if self.update_item(folio_item):
                 self.add_stats(f"Successfully set item status to {legacy_loan.next_item_status}")
                 logging.info(f"Successfully set item with barcode "
-                         f"{legacy_loan.item_barcode} to {legacy_loan.next_item_status}")
+                             f"{legacy_loan.item_barcode} to {legacy_loan.next_item_status}")
             else:
+                if legacy_loan.item_barcode not in self.failed:
+                    self.failed[legacy_loan.item_barcode] = legacy_loan
+                logging.error(f"Error when setting item with barcode "
+                              f"{legacy_loan.item_barcode} to {legacy_loan.next_item_status}")
                 self.add_stats(f"Error setting item status to {legacy_loan.next_item_status}")
         except Exception as ee:
             logging.error(f"{resp.status_code} when trying to set item with barcode "
@@ -288,7 +305,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
 
     def update_item(self, item):
         url = f'/item-storage/items/{item["id"]}'
-        self.folio_put_post(url, item, "PUT", "Update item")
+        return self.folio_put_post(url, item, "PUT", "Update item")
 
     def update_user(self, user):
         url = f'/users/{user["id"]}'
@@ -312,12 +329,14 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                 raise Exception("Bad verb")
             if resp.status_code == 422:
                 error_message = json.loads(resp.text)['errors'][0]['message']
+                logging.error(error_message)
                 self.add_stats(f"{action_description} error: {error_message}")
                 resp.raise_for_status()
             elif resp.status_code in [201, 204]:
                 self.add_stats(f"Successfully {action_description} ({resp.status_code})")
             else:
                 self.add_stats(f"{action_description} error. http status: {resp.status_code}")
+
                 resp.raise_for_status()
             return True
         except HTTPError as exception:
