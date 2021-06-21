@@ -87,7 +87,7 @@ class ServiceTaskBase:
 
     def print_migration_report(self):
         for a in self.migration_report:
-            logging.info(a)
+            logging.info(f"# {a}")
             b = self.migration_report[a]
             sortedlist = [(k, b[k]) for k in sorted(b, key=as_str)]
             for b in sortedlist:

@@ -99,7 +99,7 @@ class CirculationHelper:
         self.missing_patron_barcodes = set()
 
     def wrap_up(self):
-        logging.error(f"Missing patron barcodes: {json.dumps(list(self.missing_patron_barcodes))}")
+        logging.error(f"# Missing patron barcodes: {json.dumps(list(self.missing_patron_barcodes))}")
 
     def check_out_by_barcode_override_iris(self, legacy_loan: LegacyLoan):
         t0_function = time.time()
