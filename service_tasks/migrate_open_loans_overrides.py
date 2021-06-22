@@ -69,7 +69,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                         self.declare_lost(res_checkout.folio_loan)
                     elif legacy_loan.next_item_status == "Claimed returned":
                         self.claim_returned(res_checkout.folio_loan)
-                    elif legacy_loan.next_item_status not in ["Available", ""]:
+                    elif legacy_loan.next_item_status not in ["Available", "", "Checked out"]:
                         self.set_item_status(legacy_loan)
 
                 if num_loans % 25 == 0:
@@ -248,10 +248,10 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                 "servicePointId": str(self.service_point_id)}
         logging.info(f"Declare lost data: {json.dumps(data)}")
         if self.folio_put_post(declare_lost_url, data, "POST", "Declare item as lost"):
-            self.stats("Successfully declared loan as lost")
+            self.add_stats("Successfully declared loan as lost")
         else:
             logging.error(f"Unsuccessfully declared loan {folio_loan} as lost")
-            self.stats("Unsuccessfully declared loan as lost")
+            self.addstats("Unsuccessfully declared loan as lost")
         # TODO: Exception handling
 
     def claim_returned(self, folio_loan):
