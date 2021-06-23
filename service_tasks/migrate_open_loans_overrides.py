@@ -246,12 +246,12 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         data = {"declaredLostDateTime": dt.isoformat(due_date + timedelta(days=1)),
                 "comment": "Created at migration. Date is due date + 1 day",
                 "servicePointId": str(self.service_point_id)}
-        logging.info(f"Declare lost data: {json.dumps(data)}")
+        logging.info(f"Declare lost data: {json.dumps(data, indent=4)}")
         if self.folio_put_post(declare_lost_url, data, "POST", "Declare item as lost"):
             self.add_stats("Successfully declared loan as lost")
         else:
             logging.error(f"Unsuccessfully declared loan {folio_loan} as lost")
-            self.addstats("Unsuccessfully declared loan as lost")
+            self.add_stats("Unsuccessfully declared loan as lost")
         # TODO: Exception handling
 
     def claim_returned(self, folio_loan):
