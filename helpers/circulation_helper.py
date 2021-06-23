@@ -97,9 +97,12 @@ class CirculationHelper:
         self.folio_client = folio_client
         self.service_point_id = service_point_id
         self.missing_patron_barcodes = set()
+        self.missing_item_barcodes = set()
 
     def wrap_up(self):
-        logging.error(f"# Missing patron barcodes: {json.dumps(list(self.missing_patron_barcodes))}")
+        print()
+        logging.error(f"# Missing patron barcodes:\n{json.dumps(list(self.missing_patron_barcodes), indent=4)}")
+        logging.error(f"# Missing item barcodes:\n{json.dumps(list(self.missing_item_barcodes), indent=4)}")
 
     def check_out_by_barcode_override_iris(self, legacy_loan: LegacyLoan):
         t0_function = time.time()
@@ -134,6 +137,7 @@ class CirculationHelper:
                 elif "No item with barcode" in error_message_from_folio:
                     error_message = f"No item with barcode {legacy_loan.item_barcode} in FOLIO"
                     stat_message = "Item barcode not in FOLIO"
+                    self.missing_item_barcodes.add(legacy_loan.item_barcode)
                 elif " find user with matching barcode" in error_message_from_folio:
                     self.missing_patron_barcodes.add(legacy_loan.patron_barcode)
                     error_message = f"No patron with barcode {legacy_loan.patron_barcode} in FOLIO"

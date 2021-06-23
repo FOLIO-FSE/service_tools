@@ -4,6 +4,7 @@ import os
 import time
 from abc import abstractmethod
 from argparse import ArgumentParser
+from datetime import datetime
 
 from folioclient import FolioClient
 
@@ -16,7 +17,9 @@ class ServiceTaskBase:
         self.setup_logging(self.__class__.__name__, class_name, log_path)
 
     @staticmethod
-    def setup_logging(class_name="", log_file_path: str = None, time_stamp=time.strftime("%Y%m%d-%H%M%S")):
+    def setup_logging(class_name="", log_file_path: str = None, time_stamp=None):
+        if not time_stamp:
+            time_stamp = time.strftime("%Y%m%d-%H%M%S")
         logger = logging.getLogger()
         logger.handlers = []
         formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
