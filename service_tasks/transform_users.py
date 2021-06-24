@@ -114,7 +114,7 @@ class TransformUsers(ServiceTaskBase):
         logging.info("Starting....")
         i = 0
         try:
-            with open(os.path.join(self.results_path, 'folio_users.json'), "w+") as results_file:
+            with open(os.path.join(self.results_path, 'folio_users.json'), "w+", encoding='utf-8') as results_file:
                 for combo in self.data_map_combos:
                     i = 0
                     with open(combo["data_file"], encoding="utf8") as object_file, \
@@ -168,8 +168,7 @@ class TransformUsers(ServiceTaskBase):
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_argument(parser, "client_folder",
-                                     "Folder where results are saved. The script will create a "
-                                     "./users sub folder and add results to it.",
+                                     "Client folder for current migration. Assumes a certain folder structure.",
                                      "DirChooser")
 
     @staticmethod
