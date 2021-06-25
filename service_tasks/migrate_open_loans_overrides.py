@@ -49,17 +49,22 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             logging.info(f"Skipping {self.starting_point} records")
         for num_loans, legacy_loan in enumerate(self.valid_legacy_loans[self.starting_point:]):
             t0_migration = time.time()
+            self.add_stats("Processed loans")
             try:
                 res_checkout = self.circulation_helper.check_out_by_barcode_override_iris(legacy_loan)
                 self.add_stats(res_checkout.migration_report_message)
-                self.add_stats("Processed loans")
 
                 if not res_checkout.was_successful:
                     res_checkout = self.handle_checkout_failure(legacy_loan, res_checkout)
                     if not res_checkout.was_successful:
+                        self.add_stats("Loan failed a second time")
+                        logging.info(f"Loan failed a second time. Item barcode {legacy_loan.item_barcode}")
                         if legacy_loan.item_barcode not in self.failed:
                             self.failed[legacy_loan.item_barcode] = legacy_loan
                         continue
+                    else:
+                        self.add_stats("Successfully checked out the second time")
+                        logging.info("Successfully checked out the second time")
                 else:
                     if legacy_loan.renewal_count > 0:
                         self.update_open_loan(res_checkout.folio_loan, legacy_loan)
@@ -71,7 +76,6 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                         self.claim_returned(res_checkout.folio_loan)
                     elif legacy_loan.next_item_status not in ["Available", "", "Checked out"]:
                         self.set_item_status(legacy_loan)
-
                 if num_loans % 25 == 0:
                     self.print_dict_to_md_table(self.stats)
                     logging.info(
