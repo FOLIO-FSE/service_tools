@@ -2,6 +2,7 @@ import copy
 import csv
 import json
 import logging
+import os.path
 import time
 import traceback
 from abc import abstractmethod
@@ -21,11 +22,17 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
     """
 
     def __init__(self, folio_client, args):
+        self.client_folder = args.client_folder
+        self.reports_folder = os.path.join(self.client_folder, "reports")
+        self.results_folder = os.path.join(self.client_folder, "results")
         super().__init__(folio_client)
         self.service_point_id = args.service_point_id
         self.circulation_helper = CirculationHelper(folio_client, self.service_point_id)
         csv.register_dialect("tsv", delimiter="\t")
         self.valid_legacy_loans = []
+        file_path = os.path.join(self.results_folder, f'test_{time.strftime("%Y%m%d-%H%M%S")}.tsv')
+        with open(file_path, 'w+', encoding="utf-8") as test_file:
+            test_file.write("test")
         with open(args.open_loans_file, 'r', encoding="utf-8") as loans_file:
             self.valid_legacy_loans = list(
                 self.load_and_validate_legacy_loans(InsensitiveDictReader(loans_file, dialect="tsv")))
@@ -66,16 +73,19 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                         self.add_stats("Successfully checked out the second time")
                         logging.info("Successfully checked out the second time")
                 else:
-                    if legacy_loan.renewal_count > 0:
-                        self.update_open_loan(res_checkout.folio_loan, legacy_loan)
-                        self.add_stats("Updated renewal count for loan")
-                    # set new statuses
-                    if legacy_loan.next_item_status == "Declared lost":
-                        self.declare_lost(res_checkout.folio_loan)
-                    elif legacy_loan.next_item_status == "Claimed returned":
-                        self.claim_returned(res_checkout.folio_loan)
-                    elif legacy_loan.next_item_status not in ["Available", "", "Checked out"]:
-                        self.set_item_status(legacy_loan)
+                    if not res_checkout.folio_loan:
+                        pass
+                    else:
+                        if legacy_loan.renewal_count > 0:
+                            self.update_open_loan(res_checkout.folio_loan, legacy_loan)
+                            self.add_stats("Updated renewal count for loan")
+                        # set new statuses
+                        if legacy_loan.next_item_status == "Declared lost":
+                            self.declare_lost(res_checkout.folio_loan)
+                        elif legacy_loan.next_item_status == "Claimed returned":
+                            self.claim_returned(res_checkout.folio_loan)
+                        elif legacy_loan.next_item_status not in ["Available", "", "Checked out"]:
+                            self.set_item_status(legacy_loan)
                 if num_loans % 25 == 0:
                     self.print_dict_to_md_table(self.stats)
                     logging.info(
@@ -96,14 +106,16 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             return folio_checkout
         elif folio_checkout.error_message.startswith("No item with barcode"):
             return folio_checkout
+        elif folio_checkout.error_message.startswith("Cannot check out item that already has an open loan"):
+            return TransactionResult(True, "", "", "")
         elif folio_checkout.error_message.startswith("Aged to lost for item"):
-            logging.info("Setting Available")
+            logging.debug("Setting Available")
             legacy_loan.next_item_status = "Available"
             self.set_item_status(legacy_loan)
             res_checkout = self.circulation_helper.check_out_by_barcode_override_iris(legacy_loan)
             legacy_loan.next_item_status = "Aged to lost"
             self.set_item_status(legacy_loan)
-            logging.info(f"Successfully Checked out Aged to lost item and put the status back")
+            logging.debug(f"Successfully Checked out Aged to lost item and put the status back")
             return res_checkout
         elif folio_checkout.error_message == "Declared lost":
             return folio_checkout
@@ -113,11 +125,11 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             expiration_date = user.get("expirationDate", dt.isoformat(dt.now()))
             user["expirationDate"] = dt.isoformat(dt.now() + timedelta(days=1))
             self.activate_user(user)
-            logging.info("Successfully Activated user")
+            logging.debug("Successfully Activated user")
             res = self.circulation_helper.check_out_by_barcode_override_iris(legacy_loan)  # checkout_and_update
             self.add_stats(res.migration_report_message)
             self.deactivate_user(user, expiration_date)
-            logging.info("Successfully Deactivated user again")
+            logging.debug("Successfully Deactivated user again")
             self.add_stats("Handled inactive users")
             return res
         else:
@@ -127,7 +139,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                 self.failed[legacy_loan.item_barcode] = legacy_loan
             # Second Failure. For duplicate rows. Needs cleaning...
             else:
-                logging.info(
+                logging.debug(
                     f"Loan already in failed. item barcode {legacy_loan.item_barcode} "
                     f"Patron barcode: {legacy_loan.patron_barcode}")
                 self.failed_and_not_dupe[legacy_loan.item_barcode] = [
@@ -150,6 +162,8 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                                      widget="FileChooser"
                                      )
         ServiceTaskBase.add_argument(parser, "service_point_id", "Id of the service point where checkout occurs", "")
+        ServiceTaskBase.add_argument(parser, "client_folder", "Must contain a results and a reports folder",
+                                     "DirChooser")
 
     @staticmethod
     @abstractmethod
@@ -158,6 +172,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         ServiceTaskBase.add_cli_argument(parser,
                                          "open_loans_file", help="File to TSV file containing Open Loans")
         ServiceTaskBase.add_cli_argument(parser, "service_point_id", "Id of the service point where checkout occurs")
+        ServiceTaskBase.add_cli_argument(parser, "client_folder", "Must contain a results and a reports folder")
 
     def load_and_validate_legacy_loans(self, loans_reader):
         num_bad = 0
@@ -181,7 +196,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         # wrap up
         for k, v in self.failed.items():
             self.failed_and_not_dupe[k] = [v.to_dict()]
-        logging.info(json.dumps(self.failed_and_not_dupe, sort_keys=True, indent=4))
+
         logging.info("## Loan migration counters")
         logging.info("Title | Number")
         logging.info("--- | ---:")
@@ -189,6 +204,14 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         logging.info(f"Total Rows in file  | {self.num_legacy_loans_processed}")
         super().wrap_up()
         self.circulation_helper.wrap_up()
+        file_path = os.path.join(self.results_folder, f'failed_loans_{time.strftime("%Y%m%d-%H%M%S")}.tsv')
+        csv_columns = ['due_date', 'item_barcode', 'next_item_status', 'out_date', 'patron_barcode', 'renewal_count']
+        with open(file_path, "w+") as failed_loans_file:
+            writer = csv.DictWriter(failed_loans_file, fieldnames=csv_columns, dialect="tsv")
+            writer.writeheader()
+            for k, failed_loan in self.failed_and_not_dupe.items():
+                writer.writerow(failed_loan[0])
+        logging.info(json.dumps(self.failed_and_not_dupe, sort_keys=True, indent=4))
 
     def handle_previously_failed_loans(self, loan):
         if loan["item_id"] in self.failed:
@@ -227,14 +250,14 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             else:
                 self.add_stats(f"Update open loan error http status: {req.status_code}")
                 req.raise_for_status()
-            logging.info(f"Updating open loan was successful")
+            logging.debug(f"Updating open loan was successful")
             return True
         except HTTPError as exception:
-            logging.info(
+            logging.error(
                 f"{req.status_code} PUT FAILED Extend loan to {loan_to_put['dueDate']}"
                 f"\t {url}\t{json.dumps(loan_to_put)}")
             traceback.print_exc()
-            logging.info(exception)
+            logging.error(exception)
             return False, None, None
 
     def handle_due_date_change_failure(self, legacy_loan, param):
@@ -245,12 +268,12 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
 
     def declare_lost(self, folio_loan):
         declare_lost_url = f"/circulation/loans/{folio_loan['id']}/declare-item-lost"
-        logging.info(f"Declare lost url:{declare_lost_url}")
+        logging.debug(f"Declare lost url:{declare_lost_url}")
         due_date = du_parser.isoparse(folio_loan['dueDate'])
         data = {"declaredLostDateTime": dt.isoformat(due_date + timedelta(days=1)),
                 "comment": "Created at migration. Date is due date + 1 day",
                 "servicePointId": str(self.service_point_id)}
-        logging.info(f"Declare lost data: {json.dumps(data, indent=4)}")
+        logging.debug(f"Declare lost data: {json.dumps(data, indent=4)}")
         if self.folio_put_post(declare_lost_url, data, "POST", "Declare item as lost"):
             self.add_stats("Successfully declared loan as lost")
         else:
@@ -260,11 +283,11 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
 
     def claim_returned(self, folio_loan):
         claim_returned_url = f"/circulation/loans/{folio_loan['id']}/claim-item-returned"
-        logging.info(f"Claim returned url:{claim_returned_url}")
+        logging.debug(f"Claim returned url:{claim_returned_url}")
         due_date = du_parser.isoparse(folio_loan['dueDate'])
         data = {"itemClaimedReturnedDateTime": dt.isoformat(due_date + timedelta(days=1)),
                 "comment": "Created at migration. Date is due date + 1 day"}
-        logging.info(f"Declare lost data:\t{json.dumps(data)}")
+        logging.debug(f"Claim returned data:\t{json.dumps(data)}")
         if self.folio_put_post(claim_returned_url, data, "POST", "Declare item as lost"):
             self.stats("Successfully declared loan as Claimed returned")
         else:
@@ -283,7 +306,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
             folio_item["status"]["name"] = legacy_loan.next_item_status
             if self.update_item(folio_item):
                 self.add_stats(f"Successfully set item status to {legacy_loan.next_item_status}")
-                logging.info(f"Successfully set item with barcode "
+                logging.debug(f"Successfully set item with barcode "
                              f"{legacy_loan.item_barcode} to {legacy_loan.next_item_status}")
             else:
                 if legacy_loan.item_barcode not in self.failed:
@@ -344,7 +367,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
                 resp.raise_for_status()
             return True
         except HTTPError as exception:
-            logging.info(f"{resp.status_code}. {verb} FAILED for {url}")
+            logging.error(f"{resp.status_code}. {verb} FAILED for {url}")
             traceback.print_exc()
             logging.info(exception)
             return False

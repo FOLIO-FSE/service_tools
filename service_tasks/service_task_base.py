@@ -34,7 +34,7 @@ class ServiceTaskBase:
                                     f'service_task_log_{class_name}_{time_stamp}.log')
         else:
             log_file = f'service_task_log_{class_name}_{time_stamp}.log'
-        file_formatter = logging.Formatter("%(message)s")
+        file_formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
         file_handler = logging.FileHandler(
             filename=log_file,
         )
@@ -42,6 +42,21 @@ class ServiceTaskBase:
         file_handler.setFormatter(file_formatter)
         file_handler.setLevel(logging.INFO)
         logging.getLogger().addHandler(file_handler)
+        logger.info("Logging setup")
+
+        if log_file_path:
+            debug_log_file = os.path.join(log_file_path,
+                                    f'service_task_debug_log_{class_name}_{time_stamp}.log')
+        else:
+            debug_log_file = f'service_task_log_{class_name}_{time_stamp}.log'
+        debug_file_formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
+        debug_file_handler = logging.FileHandler(
+            filename=debug_log_file,
+        )
+        # file_handler.addFilter(LevelFilter(0, 20))
+        debug_file_handler.setFormatter(debug_file_formatter)
+        debug_file_handler.setLevel(logging.DEBUG)
+        logging.getLogger().addHandler(debug_file_handler)
         logger.info("Logging setup")
 
     def write_migration_report(self, report_file):

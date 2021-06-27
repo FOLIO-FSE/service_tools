@@ -12,10 +12,10 @@ from requests import HTTPError
 
 
 class TransactionResult(object):
-    def __init__(self, was_successful: bool, successful_message: str, error_message: str,
+    def __init__(self, was_successful: bool, folio_loan: str, error_message: str,
                  migration_report_message: str):
         self.was_successful = was_successful
-        self.folio_loan = successful_message
+        self.folio_loan = folio_loan
         self.error_message = error_message
         self.migration_report_message = migration_report_message
 
@@ -138,11 +138,12 @@ class CirculationHelper:
                     error_message = f"No item with barcode {legacy_loan.item_barcode} in FOLIO"
                     stat_message = "Item barcode not in FOLIO"
                     self.missing_item_barcodes.add(legacy_loan.item_barcode)
-                elif " find user with matching barcode" in error_message_from_folio:
+                elif "find user with matching barcode" in error_message_from_folio:
                     self.missing_patron_barcodes.add(legacy_loan.patron_barcode)
                     error_message = f"No patron with barcode {legacy_loan.patron_barcode} in FOLIO"
-
                     stat_message = "Patron barcode not in FOLIO"
+                elif "Cannot check out item that already has an open" in error_message_from_folio:
+                    return TransactionResult(True, None, "", "")
                 logging.error(
                     f"{error_message} Patron barcode: {legacy_loan.patron_barcode} Item Barcode:{legacy_loan.item_barcode}")
                 return TransactionResult(False, None, error_message, f"Check out error: {stat_message}")
@@ -150,12 +151,12 @@ class CirculationHelper:
                 stats = (f"Successfully checked out by barcode"
                          # f"HTTP {req.status_code} {json.dumps(json.loads(req.text), indent=4)} "
                          )
-                logging.info(f"{stats} (item barcode {legacy_loan.item_barcode}) in {(time.time() - t0_function):.2f}s")
+                logging.debug(f"{stats} (item barcode {legacy_loan.item_barcode}) in {(time.time() - t0_function):.2f}s")
 
                 return TransactionResult(True, json.loads(req.text), None, stats)
             elif req.status_code == 204:
                 stats = f"Successfully checked out by barcode"
-                logging.info(f"{stats} (item barcode {legacy_loan.item_barcode}) {req.status_code}")
+                logging.debug(f"{stats} (item barcode {legacy_loan.item_barcode}) {req.status_code}")
                 return TransactionResult(True, None, None, stats)
             else:
                 req.raise_for_status()
@@ -188,11 +189,11 @@ class CirculationHelper:
                 return False, None, error_message, f"Check out error: {error_message}"
             elif req.status_code == 201:
                 stats = f"Successfully checked out by barcode ({req.status_code})"
-                logging.info(stats)
+                logging.debug(stats)
                 return True, json.loads(req.text), None, stats
             elif req.status_code == 204:
                 stats = f"Successfully checked out by barcode ({req.status_code})"
-                logging.info(stats)
+                logging.debug(stats)
                 return True, None, None, stats
             else:
                 req.raise_for_status()
