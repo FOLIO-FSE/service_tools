@@ -25,7 +25,7 @@ class MigrateOpenLoansWithOverride(ServiceTaskBase):
         self.client_folder = args.client_folder
         self.reports_folder = os.path.join(self.client_folder, "reports")
         self.results_folder = os.path.join(self.client_folder, "results")
-        super().__init__(folio_client)
+        super().__init__(folio_client, "MigrateOpenLoansWithOverride", self.reports_folder)
         self.service_point_id = args.service_point_id
         self.circulation_helper = CirculationHelper(folio_client, self.service_point_id)
         csv.register_dialect("tsv", delimiter="\t")

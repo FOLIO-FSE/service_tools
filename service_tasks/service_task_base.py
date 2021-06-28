@@ -14,7 +14,7 @@ class ServiceTaskBase:
         self.stats = {}
         self.migration_report = {}
         self.folio_client = folio_client
-        self.setup_logging(self.__class__.__name__, class_name, log_path)
+        self.setup_logging(self.__class__.__name__, log_path, time.strftime("%Y%m%d-%H%M%S"))
 
     @staticmethod
     def setup_logging(class_name="", log_file_path: str = None, time_stamp=None):
@@ -28,12 +28,13 @@ class ServiceTaskBase:
         stream_handler.setLevel(logging.INFO)
         stream_handler.setFormatter(formatter)
         logger.addHandler(stream_handler)
-
+        print(f"LFP:{log_file_path}")
         if log_file_path:
             log_file = os.path.join(log_file_path,
                                     f'service_task_log_{class_name}_{time_stamp}.log')
         else:
             log_file = f'service_task_log_{class_name}_{time_stamp}.log'
+        logging.info(f"Writing log file to {log_file}")
         file_formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
         file_handler = logging.FileHandler(
             filename=log_file,
@@ -46,9 +47,10 @@ class ServiceTaskBase:
 
         if log_file_path:
             debug_log_file = os.path.join(log_file_path,
-                                    f'service_task_debug_log_{class_name}_{time_stamp}.log')
+                                          f'service_task_debug_log_{class_name}_{time_stamp}.log')
         else:
             debug_log_file = f'service_task_log_{class_name}_{time_stamp}.log'
+        logging.info(f"Writing DEBUG log files to {debug_log_file}")
         debug_file_formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
         debug_file_handler = logging.FileHandler(
             filename=debug_log_file,
