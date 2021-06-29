@@ -74,6 +74,12 @@ class CreateRecordFromModel(ServiceTaskBase):
                                 fetched_uuids += 1
                             else:
                                 record = record.replace(field, "")
+                        elif field_name.startswith("unquote"):
+                            field_name = field_name[8:]
+                            content = row[field_name]
+                            unquote_field  = "'" + field + "'"
+                            record = record.replace(unquote_field, content)
+
                         elif row[field_name] != "":
                             content = row[field_name].replace("'", "\\'")
                             record = record.replace(field, content)
@@ -178,7 +184,7 @@ class CreateRecordFromModel(ServiceTaskBase):
                                      ""),
         ServiceTaskBase.add_argument(sub_parser,
                                      "id_map",
-                                     "OPTIONAL An ID map. If left blank, one will be created.",
+                                     "OPTIONAL. An ID map. If left blank, one will be created.",
                                      "FileChooser", required=False),
         ServiceTaskBase.add_argument(sub_parser,
                                      "map_key",
@@ -202,7 +208,7 @@ class CreateRecordFromModel(ServiceTaskBase):
                                          "Name of the record type. Will be used in result file name and to qualify the UUID in the output ID map."),
         ServiceTaskBase.add_cli_argument(sub_parser,
                                          "id_map",
-                                         "An existing ID map. If left blank, one will be created."),
+                                         "OPTIONAL. An existing ID map. If left blank, one will be created."),
         ServiceTaskBase.add_cli_argument(sub_parser,
                                          "map_key",
                                          "Will be used as a unique key in the (provided or generated) id_map.")

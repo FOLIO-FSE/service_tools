@@ -1,12 +1,10 @@
 import json
-import logging
 import uuid
 from abc import abstractmethod
 from typing import Dict
 
 import requests
 from folioclient import FolioClient
-import os
 
 
 class MapperBase():
@@ -60,12 +58,15 @@ class MapperBase():
             self.mapped_folio_fields[field_name][1] += int(was_empty)
 
     def instantiate_user(self):
+        user_id = str(uuid.uuid4())
         folio_user = {"metadata": self.folio_client.get_metadata_construct(),
-                      "id": str(uuid.uuid4()),
+                      "id": user_id,
                       "type": "object",
                       "personal": {},
-                      "customFields": {}}
+                      "customFields": {}
+                      }
         self.report_folio_mapping("id", True)
+        self.report_folio_mapping("requestPreference", True)
         self.report_folio_mapping("metadata", True)
         return folio_user
 
@@ -104,6 +105,40 @@ class MapperBase():
             sortedlist = [(k, b[k]) for k in sorted(b, key=as_str)]
             for b in sortedlist:
                 print(f"{b[0]} | {b[1]}")
+
+    def save_migration_report_to_disk(self, file_path, total_records):
+        with open(file_path, "w+") as report_file:
+            for a in self.migration_report:
+                report_file.write('\n')
+                report_file.write(f"## {a} - {len(self.migration_report[a])} things\n")
+                report_file.write(f"Measure | Count\n")
+                report_file.write("--- | ---:\n")
+                b = self.migration_report[a]
+                sortedlist = [(k, b[k]) for k in sorted(b, key=as_str)]
+                for b in sortedlist:
+                    report_file.write(f"{b[0]} | {b[1]}\n")
+            report_file.write('\n## Mapped FOLIO fields\n')
+            d_sorted = {k: self.mapped_folio_fields[k] for k in sorted(self.mapped_folio_fields)}
+            report_file.write(f"FOLIO Field | Mapped | Empty | Unmapped\n")
+            report_file.write("--- | --- | --- | ---:\n")
+            for k, v in d_sorted.items():
+                unmapped = total_records - v[0]
+                mapped = v[0] - v[1]
+                unmapped_per = "{:.1%}".format(unmapped / total_records)
+                mp = mapped / total_records
+                mapped_per = "{:.0%}".format(mp if mp > 0 else 0)
+                report_file.write(f"{k} | {mapped if mapped > 0 else 0} ({mapped_per}) | {v[1]} | {unmapped}\n")
+            report_file.write('\n## Mapped Legacy fields\n')
+            d_sorted = {k: self.mapped_legacy_fields[k] for k in sorted(self.mapped_legacy_fields)}
+            report_file.write(f"Legacy Field | Mapped | Empty | Unmapped\n")
+            report_file.write("--- | --- | --- | ---:\n")
+            for k, v in d_sorted.items():
+                unmapped = total_records - v[0]
+                mapped = v[0] - v[1]
+                unmapped_per = "{:.1%}".format(unmapped / total_records)
+                mp = mapped / total_records
+                mapped_per = "{:.0%}".format(mp if mp > 0 else 0)
+                report_file.write(f"{k} | {mapped if mapped > 0 else 0} ({mapped_per}) | {v[1]} | {unmapped}\n")
 
     @staticmethod
     def print_dict_to_md_table(my_dict, h1="", h2=""):
@@ -177,7 +212,6 @@ class MapperBase():
         req = requests.get(latest_path)
         req.raise_for_status()
         return json.loads(req.text)
-
 
 
 def as_str(s):

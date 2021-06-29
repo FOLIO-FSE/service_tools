@@ -27,10 +27,16 @@ class VirtualBoundWithItemHandler(ServiceTaskBase):
         with_donor = 0
         with_note = 0
 
+        if self.source_path.endswith(".tsv"):
+            delimiter = "\t"
+        else:
+            delimiter =","
+
+
         with open(self.source_path, "r") as source_file, open(self.result_file, 'w+') as results_file:
             # Loop through all the rows
-            reader = csv.DictReader(source_file)
-            writer = csv.DictWriter(results_file, fieldnames=reader.fieldnames, delimiter='\t', lineterminator="\n")
+            reader = csv.DictReader(source_file, delimiter=delimiter)
+            writer = csv.DictWriter(results_file, fieldnames=reader.fieldnames, delimiter=delimiter, lineterminator="\n")
             writer.writeheader()
             for row_index, row in enumerate(reader):
                 # If location == none, we are dealing with a "Virtual bound-with"
@@ -56,9 +62,11 @@ class VirtualBoundWithItemHandler(ServiceTaskBase):
                 f"Done!\nNumber of rows processed: {row_index}\nA total of {len(self.virtual_bound_withs)} "
                 f"were artificial items {with_v}-{with_donor}-{with_note} ")
             source_file.seek(0)
-            reader.__init__(source_file)
+            reader.__init__(source_file, delimiter=delimiter)
             unmatched = 0
             for row_index2, row2 in enumerate(reader):
+                if not row2.get("I LOCATION"):
+                    print(row2)
                 if row2["I LOCATION"].strip() != "none":
                     bib_ids = ast.literal_eval(row2["RECORD #(BIBLIO)"])
                     bib_class_numbers = ast.literal_eval(row2["CLASS NO.(BIBLIO)"])

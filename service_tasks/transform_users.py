@@ -4,6 +4,7 @@ import logging
 import os
 import traceback
 from abc import abstractmethod
+import time
 from pathlib import Path
 from typing import Dict
 
@@ -33,6 +34,7 @@ class TransformUsers(ServiceTaskBase):
         self.failed_ids = []
         self.use_group_map = True
         self.results_path = None
+        self.reports_path = None
         self.group_map_path = None
         self.failed_objects = []
         self.client_folder = Path(args.client_folder)
@@ -41,6 +43,8 @@ class TransformUsers(ServiceTaskBase):
         # Init stuff
         self.setup_folder_structures()
         csv.register_dialect("tsv", delimiter="\t")
+        self.time_stamp = time.strftime("%Y%m%d-%H%M%S")
+        self.setup_logging("", str(self.reports_path), self.time_stamp)
 
         if self.use_group_map:
             with open(self.group_map_path, "r") as group_map_path:
@@ -58,22 +62,19 @@ class TransformUsers(ServiceTaskBase):
         else:
             raise Exception(f"Client Folder supplied - {self.client_folder} - is not a folder")
         self.results_path = self.client_folder / "results"
+
         if self.results_path.is_dir():
-            logging.info(f"Reports, maps etc will be stored at  {self.results_path}. ")
+            logging.info(f"Results, maps etc will be stored at  {self.results_path}. ")
         else:
             raise Exception(f"Results folder supplied - {self.results_path} - is not a folder")
 
-        # Mapping file folder and file
-        parent = self.client_folder.parent
-        parent_children = list(os.walk(parent))[0][1]
-        p = next((f for f in list(parent_children) if f.startswith("migration_")), None)
+        self.reports_path = self.client_folder / "reports"
+        if self.reports_path.is_dir():
+            logging.info(f"Reports will be stored at  {self.reports_path}. ")
+        else:
+            raise Exception(f"Reports folder supplied - {self.reports_path} - is not a folder")
 
-        if not p or not (parent / p).is_dir():
-            raise Exception(
-                f"Could not find Git repository path next to the client folder in {parent}"
-                "The folder should be named migration_")
-        git_repo_path = parent / p
-        mapping_path = parent / p / "mapping_files"
+        mapping_path = self.client_folder / "mapping_files"
         if not mapping_path.is_dir():
             raise Exception(
                 f"Could not find mapping_files folder path at {mapping_path} ")
@@ -88,7 +89,7 @@ class TransformUsers(ServiceTaskBase):
 
         # objects files
         obj_folder = self.client_folder / 'data' / 'users'
-        if not git_repo_path.is_dir():
+        if not obj_folder.is_dir():
             raise Exception(f"Could not find user data files path expected to be at {obj_folder}")
         self.data_files = list(obj_folder.glob('**/*'))
         if not self.data_files:
@@ -113,7 +114,7 @@ class TransformUsers(ServiceTaskBase):
         logging.info("Starting....")
         i = 0
         try:
-            with open(os.path.join(self.results_path, 'folio_users.json'), "w+") as results_file:
+            with open(os.path.join(self.results_path, 'folio_users.json'), "w+", encoding='utf-8') as results_file:
                 for combo in self.data_map_combos:
                     i = 0
                     with open(combo["data_file"], encoding="utf8") as object_file, \
@@ -124,19 +125,16 @@ class TransformUsers(ServiceTaskBase):
                         for idx,  legacy_user in enumerate(self.transformer.get_users(object_file, file_format)):
                             i += 1
                             try:
+                                if i == 1:
+                                    logging.info("First Legacy  user")
+                                    logging.info(json.dumps(legacy_user, indent=4))
                                 folio_user = self.transformer.do_map(legacy_user, user_map, idx)
                                 clean_user(folio_user)
                                 results_file.write(f"{json.dumps(folio_user)}\n")
                                 if i == 1:
-                                    print("## First Legacy  user")
-                                    print("```")  # Markdown syntax highlighting
-                                    print(json.dumps(legacy_user, indent=4))
-                                    print("```")  # Markdown syntax highlighting
-                                    print("## First FOLIO  user")
-                                    print("```")  # Markdown syntax highlighting
-                                    print(json.dumps(folio_user, indent=4, sort_keys=True))
-                                    print("```")  # Markdown syntax highlighting
-                                    print_email_warning()
+                                    logging.info("## First FOLIO  user")
+                                    logging.info(json.dumps(folio_user, indent=4, sort_keys=True))
+
                                 self.add_stats("Successful user transformations")
                                 if i % 1000 == 0:
                                     logging.info(f"{i} users processed")
@@ -149,11 +147,15 @@ class TransformUsers(ServiceTaskBase):
                                 logging.error(json.dumps(legacy_user))
                                 self.add_stats("Failed user transformations")
                                 raise ee
+                            finally:
+                                if i == 1:
+                                    print_email_warning()
         except Exception as ee:
             logging.error(i, exc_info=True)
         self.print_dict_to_md_table(self.stats)
         self.transformer.write_migration_report()
         self.transformer.print_mapping_report(i)
+        self.transformer.save_migration_report_to_disk(self.reports_path / f'user_transformation_report_{self.time_stamp}.md', i)
 
     def wrap_up(self):
         path = os.path.join(self.results_path, "user_id_map.json")
@@ -166,8 +168,7 @@ class TransformUsers(ServiceTaskBase):
     def add_arguments(parser):
         ServiceTaskBase.add_common_arguments(parser)
         ServiceTaskBase.add_argument(parser, "client_folder",
-                                     "Folder where results are saved. The script will create a "
-                                     "./users sub folder and add results to it.",
+                                     "Client folder for current migration. Assumes a certain folder structure.",
                                      "DirChooser")
 
     @staticmethod

@@ -4,19 +4,22 @@ import os
 import time
 from abc import abstractmethod
 from argparse import ArgumentParser
+from datetime import datetime
 
 from folioclient import FolioClient
 
 
 class ServiceTaskBase:
-    def __init__(self, folio_client: FolioClient = None, class_name=""):
+    def __init__(self, folio_client: FolioClient = None, class_name="", log_path=""):
         self.stats = {}
         self.migration_report = {}
         self.folio_client = folio_client
-        self.setup_logging(self.__class__.__name__)
+        self.setup_logging(self.__class__.__name__, log_path, time.strftime("%Y%m%d-%H%M%S"))
 
     @staticmethod
-    def setup_logging(class_name="", log_file_path=None):
+    def setup_logging(class_name="", log_file_path: str = None, time_stamp=None):
+        if not time_stamp:
+            time_stamp = time.strftime("%Y%m%d-%H%M%S")
         logger = logging.getLogger()
         logger.handlers = []
         formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
@@ -25,20 +28,37 @@ class ServiceTaskBase:
         stream_handler.setLevel(logging.INFO)
         stream_handler.setFormatter(formatter)
         logger.addHandler(stream_handler)
-
+        print(f"LFP:{log_file_path}")
         if log_file_path:
             log_file = os.path.join(log_file_path,
-                                    f'service_task_log_{class_name}_{time.strftime("%Y%m%d-%H%M%S")}.log')
+                                    f'service_task_log_{class_name}_{time_stamp}.log')
         else:
-            log_file = f'service_task_log_{class_name}_{time.strftime("%Y%m%d-%H%M%S")}.log'
-        file_formatter = logging.Formatter("%(message)s")
+            log_file = f'service_task_log_{class_name}_{time_stamp}.log'
+        logging.info(f"Writing log file to {log_file}")
+        file_formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
         file_handler = logging.FileHandler(
             filename=log_file,
         )
         # file_handler.addFilter(LevelFilter(0, 20))
         file_handler.setFormatter(file_formatter)
-        file_handler.setLevel(logging.ERROR)
+        file_handler.setLevel(logging.INFO)
         logging.getLogger().addHandler(file_handler)
+        logger.info("Logging setup")
+
+        if log_file_path:
+            debug_log_file = os.path.join(log_file_path,
+                                          f'service_task_debug_log_{class_name}_{time_stamp}.log')
+        else:
+            debug_log_file = f'service_task_log_{class_name}_{time_stamp}.log'
+        logging.info(f"Writing DEBUG log files to {debug_log_file}")
+        debug_file_formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
+        debug_file_handler = logging.FileHandler(
+            filename=debug_log_file,
+        )
+        # file_handler.addFilter(LevelFilter(0, 20))
+        debug_file_handler.setFormatter(debug_file_formatter)
+        debug_file_handler.setLevel(logging.DEBUG)
+        logging.getLogger().addHandler(debug_file_handler)
         logger.info("Logging setup")
 
     def write_migration_report(self, report_file):
@@ -71,24 +91,27 @@ class ServiceTaskBase:
     @staticmethod
     def print_dict_to_md_table(my_dict, h1="", h2=""):
         d_sorted = {k: my_dict[k] for k in sorted(my_dict)}
-        print(f"{h1} | {h2}")
-        print("--- | ---:")
         for k, v in d_sorted.items():
-            print(f"{k} | {v}")
+            logging.info(f"{k} | {v}")
 
     def print_stats(self):
         self.print_dict_to_md_table(self.stats, "Measure", "  #  ")
 
     def add_to_migration_report(self, header, message_string):
         if header not in self.migration_report:
-            self.migration_report[header] = []
-        self.migration_report[header].append(message_string)
+            self.migration_report[header] = {}
+        if message_string not in self.migration_report[header]:
+            self.migration_report[header][message_string] = 1
+        else:
+            self.migration_report[header][message_string] += 1
 
     def print_migration_report(self):
         for a in self.migration_report:
             logging.info(f"# {a}")
-            for b in self.migration_report[a]:
-                logging.info(b)
+            b = self.migration_report[a]
+            sortedlist = [(k, b[k]) for k in sorted(b, key=as_str)]
+            for b in sortedlist:
+                logging.info(f"{b[0]}\t{b[1]}")
 
     @staticmethod
     @abstractmethod

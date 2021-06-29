@@ -1,4 +1,5 @@
 import json
+import logging
 
 from service_tasks.service_task_base import ServiceTaskBase, abstractmethod
 import sys, csv
@@ -21,11 +22,13 @@ class CornellReplaceMfhdIdsWithUuids(ServiceTaskBase):
         with open(self.item_file_path, "r") as item_file, open(self.results_file_path, "w") as results_file:
             missing = 0
             for index, json_item in enumerate(item_file):
-                item = json.loads(json_item)
                 try:
-                    item['holdingsRecordId'] = self.instance_id_map[item['holdingsRecordId']]["id"]
+                    item = json.loads(json_item)
+                    item['holdingsRecordId'] = self.instance_id_map[item['mfhdId']]["id"]
+                    del item["mfhdId"]
                     results_file.write(f"{json.dumps(item)}\n")
-                except Exception:
+                except Exception as ee:
+                    logging.error(f"{ee}\t{json_item}")
                     missing += 1
         print(missing)
         print("Done!", flush=True)
