@@ -11,7 +11,6 @@ class MFHDBuilder(ServiceTaskBase):
         self.infile = args.infile
         self.bibField = args.bibID
         self.holdField = args.holdID
-        self.library = args.library
         self.locField = args.location
         self.callField = args.callno
         self.holdings = args.holdings
@@ -39,18 +38,14 @@ class MFHDBuilder(ServiceTaskBase):
         for row in df.index:
             bibID = str(df[self.bibField][row])
             holdID = str(df[self.holdField][row])
-            library = str(df[self.locField][row])
             location = str(df[self.locField][row])
-            holdings = str(df[self.holdings][row])
+            if (self.holdings != 'NA'):
+                holdings = str(df[self.holdings][row])
             callno = str(df[self.callField][row])
             callno = callno.replace(" ", "$i", 1)
 
-            if (self.library != 'NA'):
-                holdID = holdID + library + location 
-                marc852 = '=852 0\\$a' + library + '$c' + location + '$h' + callno + "\n" 
-            else:
-                holdID = holdID + location 
-                marc852 = '=852 0\\$b' + location + '$h' + callno + "\n"
+            holdID = holdID + location 
+            marc852 = '=852  0\\$b' + location + '$h' + callno + "\n"
 
             marc001 = '=001  ' + holdID + "\n"
             marc004 = '=004  ' + bibID + "\n"
@@ -65,12 +60,11 @@ class MFHDBuilder(ServiceTaskBase):
                 f.write(marc852)
 
                 if (self.holdings != 'NA'):
-                    holdID = holdID + library 
                     marc866 = '=866  \\$a' + holdings + "\n" 
                     f.write(marc866) 
 
                 f.write("\n")
-                repeatRecords[bibID] = 1
+                repeatRecords[holdID] = 1
                 recordsWritten += 1
             else:
                 repeatCounter += 1
@@ -86,7 +80,6 @@ class MFHDBuilder(ServiceTaskBase):
                                      "FileChooser")
         ServiceTaskBase.add_argument(parser, "holdID", "Field containing holdings ID", "")
         ServiceTaskBase.add_argument(parser, "bibID", "Field containing bib ID", "")
-        ServiceTaskBase.add_argument(parser, "library", "Type NA if not applicable. Field containing library code", "")
         ServiceTaskBase.add_argument(parser, "location", "Field containing location code", "")
         ServiceTaskBase.add_argument(parser, "callno", "Field containing call number", "")
         ServiceTaskBase.add_argument(parser, "holdings", "Type NA if not applicable. Field containing holdings statement", "")
@@ -98,7 +91,6 @@ class MFHDBuilder(ServiceTaskBase):
                                          "Tab or comma delimited input file (csv/tsv extension required)")
         ServiceTaskBase.add_cli_argument(parser, "holdID", "Field containing holdings ID")
         ServiceTaskBase.add_cli_argument(parser, "bibID", "Field containing bib ID")
-        ServiceTaskBase.add_cli_argument(parser, "library", "Type NA if not applicable. Field containing library code")
         ServiceTaskBase.add_cli_argument(parser, "location", "Field containing location code")
         ServiceTaskBase.add_cli_argument(parser, "callno", "Field containing call number")
         ServiceTaskBase.add_cli_argument(parser, "holdings", "Type NA if not applicable. Field containing holdings statement")
