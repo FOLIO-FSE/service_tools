@@ -3,6 +3,7 @@ import json
 import logging
 import re
 import time
+import uuid
 from datetime import datetime
 
 import requests
@@ -18,6 +19,55 @@ class TransactionResult(object):
         self.folio_loan = folio_loan
         self.error_message = error_message
         self.migration_report_message = migration_report_message
+
+
+class LegacyRequest(object):
+    def __init__(self, legacy_request_dict, row=0):
+        # validate
+        correct_headers = ["item_barcode", "patron_barcode", "request_date", "request_expiration_date", "comment",
+                           "request_type", "pickup_servicepoint_id"]
+        self.errors = []
+
+        for prop in correct_headers:
+            if prop not in legacy_request_dict:
+                self.errors.append(("Missing properties in legacy data", prop))
+            if prop != "comment" and not legacy_request_dict[prop].strip():
+                self.errors.append(("Empty properties in legacy data", prop))
+
+        self.item_barcode = legacy_request_dict["item_barcode"].strip()
+        self.patron_id = ""
+        self.item_id = ""
+        self.patron_barcode = legacy_request_dict["patron_barcode"].strip()
+        self.comment = legacy_request_dict["comment"].strip()
+        self.request_type = legacy_request_dict["request_type"].strip()
+        self.pickup_servicepoint_id = legacy_request_dict["pickup_servicepoint_id"].strip()
+        self.fulfillment_preference = "Hold Shelf"
+
+        try:
+            temp_request_date: datetime = parse(legacy_request_dict["request_date"])
+        except Exception as ee:
+            self.errors.append(("Parse date failure. Setting UTC NOW", "request_date"))
+            temp_request_date = datetime.utcnow()
+        try:
+            temp_expiration_date: datetime = parse(legacy_request_dict["request_expiration_date"])
+        except Exception as ee:
+            temp_expiration_date = datetime.utcnow()
+            self.errors.append(("Parse date failure. Setting UTC NOW", "request_expiration_date"))
+
+        self.request_date = temp_request_date
+        self.request_expiration_date = temp_expiration_date
+
+    def to_dict(self):
+        return {"requestType": self.request_type,
+                "fulfilmentPreference": self.fulfillment_preference,
+                "requester": {"barcode": self.patron_barcode},
+                "requesterId": self.patron_id,
+                "item": {"barcode": self.item_barcode}, "itemId": self.item_id,
+                "requestExpirationDate": self.request_expiration_date.isoformat(),
+                "patronComments": self.comment,
+                "pickupServicePointId": self.pickup_servicepoint_id,
+                "requestDate": self.request_date.isoformat(),
+                "id": str(uuid.uuid4())}
 
 
 class LegacyLoan(object):
@@ -104,6 +154,36 @@ class CirculationHelper:
         logging.error(f"# Missing patron barcodes:\n{json.dumps(list(self.missing_patron_barcodes), indent=4)}")
         logging.error(f"# Missing item barcodes:\n{json.dumps(list(self.missing_item_barcodes), indent=4)}")
 
+    def get_user_by_barcode(self, user_barcode):
+        if user_barcode in self.missing_patron_barcodes:
+            logging.info("User is already detected as missing")
+            return {}
+        user_path = f"/users?query=barcode=={user_barcode}"
+        try:
+            users = self.folio_client.folio_get(user_path, "users")
+            if any(users):
+                return users[0]
+            self.missing_patron_barcodes.add(user_barcode)
+            return {}
+        except Exception as ee:
+            logging.error(f"{ee} {user_path}")
+            return {}
+
+    def get_item_by_barcode(self, item_barcode):
+        if item_barcode in self.missing_item_barcodes:
+            logging.info("Item is already detected as missing")
+            return {}
+        item_path = f"/item-storage/items?query=barcode=={item_barcode}"
+        try:
+            item = self.folio_client.folio_get(item_path, "items")
+            if any(item):
+                return item[0]
+            self.missing_item_barcodes.add(item_barcode)
+            return {}
+        except Exception as ee:
+            logging.error(f"{ee} {item_path}")
+            return {}
+
     def check_out_by_barcode_override_iris(self, legacy_loan: LegacyLoan):
         t0_function = time.time()
         data = {
@@ -151,7 +231,8 @@ class CirculationHelper:
                 stats = (f"Successfully checked out by barcode"
                          # f"HTTP {req.status_code} {json.dumps(json.loads(req.text), indent=4)} "
                          )
-                logging.debug(f"{stats} (item barcode {legacy_loan.item_barcode}) in {(time.time() - t0_function):.2f}s")
+                logging.debug(
+                    f"{stats} (item barcode {legacy_loan.item_barcode}) in {(time.time() - t0_function):.2f}s")
 
                 return TransactionResult(True, json.loads(req.text), None, stats)
             elif req.status_code == 204:
@@ -203,22 +284,19 @@ class CirculationHelper:
 
     @staticmethod
     def create_request(
-            folio_client: FolioClient, request_type, patron, item, service_point_id, request_date=datetime.now(),
+            folio_client: FolioClient, legacy_request: LegacyRequest,
     ):
         try:
             df = "%Y-%m-%dT%H:%M:%S.%f+0000"
-            data = {
-                "requestType": request_type,
-                "fulfilmentPreference": "Hold Shelf",
-                "requester": {"barcode": patron["barcode"]},
-                "requesterId": patron["id"],
-                "item": {"barcode": item["barcode"]},
-                "itemId": item["id"],
-                "pickupServicePointId": service_point_id,
-                "requestDate": request_date.strftime(df),
-            }
             path = "/circulation/requests"
             url = f"{folio_client.okapi_url}{path}"
+            data = legacy_request.to_dict()
+
+            data["requestProcessingParameters"] = {"overrideBlocks": {
+                "itemNotLoanableBlock": {"dueDate": legacy_request.request_expiration_date.isoformat()},
+                "patronBlock": {},
+                "itemLimitBlock": {},
+                "comment": "Migrated from legacy system"}}
             req = requests.post(url, headers=folio_client.okapi_headers, data=json.dumps(data))
             logging.debug(f"POST {req.status_code}\t{url}\t{json.dumps(data)}")
             if str(req.status_code) == "422":
@@ -226,7 +304,7 @@ class CirculationHelper:
                 return False
             else:
                 req.raise_for_status()
-                logging.info(f"{req.status_code} Successfully created {request_type}")
+                logging.info(f"{req.status_code} Successfully created {legacy_request.request_type}")
                 return True
         except Exception as exception:
             logging.error(exception, exc_info=True)
@@ -260,7 +338,7 @@ class CirculationHelper:
             return False
 
     @staticmethod
-    def create_request(
+    def create_request_variant(
             folio_client: FolioClient, request_type, patron, item, service_point_id, request_date=datetime.now(),
     ):
         try:

@@ -34,6 +34,8 @@ class PostAnyJsonRecords(ServiceTaskBase):
 
                 if self.dupe_check == "yes":
                     is_dupe = self.check_for_rec_in_folio(rec_id)
+                else:
+                    is_dupe = False
 
                 if not is_dupe:
                     try:
@@ -47,7 +49,7 @@ class PostAnyJsonRecords(ServiceTaskBase):
                         elif req.status_code == 422:
                             self.failed_posts += 1
                             print(
-                                f"{rec_id}\tHTTP {req.status_code}\t Error: {req.text}")
+                                f"{rec_id}\tHTTP {req.status_code}\t Error: {json.loads(req.text)['errors'][0]['message']}\t{json.dumps(rec)}")
                         else:
                             self.failed_posts += 1
                             print(
@@ -77,6 +79,19 @@ class PostAnyJsonRecords(ServiceTaskBase):
                 return True
             elif len(matched_record) > 1:
                 print(f"More than one matches for {rec_name}!")
+        elif self.endpoint == "/circulation/requests":
+            try:
+                path = self.endpoint + '/' + rec_name
+                request = self.folio_client.folio_get(path)
+                if request:
+                    # print(f'found! {request["id"]}')
+                    return True
+                else:
+                    #print("Not found!")
+                    return False
+            except Exception as ee:
+                # print(ee)
+                return False
         else:
             "Functionality for doing this for non licennse/agreement records not built out...."
 
