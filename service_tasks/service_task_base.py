@@ -32,33 +32,33 @@ class ServiceTaskBase:
         if log_file_path:
             log_file = os.path.join(log_file_path,
                                     f'service_task_log_{class_name}_{time_stamp}.log')
+            logging.info(f"Writing log file to {log_file}")
+            file_formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
+            file_handler = logging.FileHandler(
+                filename=log_file,
+            )
+            # file_handler.addFilter(LevelFilter(0, 20))
+            file_handler.setFormatter(file_formatter)
+            file_handler.setLevel(logging.INFO)
+            logging.getLogger().addHandler(file_handler)
         else:
-            log_file = f'service_task_log_{class_name}_{time_stamp}.log'
-        logging.info(f"Writing log file to {log_file}")
-        file_formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
-        file_handler = logging.FileHandler(
-            filename=log_file,
-        )
-        # file_handler.addFilter(LevelFilter(0, 20))
-        file_handler.setFormatter(file_formatter)
-        file_handler.setLevel(logging.INFO)
-        logging.getLogger().addHandler(file_handler)
+            logging.info("no path, no logfile")
         logger.info("Logging setup")
 
         if log_file_path:
             debug_log_file = os.path.join(log_file_path,
                                           f'service_task_debug_log_{class_name}_{time_stamp}.log')
+            logging.info(f"Writing DEBUG log files to {debug_log_file}")
+            debug_file_formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
+            debug_file_handler = logging.FileHandler(
+                filename=debug_log_file,
+            )
+            # file_handler.addFilter(LevelFilter(0, 20))
+            debug_file_handler.setFormatter(debug_file_formatter)
+            debug_file_handler.setLevel(logging.DEBUG)
+            logging.getLogger().addHandler(debug_file_handler)
         else:
-            debug_log_file = f'service_task_log_{class_name}_{time_stamp}.log'
-        logging.info(f"Writing DEBUG log files to {debug_log_file}")
-        debug_file_formatter = logging.Formatter('%(levelname)s\t%(message)s\t%(asctime)s')
-        debug_file_handler = logging.FileHandler(
-            filename=debug_log_file,
-        )
-        # file_handler.addFilter(LevelFilter(0, 20))
-        debug_file_handler.setFormatter(debug_file_formatter)
-        debug_file_handler.setLevel(logging.DEBUG)
-        logging.getLogger().addHandler(debug_file_handler)
+            logging.info("no path, no logfile")
         logger.info("Logging setup")
 
     def write_migration_report(self, report_file):
