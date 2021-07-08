@@ -62,7 +62,6 @@ class ServiceTaskBase:
         logger.info("Logging setup")
 
     def write_migration_report(self, report_file):
-
         for a in self.migration_report:
             report_file.write(f"   \n")
             report_file.write(f"## {a}    \n")
