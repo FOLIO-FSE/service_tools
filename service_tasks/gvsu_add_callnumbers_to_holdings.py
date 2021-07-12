@@ -21,17 +21,20 @@ class GVSUAddCallnumbersToHoldings(ServiceTaskBase):
     def do_work(self):
         time_stamp = time.strftime("%Y%m%d-%H%M%S")
         failed_path = Path(self.args.results_folder) / f'failed_recs_{time_stamp}.tsv'
-        with open(failed_path, "w+") as failed_file:
+        with open(failed_path, "w+", newline='') as failed_file:
             failed_writer = None
             api_path = "/inventory/instances"
             hold_path = "/holdings-storage/holdings"
             with open(self.args.input_file, 'r', encoding="utf-8") as input_file:
-                for idx, row in enumerate(InsensitiveDictReader(input_file, dialect="tsv")):
+                for idx, row in enumerate(csv.DictReader(input_file, dialect="tsv")):
                     try:
                         if idx == 0:
-                            failed_writer = csv.DictWriter(failed_file, dialect='tsv', fieldnames=row.keys())
+                            print(list(row.keys()))
+                            print(row)
+                            failed_writer = csv.DictWriter(failed_file, dialect='tsv', fieldnames=list(row.keys()))
                             failed_writer.writeheader()
-                        bib_id = row["record number(bibliographic)"]
+                            failed_file.flush()
+                        bib_id = row["Record Number(Bibliographic)"]
                         if row.get("090", "") or row.get("050", "") or row.get("086", ""):
                             query = f'?limit=100&query=(identifiers =/@value \"{bib_id}\")'
                             objects = list(self.folio_client.folio_get_all(api_path, "instances", query))
