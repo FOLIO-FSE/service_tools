@@ -1,3 +1,4 @@
+import collections
 import json
 import uuid
 from abc import abstractmethod
@@ -22,40 +23,37 @@ class MapperBase():
     def print_mapping_report(self, total_records):
         print('\n## Mapped FOLIO fields')
         d_sorted = {k: self.mapped_folio_fields[k] for k in sorted(self.mapped_folio_fields)}
-        print(f"FOLIO Field | Mapped | Empty | Unmapped")
-        print("--- | --- | --- | ---:")
+        print("FOLIO Field | % | Has value")
+        print("--- | --- | --- :")
         for k, v in d_sorted.items():
-            unmapped = total_records - v[0]
-            mapped = v[0] - v[1]
-            unmapped_per = "{:.1%}".format(unmapped / total_records)
-            mp = mapped / total_records
+            mp = v / total_records
             mapped_per = "{:.0%}".format(mp if mp > 0 else 0)
-            print(f"{k} | {mapped if mapped > 0 else 0} ({mapped_per}) | {v[1]} | {unmapped}")
+            print(f"{k} | {mapped_per} | {v} ")
         print('\n## Mapped Legacy fields')
         d_sorted = {k: self.mapped_legacy_fields[k] for k in sorted(self.mapped_legacy_fields)}
-        print(f"Legacy Field | Mapped | Empty | Unmapped")
-        print("--- | --- | --- | ---:")
+        print("Legacy Field | % | Has Value")
+        print("--- | --- | --- :")
         for k, v in d_sorted.items():
-            unmapped = total_records - v[0]
-            mapped = v[0] - v[1]
-            unmapped_per = "{:.1%}".format(unmapped / total_records)
-            mp = mapped / total_records
+            mp = v / total_records
             mapped_per = "{:.0%}".format(mp if mp > 0 else 0)
-            print(f"{k} | {mapped if mapped > 0 else 0} ({mapped_per}) | {v[1]} | {unmapped}")
+            print(f"{k} | {mapped_per} | {v}")
 
-    def report_legacy_mapping(self, field_name, was_mapped, was_empty=False):
-        if field_name not in self.mapped_legacy_fields:
-            self.mapped_legacy_fields[field_name] = [int(was_mapped), int(was_empty)]
-        else:
-            self.mapped_legacy_fields[field_name][0] += int(was_mapped)
-            self.mapped_legacy_fields[field_name][1] += int(was_empty)
+    def report_legacy_mapping(self, legacy_object):
+        for field_name, value in legacy_object.items():
+            v = 1 if value else 0
+            if field_name not in self.mapped_legacy_fields:
+                self.mapped_legacy_fields[field_name] = v
+            else:
+                self.mapped_legacy_fields[field_name] += v
 
-    def report_folio_mapping(self, field_name, transformed, was_empty=False):
-        if field_name not in self.mapped_folio_fields:
-            self.mapped_folio_fields[field_name] = [int(transformed), int(was_empty)]
-        else:
-            self.mapped_folio_fields[field_name][0] += int(transformed)
-            self.mapped_folio_fields[field_name][1] += int(was_empty)
+    def report_folio_mapping(self, folio_object):
+        flat_object = flatten(folio_object)
+        for field_name, value in flat_object.items():
+            v = 1 if value else 0
+            if field_name not in self.mapped_folio_fields:
+                self.mapped_folio_fields[field_name] = v
+            else:
+                self.mapped_folio_fields[field_name] += v
 
     def instantiate_user(self):
         user_id = str(uuid.uuid4())
@@ -65,9 +63,6 @@ class MapperBase():
                       "personal": {},
                       "customFields": {}
                       }
-        self.report_folio_mapping("id", True)
-        self.report_folio_mapping("requestPreference", True)
-        self.report_folio_mapping("metadata", True)
         return folio_user
 
     def validate(self, folio_user):
@@ -111,7 +106,7 @@ class MapperBase():
             for a in self.migration_report:
                 report_file.write('\n')
                 report_file.write(f"## {a} - {len(self.migration_report[a])} things\n")
-                report_file.write(f"Measure | Count\n")
+                report_file.write("Measure | Count\n")
                 report_file.write("--- | ---:\n")
                 b = self.migration_report[a]
                 sortedlist = [(k, b[k]) for k in sorted(b, key=as_str)]
@@ -119,26 +114,20 @@ class MapperBase():
                     report_file.write(f"{b[0]} | {b[1]}\n")
             report_file.write('\n## Mapped FOLIO fields\n')
             d_sorted = {k: self.mapped_folio_fields[k] for k in sorted(self.mapped_folio_fields)}
-            report_file.write(f"FOLIO Field | Mapped | Empty | Unmapped\n")
+            report_file.write("FOLIO Field | % | Has Value\n")
             report_file.write("--- | --- | --- | ---:\n")
-            for k, v in d_sorted.items():
-                unmapped = total_records - v[0]
-                mapped = v[0] - v[1]
-                unmapped_per = "{:.1%}".format(unmapped / total_records)
-                mp = mapped / total_records
+            for k, v in d_sorted.items():                
+                mp = v / total_records
                 mapped_per = "{:.0%}".format(mp if mp > 0 else 0)
-                report_file.write(f"{k} | {mapped if mapped > 0 else 0} ({mapped_per}) | {v[1]} | {unmapped}\n")
+                report_file.write(f"{k} | {mapped_per} | {v} \n")
             report_file.write('\n## Mapped Legacy fields\n')
             d_sorted = {k: self.mapped_legacy_fields[k] for k in sorted(self.mapped_legacy_fields)}
-            report_file.write(f"Legacy Field | Mapped | Empty | Unmapped\n")
+            report_file.write("Legacy Field | % | Has Value\n")
             report_file.write("--- | --- | --- | ---:\n")
             for k, v in d_sorted.items():
-                unmapped = total_records - v[0]
-                mapped = v[0] - v[1]
-                unmapped_per = "{:.1%}".format(unmapped / total_records)
-                mp = mapped / total_records
+                mp = v / total_records
                 mapped_per = "{:.0%}".format(mp if mp > 0 else 0)
-                report_file.write(f"{k} | {mapped if mapped > 0 else 0} ({mapped_per}) | {v[1]} | {unmapped}\n")
+                report_file.write(f"{k} | {mapped_per} | {v}\n")
 
     @staticmethod
     def print_dict_to_md_table(my_dict, h1="", h2=""):
@@ -212,6 +201,17 @@ class MapperBase():
         req = requests.get(latest_path)
         req.raise_for_status()
         return json.loads(req.text)
+                     
+
+def flatten(d, parent_key='', sep='.'):
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(flatten(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)       
 
 
 def as_str(s):

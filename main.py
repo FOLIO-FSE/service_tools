@@ -2,10 +2,9 @@ import logging
 
 from folioclient import FolioClient
 from gooey import Gooey, GooeyParser
-import traceback
 
-from service_tasks.service_task_base import ServiceTaskBase
 from service_tasks import *
+from service_tasks.service_task_base import ServiceTaskBase
 
 
 def parse_args(task_classes):
@@ -23,17 +22,17 @@ def parse_args(task_classes):
 @Gooey(
     advanced=True,
     clear_before_run=True,
-    terminal_font_family='consolas',
+    terminal_font_family="consolas",
     progress_regex=r"^progress: (?P<current>\d+)/(?P<total>\d+)$",
     progress_expr="current / total * 100",
     required_cols=1,
     optional_cols=0,
     default_size=[1100, 800],
     program_name="FOLIO Service task helper",
-    header_bg_color='#FFFFFF',
-    body_bg_color='#FFFFFF',
-    footer_bg_color='#FFFFFF',
-    image_dir='./icons/'
+    header_bg_color="#FFFFFF",
+    body_bg_color="#FFFFFF",
+    footer_bg_color="#FFFFFF",
+    image_dir="./icons/",
 )
 def main():
     try:
@@ -53,8 +52,8 @@ def main():
             task_obj = task_class(args)
         task_obj.do_work()
     except OSError as os_error:
-        if 'Connection aborted' in str(os_error):
-            s = "Likely a Network error. Check you are connected and that your VPN is working"
+        s = "Network error? Check you are connected and that your VPN is working"
+        if "Connection aborted" in str(os_error):
             logging.error(s, os_error)
             raise Exception(s)
         raise os_error
