@@ -40,7 +40,6 @@ class PostExtraMigrationData(ServiceTaskBase):
                     url = f"{self.folio_client.okapi_url}/{endpoint}"
                     body = json.dumps(record, ensure_ascii=False)
                     response = self.post_objects(url, body)
-                    print(response.status_code)
                     # Interpret the response and deal with failed rows
                     if response.status_code == 201:
                         self.num_posted += 1
@@ -57,8 +56,9 @@ class PostExtraMigrationData(ServiceTaskBase):
                             f"Row {i}\tHTTP {response.status_code}\t {response.text}")
 
                 except KeyError as ke:
+                    self.num_failed += 1
                     self.failed_rows.append(row[0] + "\t" + row[1])
-                    logging.error(f"Row {i}\t Can't post object as object type not in object_types dict: {ke}")
+                    logging.error(f"Row {i}\t Cannot POST as object type not in object_types dict: {ke}")
                 
                 if self.num_processed % 10 == 0:
                     logging.info(
