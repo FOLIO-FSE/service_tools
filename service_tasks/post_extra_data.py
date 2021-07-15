@@ -60,7 +60,7 @@ class PostExtraMigrationData(ServiceTaskBase):
                     self.failed_rows.append(row[0] + "\t" + row[1])
                     logging.error(f"Row {i}\t Cannot POST as object type not in object_types dict: {ke}")
                 
-                if self.num_processed % 10 == 0:
+                if self.num_processed % 100 == 0:
                     logging.info(
                         f"Total processed: {self.num_processed} Total failed: {self.num_failed} "
                         f"in {response.elapsed.total_seconds()}s")
