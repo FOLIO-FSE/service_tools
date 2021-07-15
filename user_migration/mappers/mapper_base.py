@@ -8,7 +8,7 @@ import requests
 from folioclient import FolioClient
 
 
-class MapperBase():
+class MapperBase:
     def __init__(self, folio_client: FolioClient):
         self.stats = {}
         self.legacy_id_map: Dict[str, str] = {}
@@ -21,16 +21,20 @@ class MapperBase():
         self.user_schema = self.get_user_schema()
 
     def print_mapping_report(self, total_records):
-        print('\n## Mapped FOLIO fields')
-        d_sorted = {k: self.mapped_folio_fields[k] for k in sorted(self.mapped_folio_fields)}
+        print("\n## Mapped FOLIO fields")
+        d_sorted = {
+            k: self.mapped_folio_fields[k] for k in sorted(self.mapped_folio_fields)
+        }
         print("FOLIO Field | % | Has value")
         print("--- | --- | --- :")
         for k, v in d_sorted.items():
             mp = v / total_records
             mapped_per = "{:.0%}".format(mp if mp > 0 else 0)
             print(f"{k} | {mapped_per} | {v} ")
-        print('\n## Mapped Legacy fields')
-        d_sorted = {k: self.mapped_legacy_fields[k] for k in sorted(self.mapped_legacy_fields)}
+        print("\n## Mapped Legacy fields")
+        d_sorted = {
+            k: self.mapped_legacy_fields[k] for k in sorted(self.mapped_legacy_fields)
+        }
         print("Legacy Field | % | Has Value")
         print("--- | --- | --- :")
         for k, v in d_sorted.items():
@@ -57,18 +61,22 @@ class MapperBase():
 
     def instantiate_user(self):
         user_id = str(uuid.uuid4())
-        folio_user = {"metadata": self.folio_client.get_metadata_construct(),
-                      "id": user_id,
-                      "type": "object",
-                      "personal": {},
-                      "customFields": {}
-                      }
+        folio_user = {
+            "metadata": self.folio_client.get_metadata_construct(),
+            "id": user_id,
+            "type": "object",
+            "personal": {},
+            "customFields": {},
+        }
         return folio_user
 
     def validate(self, folio_user):
         failures = []
-        self.add_to_migration_report("Number of addresses per user", len(folio_user["personal"].get("addresses", [])))
-        req_fields = ['username', 'email', 'active']
+        self.add_to_migration_report(
+            "Number of addresses per user",
+            len(folio_user["personal"].get("addresses", [])),
+        )
+        req_fields = ["username", "email", "active"]
         for req in req_fields:
             if req not in folio_user:
                 failures.append(req)
@@ -76,8 +84,8 @@ class MapperBase():
                     "Failed records that needs to get fixed",
                     f"Required field {req} is missing from {folio_user['username']}",
                 )
-        if not folio_user['personal'].get('lastName', ""):
-            failures.append('lastName')
+        if not folio_user["personal"].get("lastName", ""):
+            failures.append("lastName")
             self.add_to_migration_report(
                 "Failed records that needs to get fixed",
                 f"Required field personal.lastName is missing from {folio_user['username']}",
@@ -92,7 +100,7 @@ class MapperBase():
 
     def write_migration_report(self, other_report=None):
         for a in self.migration_report:
-            print('')
+            print("")
             print(f"## {a} - {len(self.migration_report[a])} things")
             print(f"Measure | Count")
             print("--- | ---:")
@@ -104,7 +112,7 @@ class MapperBase():
     def save_migration_report_to_disk(self, file_path, total_records):
         with open(file_path, "w+") as report_file:
             for a in self.migration_report:
-                report_file.write('\n')
+                report_file.write("\n")
                 report_file.write(f"## {a} - {len(self.migration_report[a])} things\n")
                 report_file.write("Measure | Count\n")
                 report_file.write("--- | ---:\n")
@@ -112,16 +120,21 @@ class MapperBase():
                 sortedlist = [(k, b[k]) for k in sorted(b, key=as_str)]
                 for b in sortedlist:
                     report_file.write(f"{b[0]} | {b[1]}\n")
-            report_file.write('\n## Mapped FOLIO fields\n')
-            d_sorted = {k: self.mapped_folio_fields[k] for k in sorted(self.mapped_folio_fields)}
+            report_file.write("\n## Mapped FOLIO fields\n")
+            d_sorted = {
+                k: self.mapped_folio_fields[k] for k in sorted(self.mapped_folio_fields)
+            }
             report_file.write("FOLIO Field | % | Has Value\n")
             report_file.write("--- | --- | --- | ---:\n")
-            for k, v in d_sorted.items():                
+            for k, v in d_sorted.items():
                 mp = v / total_records
                 mapped_per = "{:.0%}".format(mp if mp > 0 else 0)
                 report_file.write(f"{k} | {mapped_per} | {v} \n")
-            report_file.write('\n## Mapped Legacy fields\n')
-            d_sorted = {k: self.mapped_legacy_fields[k] for k in sorted(self.mapped_legacy_fields)}
+            report_file.write("\n## Mapped Legacy fields\n")
+            d_sorted = {
+                k: self.mapped_legacy_fields[k]
+                for k in sorted(self.mapped_legacy_fields)
+            }
             report_file.write("Legacy Field | % | Has Value\n")
             report_file.write("--- | --- | --- | ---:\n")
             for k, v in d_sorted.items():
@@ -201,9 +214,9 @@ class MapperBase():
         req = requests.get(latest_path)
         req.raise_for_status()
         return json.loads(req.text)
-                     
 
-def flatten(d, parent_key='', sep='.'):
+
+def flatten(d, parent_key="", sep="."):
     items = []
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
@@ -211,11 +224,11 @@ def flatten(d, parent_key='', sep='.'):
             items.extend(flatten(v, new_key, sep=sep).items())
         else:
             items.append((new_key, v))
-    return dict(items)       
+    return dict(items)
 
 
 def as_str(s):
     try:
-        return str(s), ''
+        return str(s), ""
     except ValueError:
-        return '', s
+        return "", s
